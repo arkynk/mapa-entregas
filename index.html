@@ -1,1703 +1,3630 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="utf-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
 
-  <title>Mapa de Entregas</title>
+<meta name="theme-color" content="#111827">
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
+<title>Mapa de Entregas</title>
 
-  <style>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  crossorigin=""
+>
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+<style>
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      min-height: 100%;
-      background: #f1f5f9;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #1e293b;
-    }
+:root{
+  --bg:#eef2f5;
+  --card:#fff;
+  --dark:#111827;
+  --dark2:#1f2937;
+  --text:#111827;
+  --muted:#64748b;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --orange:#ea580c;
+  --line:#dbe2ea;
+}
 
-    body {
-      overflow-x: hidden;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    /* ==============================
-       CABEÇALHO
-       ============================== */
+html,
+body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
 
-    header {
-      width: 100%;
-      background: #111827;
-      color: #ffffff;
-      padding: 11px 13px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
-    }
+body{
+  padding-bottom:24px;
+}
 
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
+header{
+  background:#000;
+  color:#fff;
+  padding:18px;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
 
-    .titulo {
-      min-width: 0;
-    }
+header h1{
+  margin:0 0 5px;
+  font-size:24px;
+}
 
-    .titulo h1 {
-      margin: 0;
-      font-size: 19px;
-      line-height: 22px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+header p{
+  margin:0;
+  color:#cbd5e1;
+  font-size:13px;
+}
 
-    .titulo p {
-      margin: 2px 0 0;
-      font-size: 11px;
-      color: #cbd5e1;
-    }
+.wrap{
+  max-width:760px;
+  margin:auto;
+  padding:12px;
+}
 
-    .contador {
-      flex-shrink: 0;
-      min-width: 68px;
-      padding: 6px 9px;
-      border-radius: 9px;
-      background: #1f2937;
-      border: 1px solid #374151;
-      text-align: center;
-    }
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:4px 0 10px;
+}
 
-    .contador strong {
-      display: block;
-      font-size: 17px;
-      line-height: 18px;
-    }
+.stat{
+  background:var(--dark2);
+  color:#fff;
+  border-radius:14px;
+  padding:11px 5px;
+  text-align:center;
+}
 
-    .contador span {
-      display: block;
-      margin-top: 2px;
-      font-size: 9px;
-      color: #cbd5e1;
-    }
+.stat b{
+  display:block;
+  font-size:20px;
+}
 
-    /* ==============================
-       CONTEÚDO
-       ============================== */
+.stat span{
+  font-size:12px;
+  color:#cbd5e1;
+}
 
-    main {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 10px;
-    }
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:9px;
+}
 
-    /* ==============================
-       BOTÃO
-       ============================== */
+button{
+  border:0;
+  border-radius:14px;
+  padding:14px 12px;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+}
 
-    .botao-localizar {
-      width: 100%;
-      height: 48px;
-      border: 0;
-      border-radius: 11px;
-      background: #2563eb;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-bottom: 10px;
-      box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
-    }
+button:disabled{
+  opacity:.55;
+  cursor:wait;
+}
 
-    .botao-localizar:active {
-      transform: scale(0.99);
-    }
+.primary{
+  background:var(--dark);
+  color:#fff;
+}
 
-    .botao-localizar:disabled {
-      background: #64748b;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+.light{
+  background:#fff;
+  color:#111827;
+  border:1px solid var(--line);
+}
 
-    /* ==============================
-       STATUS
-       ============================== */
+.blue{
+  background:var(--blue);
+  color:#fff;
+}
 
-    .status {
-      width: 100%;
-      background: #ffffff;
-      border-radius: 11px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-    }
+.green{
+  background:var(--green);
+  color:#fff;
+}
 
-    .status-texto {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 18px;
-    }
+.red{
+  background:var(--red);
+  color:#fff;
+}
 
-    .status-detalhe {
-      margin-top: 4px;
-      color: #64748b;
-      font-size: 11px;
-      line-height: 15px;
-      word-break: break-word;
-    }
+.orange{
+  background:var(--orange);
+  color:#fff;
+}
 
-    .progresso-container {
-      width: 100%;
-      height: 8px;
-      margin-top: 8px;
-      overflow: hidden;
-      border-radius: 20px;
-      background: #e2e8f0;
-    }
+.small{
+  font-size:12px;
+  padding:9px 10px;
+  border-radius:10px;
+}
 
-    .progresso {
-      width: 0%;
-      height: 100%;
-      background: #2563eb;
-      border-radius: 20px;
-      transition: width 0.25s ease;
-    }
+#map{
+  height:52vh;
+  min-height:390px;
+  border-radius:18px;
+  border:1px solid #cbd5e1;
+  overflow:hidden;
+  background:#dfe7d9;
+}
 
-    /* ==============================
-       MAPA
-       ============================== */
+.notice{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  margin:10px 0;
+  color:#475569;
+  font-size:13px;
+  line-height:1.4;
+}
 
-    #map {
-      width: 100%;
-      height: 42vh;
-      min-height: 280px;
-      max-height: 360px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #dbeafe;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    }
+.progress{
+  height:8px;
+  background:#dbe4ed;
+  border-radius:99px;
+  overflow:hidden;
+  margin:9px 0;
+}
 
-    /* ==============================
-       RESUMO
-       ============================== */
+.progress > div{
+  height:100%;
+  width:0;
+  background:var(--blue);
+  transition:width:.2s;
+}
 
-    .resumo {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin-top: 10px;
-    }
+.nearby{
+  margin-top:10px;
+}
 
-    .resumo-item {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 9px 5px;
-      text-align: center;
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
-    }
+.nearby h2{
+  font-size:18px;
+  margin:10px 2px;
+}
 
-    .resumo-numero {
-      display: block;
-      font-size: 19px;
-      font-weight: 700;
-      line-height: 21px;
-    }
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:13px;
+  margin:8px 0;
+  box-shadow:0 2px 8px rgba(15,23,42,.05);
+}
 
-    .resumo-label {
-      display: block;
-      margin-top: 3px;
-      font-size: 9px;
-      color: #64748b;
-    }
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
 
-    /* ==============================
-       LISTA
-       ============================== */
+.card-title{
+  font-weight:800;
+}
 
-    .lista-container {
-      margin-top: 10px;
-      background: #ffffff;
-      border-radius: 11px;
-      padding: 10px;
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-    }
+.address{
+  font-size:14px;
+  margin:6px 0;
+  color:#334155;
+  line-height:1.35;
+}
 
-    .lista-titulo {
-      margin: 0 0 8px;
-      font-size: 14px;
-      font-weight: 700;
-    }
+.city{
+  color:#64748b;
+  font-size:12px;
+  margin-top:3px;
+}
 
-    .cliente-item {
-      padding: 9px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
+.distance{
+  font-weight:800;
+  color:var(--blue);
+  white-space:nowrap;
+}
 
-    .cliente-item:last-child {
-      border-bottom: 0;
-    }
+.method{
+  color:#64748b;
+  font-size:11px;
+  margin-top:5px;
+}
 
-    .cliente-nome {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 17px;
-    }
+.card-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:9px;
+}
 
-    .cliente-endereco {
-      margin-top: 3px;
-      color: #64748b;
-      font-size: 11px;
-      line-height: 15px;
-    }
+.empty{
+  padding:22px;
+  text-align:center;
+  color:var(--muted);
+  background:#fff;
+  border-radius:16px;
+  border:1px dashed #cbd5e1;
+}
 
-    .cliente-status {
-      margin-top: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 15px;
-    }
+.modal-bg{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:3000;
+  align-items:flex-end;
+}
 
-    .aguardando {
-      color: #64748b;
-    }
+.modal{
+  background:#fff;
+  width:100%;
+  max-width:760px;
+  margin:auto auto 0;
+  border-radius:22px 22px 0 0;
+  padding:18px;
+  max-height:88vh;
+  overflow:auto;
+}
 
-    .localizando {
-      color: #2563eb;
-    }
+.modal h2{
+  margin:0 0 6px;
+  font-size:21px;
+}
 
-    .segunda-tentativa {
-      color: #d97706;
-    }
+.modal .addr{
+  color:#475569;
+  line-height:1.45;
+  margin-bottom:12px;
+}
 
-    .sucesso {
-      color: #15803d;
-    }
+.status-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
 
-    .falha {
-      color: #dc2626;
-    }
+.close{
+  background:#e5e7eb;
+  color:#111827;
+}
 
-    /* ==============================
-       LEAFLET
-       ============================== */
+.debug{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:10px;
+  margin:10px 0;
+  font-size:12px;
+  line-height:1.45;
+  color:#475569;
+}
 
-    .leaflet-popup-content {
-      margin: 10px 12px;
-    }
+.marker-pin{
+  width:34px;
+  height:34px;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:3px solid #fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.3);
+}
 
-    .popup-nome {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
+.marker-pin span{
+  transform:rotate(45deg);
+  color:#fff;
+  font-weight:900;
+  font-size:15px;
+}
 
-    .popup-endereco {
-      font-size: 12px;
-      line-height: 16px;
-      color: #475569;
-    }
+.user-dot{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#1677ff;
+  border:4px solid #fff;
+  box-shadow:0 0 0 7px rgba(37,99,235,.18);
+}
 
-    @media (min-width: 700px) {
+@media(min-width:700px){
 
-      main {
-        padding: 15px;
-      }
+  .modal{
+    border-radius:22px;
+    margin:auto;
+  }
 
-      #map {
-        height: 500px;
-        max-height: none;
-      }
+  .modal-bg{
+    align-items:center;
+    padding:20px;
+  }
 
-      .titulo h1 {
-        font-size: 21px;
-      }
+  .status-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
 
-    }
+}
 
-  </style>
+</style>
 
 </head>
 
 <body>
 
-  <header>
+<header>
 
-    <div class="header-top">
+  <h1>🚚 Mapa de Entregas</h1>
 
-      <div class="titulo">
+  <p>
+    Localização inteligente por cidade
+  </p>
 
-        <h1>📦 Mapa de Entregas</h1>
+</header>
 
-        <p>Localização dos clientes</p>
+<div class="wrap">
 
-      </div>
+  <div class="stats">
 
-      <div class="contador">
-
-        <strong id="contadorClientes">0</strong>
-
-        <span>clientes</span>
-
-      </div>
-
+    <div class="stat">
+      <b id="total">0</b>
+      <span>Total</span>
     </div>
 
-  </header>
+    <div class="stat">
+      <b id="pending">0</b>
+      <span>Pendentes</span>
+    </div>
+
+    <div class="stat">
+      <b id="done">0</b>
+      <span>Concluídas</span>
+    </div>
+
+  </div>
 
 
-  <main>
+  <div class="actions">
 
     <button
-      id="botaoLocalizar"
-      class="botao-localizar"
-      type="button"
+      class="primary"
+      id="locBtn"
     >
-      📍 LOCALIZAR CLIENTES
+      📍 Minha localização
     </button>
 
+    <button
+      class="light"
+      id="nearBtn"
+    >
+      📌 Mais próximas
+    </button>
 
-    <div class="status">
+    <button
+      class="blue"
+      id="geocodeBtn"
+    >
+      🗺️ Localizar novamente
+    </button>
 
-      <div
-        id="statusTexto"
-        class="status-texto"
+    <button
+      class="light"
+      id="exportBtn"
+    >
+      📥 Exportar CSV
+    </button>
+
+  </div>
+
+
+  <div class="notice">
+
+    <b>Localização inteligente</b>
+
+    <div style="margin-top:5px">
+
+      O sistema utiliza a <b>cidade da própria entrega</b>
+      para fazer as buscas. Depois tenta automaticamente
+      diferentes formatos do endereço.
+
+    </div>
+
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+
+    <div id="geocodeStatus">
+      Nenhuma nova localização realizada.
+    </div>
+
+  </div>
+
+
+  <div id="map"></div>
+
+
+  <div class="notice">
+
+    <b>Como usar:</b>
+
+    toque em um ponto para ver o endereço.
+
+    Depois use <b>“Ir para o endereço”</b>.
+
+    Ao finalizar, registre
+
+    <b>Carta</b>,
+
+    <b>Não localizado</b>
+
+    ou
+
+    <b>Zona de risco</b>.
+
+  </div>
+
+
+  <section class="nearby">
+
+    <h2>
+      📍 Entregas pendentes — mais próximas primeiro
+    </h2>
+
+    <div id="nearbyList"></div>
+
+  </section>
+
+</div>
+
+
+<div
+  class="modal-bg"
+  id="modalBg"
+>
+
+  <div class="modal">
+
+    <h2 id="modalTitle">
+      Entrega
+    </h2>
+
+    <div
+      class="addr"
+      id="modalAddress"
+    ></div>
+
+    <div id="modalDistance"></div>
+
+    <div
+      class="debug"
+      id="modalDebug"
+    ></div>
+
+    <div class="status-grid">
+
+      <button
+        class="green"
+        id="cartaBtn"
       >
-        Aguardando início...
-      </div>
+        📄 CARTA
+      </button>
 
-      <div
-        id="statusDetalhe"
-        class="status-detalhe"
+      <button
+        class="red"
+        id="naoBtn"
       >
-        Toque no botão acima para iniciar a localização dos clientes.
-      </div>
+        ❌ NÃO LOCALIZADO
+      </button>
 
-      <div class="progresso-container">
-
-        <div
-          id="barraProgresso"
-          class="progresso"
-        ></div>
-
-      </div>
+      <button
+        class="orange"
+        id="riscoBtn"
+      >
+        ⚠️ ZONA DE RISCO
+      </button>
 
     </div>
 
+    <button
+      class="close"
+      id="closeBtn"
+      style="width:100%;margin-top:9px"
+    >
+      Fechar
+    </button>
 
-    <div id="map"></div>
+  </div>
 
-
-    <div class="resumo">
-
-      <div class="resumo-item">
-
-        <span
-          id="contadorProcessados"
-          class="resumo-numero"
-        >
-          0
-        </span>
-
-        <span class="resumo-label">
-          Processados
-        </span>
-
-      </div>
+</div>
 
 
-      <div class="resumo-item">
-
-        <span
-          id="contadorEncontrados"
-          class="resumo-numero"
-        >
-          0
-        </span>
-
-        <span class="resumo-label">
-          Localizados
-        </span>
-
-      </div>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  crossorigin=""
+></script>
 
 
-      <div class="resumo-item">
+<script>
 
-        <span
-          id="contadorFalhas"
-          class="resumo-numero"
-        >
-          0
-        </span>
+/* ============================================================
+   CONFIGURAÇÃO
+============================================================ */
 
-        <span class="resumo-label">
-          Não localizados
-        </span>
+const DEFAULT_CENTER = [
+  -29.1678,
+  -51.1794
+];
 
-      </div>
+const STORAGE_KEY =
+  "mapa_entregas_lista1_v1";
 
-    </div>
+const CACHE_KEY =
+  "mapa_entregas_geocache_lista1_v2";
 
-
-    <div class="lista-container">
-
-      <div class="lista-titulo">
-        📋 Lista de clientes
-      </div>
-
-      <div id="listaClientes"></div>
-
-    </div>
-
-  </main>
+const GEO_HISTORY_KEY =
+  "mapa_entregas_geohistory_v1";
 
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  ></script>
+/*
+  IMPORTANTE:
+
+  Não colocamos uma cidade fixa aqui.
+
+  A cidade será retirada do próprio registro.
+
+  Exemplos:
+
+  Caxias do Sul
+  Farroupilha
+  Garibaldi
+  Bento Gonçalves
+  Carlos Barbosa
+  etc.
+*/
 
 
-  <script src="./clientes.js?v=20261006"></script>
+/* ============================================================
+   MAPA
+============================================================ */
+
+const map =
+  L.map("map",{
+    zoomControl:true
+  }).setView(
+    DEFAULT_CENTER,
+    13
+  );
 
 
-  <script>
+L.tileLayer(
+  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom:19,
+    attribution:
+      "&copy; OpenStreetMap contributors"
+  }
+).addTo(map);
 
-    /* ============================================================
-       CONFIGURAÇÕES
-       ============================================================ */
 
-    const CENTRO_INICIAL = [
-      -29.1678,
-      -51.1794
+/* ============================================================
+   ESTADO
+============================================================ */
+
+let deliveries =
+  loadData();
+
+let geocache =
+  JSON.parse(
+    localStorage.getItem(CACHE_KEY) || "{}"
+  );
+
+let geoHistory =
+  JSON.parse(
+    localStorage.getItem(GEO_HISTORY_KEY) || "{}"
+  );
+
+let userPos = null;
+
+let userMarker = null;
+
+let accuracyCircle = null;
+
+let markers = new Map();
+
+let selectedId = null;
+
+let watchId = null;
+
+
+/* ============================================================
+   NORMALIZAÇÃO
+============================================================ */
+
+function normalize(value){
+
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase()
+    .replace(/\s+/g," ")
+    .trim();
+
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function esc(value){
+
+  return String(value ?? "")
+    .replace(/[&<>"']/g,m=>({
+
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+
+    }[m]));
+
+}
+
+
+/* ============================================================
+   COORDENADAS
+============================================================ */
+
+function normalizeCoordinates(obj){
+
+  let lat =
+    Number(obj.lat);
+
+  let lon =
+    Number(obj.lon);
+
+  if(
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon)
+  ){
+
+    obj.lat = null;
+    obj.lon = null;
+
+    return false;
+
+  }
+
+
+  /*
+    Corrige automaticamente caso
+    latitude/longitude tenham vindo invertidas.
+  */
+
+  if(
+    Math.abs(lat) > 90 &&
+    Math.abs(lon) <= 90
+  ){
+
+    [
+      lat,
+      lon
+    ] = [
+      lon,
+      lat
     ];
 
-    const ZOOM_INICIAL = 12;
-
-    const INTERVALO_GEOCODIFICACAO = 1500;
+  }
 
 
-    /* ============================================================
-       ELEMENTOS
-       ============================================================ */
+  /*
+    Não aceita coordenadas obviamente inválidas.
+    A faixa abaixo cobre o RS inteiro,
+    não apenas Caxias.
+  */
 
-    const botaoLocalizar =
-      document.getElementById("botaoLocalizar");
+  if(
+    lat < -34.5 ||
+    lat > -26 ||
+    lon < -58 ||
+    lon > -48
+  ){
 
-    const statusTexto =
-      document.getElementById("statusTexto");
+    obj.lat = null;
+    obj.lon = null;
 
-    const statusDetalhe =
-      document.getElementById("statusDetalhe");
+    return false;
 
-    const barraProgresso =
-      document.getElementById("barraProgresso");
-
-    const contadorClientes =
-      document.getElementById("contadorClientes");
-
-    const contadorProcessados =
-      document.getElementById("contadorProcessados");
-
-    const contadorEncontrados =
-      document.getElementById("contadorEncontrados");
-
-    const contadorFalhas =
-      document.getElementById("contadorFalhas");
-
-    const listaClientes =
-      document.getElementById("listaClientes");
+  }
 
 
-    /* ============================================================
-       MAPA
-       ============================================================ */
+  obj.lat = lat;
+  obj.lon = lon;
 
-    const mapa = L.map("map", {
-      zoomControl: true,
-      attributionControl: true
-    }).setView(
-      CENTRO_INICIAL,
-      ZOOM_INICIAL
+  return true;
+
+}
+
+
+/* ============================================================
+   EXTRAÇÃO DA CIDADE
+============================================================ */
+
+function extractCityFromAddress(address){
+
+  if(!address)
+    return "";
+
+  const parts =
+    String(address)
+      .split(",")
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+
+  /*
+    Formato mais comum:
+
+    RUA, NUMERO, BAIRRO, CIDADE, RS, Brasil
+
+    Cidade = penúltimo bloco antes de RS/Brasil.
+  */
+
+  const cleaned =
+    parts.filter(
+      p =>
+        normalize(p) !== "rs" &&
+        normalize(p) !== "rio grande do sul" &&
+        normalize(p) !== "brasil"
     );
 
 
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap"
-      }
-    ).addTo(mapa);
+  if(cleaned.length >= 3){
 
+    return cleaned[cleaned.length - 1];
 
-    const camadaMarcadores =
-      L.layerGroup().addTo(mapa);
+  }
 
 
-    /* ============================================================
-       VARIÁVEIS
-       ============================================================ */
+  return "";
 
-    let clientes = [];
+}
 
-    let processando = false;
 
-    let encontrados = 0;
+/* ============================================================
+   OBTÉM A CIDADE DO REGISTRO
+============================================================ */
 
-    let falhas = 0;
+function getDeliveryCity(d){
 
-    let processados = 0;
+  /*
+    Primeiro tenta campos separados.
 
-    let limitesMapa =
-      L.latLngBounds([]);
+    Isso permite que, no futuro,
+    uma importação da planilha tenha:
 
+    cidade
+    city
+    municipio
+  */
 
-    /* ============================================================
-       FUNÇÕES BÁSICAS
-       ============================================================ */
+  const explicit =
+    d.city ||
+    d.cidade ||
+    d.municipio ||
+    d.município ||
+    d.Cidade ||
+    d.CIDADE;
 
-    function esperar(ms) {
 
-      return new Promise(
-        resolve => setTimeout(resolve, ms)
-      );
+  if(explicit){
 
-    }
+    return String(explicit)
+      .trim();
 
+  }
 
-    function escaparHTML(valor) {
 
-      if (valor === null || valor === undefined) {
-        return "";
-      }
+  /*
+    Se o registro antigo não possuir
+    a coluna separada, extrai da string
+    do endereço.
 
-      return String(valor)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    Isso mantém compatibilidade com
+    os dados que já estão no celular.
+  */
 
-    }
+  return extractCityFromAddress(
+    d.address ||
+    d.endereco ||
+    d["Endereço completo"] ||
+    ""
+  );
 
+}
 
-    /* ============================================================
-       PEGAR NOME
-       ============================================================ */
 
-    function pegarNome(cliente) {
+/* ============================================================
+   NORMALIZA UM REGISTRO
+============================================================ */
 
-      if (!cliente || typeof cliente !== "object") {
-        return "Cliente";
-      }
+function normalizeDelivery(d,index){
 
-      const possibilidades = [
-        cliente.nome,
-        cliente.cliente,
-        cliente.razao_social,
-        cliente.razaoSocial,
-        cliente.fantasia,
-        cliente.nome_cliente,
-        cliente.NOME,
-        cliente.Nome
-      ];
+  if(!d.id)
+    d.id = index + 1;
 
-      for (const valor of possibilidades) {
+  if(!d.label)
+    d.label = "Entrega " + d.id;
 
-        if (
-          valor !== undefined &&
-          valor !== null &&
-          String(valor).trim() !== ""
-        ) {
+  if(!d.address){
 
-          return String(valor).trim();
+    d.address =
+      d.endereco ||
+      d["Endereço completo"] ||
+      "";
 
-        }
+  }
 
-      }
 
-      return "Cliente";
+  d.city =
+    getDeliveryCity(d);
 
-    }
 
+  if(!d.status)
+    d.status = "PENDENTE";
 
-    /* ============================================================
-       PEGAR ENDEREÇO
-       ============================================================ */
 
-    function pegarEndereco(cliente) {
+  if(
+    d.lat !== null &&
+    d.lat !== undefined
+  ){
 
-      if (!cliente || typeof cliente !== "object") {
-        return "";
-      }
+    normalizeCoordinates(d);
 
+  }
 
-      const enderecoDireto = [
-        cliente.endereco,
-        cliente.endereço,
-        cliente.address,
-        cliente.ENDERECO,
-        cliente.Endereco
-      ];
 
+  if(!Number.isFinite(Number(d.lat)))
+    d.lat = null;
 
-      for (const valor of enderecoDireto) {
+  if(!Number.isFinite(Number(d.lon)))
+    d.lon = null;
 
-        if (
-          valor !== undefined &&
-          valor !== null &&
-          String(valor).trim() !== ""
-        ) {
 
-          return String(valor).trim();
+  if(!("locMethod" in d))
+    d.locMethod = null;
 
-        }
+  if(!("locQuery" in d))
+    d.locQuery = null;
 
-      }
+  if(!("locDisplay" in d))
+    d.locDisplay = null;
 
+  if(!("locScore" in d))
+    d.locScore = null;
 
-      const partes = [];
 
+  return d;
 
-      const rua =
-        cliente.rua ??
-        cliente.Rua ??
-        cliente.logradouro ??
-        cliente.Logradouro ??
-        cliente.ENDERECO_RUA ??
-        "";
+}
 
 
-      const numero =
-        cliente.numero ??
-        cliente.Numero ??
-        cliente.n ??
-        cliente.N ??
-        "";
+/* ============================================================
+   CARREGA DADOS
+============================================================ */
 
+function loadData(){
 
-      const bairro =
-        cliente.bairro ??
-        cliente.Bairro ??
-        "";
+  try{
 
-
-      const cidade =
-        cliente.cidade ??
-        cliente.Cidade ??
-        cliente.municipio ??
-        cliente.Municipio ??
-        "";
-
-
-      const uf =
-        cliente.uf ??
-        cliente.UF ??
-        cliente.estado ??
-        cliente.Estado ??
-        "";
-
-
-      if (String(rua).trim() !== "") {
-        partes.push(String(rua).trim());
-      }
-
-
-      if (String(numero).trim() !== "") {
-        partes.push(String(numero).trim());
-      }
-
-
-      if (String(bairro).trim() !== "") {
-        partes.push(String(bairro).trim());
-      }
-
-
-      if (String(cidade).trim() !== "") {
-        partes.push(String(cidade).trim());
-      }
-
-
-      if (String(uf).trim() !== "") {
-        partes.push(String(uf).trim());
-      }
-
-
-      return partes.join(", ");
-
-    }
-
-
-    /* ============================================================
-       CARREGAR CLIENTES
-       ============================================================ */
-
-    function carregarClientes() {
-
-      let dados = null;
-
-
-      if (
-        typeof CLIENTES !== "undefined" &&
-        Array.isArray(CLIENTES)
-      ) {
-
-        dados = CLIENTES;
-
-      }
-      else if (
-        typeof clientes !== "undefined" &&
-        Array.isArray(clientes)
-      ) {
-
-        dados = clientes;
-
-      }
-      else if (
-        typeof dadosClientes !== "undefined" &&
-        Array.isArray(dadosClientes)
-      ) {
-
-        dados = dadosClientes;
-
-      }
-      else if (
-        typeof dados !== "undefined" &&
-        Array.isArray(dados)
-      ) {
-
-        dados = dados;
-
-      }
-
-
-      if (!Array.isArray(dados)) {
-
-        statusTexto.textContent =
-          "Erro ao carregar clientes.";
-
-        statusDetalhe.textContent =
-          "Não foi encontrada uma lista válida no arquivo clientes.js.";
-
-        return;
-
-      }
-
-
-      clientes = dados
-        .map((cliente, indice) => {
-
-          return {
-
-            original: cliente,
-
-            indice: indice,
-
-            nome: pegarNome(cliente),
-
-            endereco: pegarEndereco(cliente),
-
-            status: "Aguardando localização...",
-
-            lat: null,
-
-            lon: null
-
-          };
-
-        })
-        .filter(cliente => {
-
-          return (
-            cliente.endereco &&
-            cliente.endereco.trim() !== ""
-          );
-
-        });
-
-
-      contadorClientes.textContent =
-        clientes.length;
-
-
-      atualizarLista();
-
-
-      atualizarInformacoes();
-
-
-      if (clientes.length === 0) {
-
-        statusTexto.textContent =
-          "Nenhum cliente encontrado.";
-
-        statusDetalhe.textContent =
-          "Verifique o conteúdo do arquivo clientes.js.";
-
-      }
-
-    }
-
-
-    /* ============================================================
-       ATUALIZAR STATUS DO CLIENTE
-       ============================================================ */
-
-    function atualizarStatusCliente(
-      cliente,
-      texto,
-      classe
-    ) {
-
-      cliente.status = texto;
-
-      const elemento =
-        document.getElementById(
-          "cliente-" + cliente.indice
-        );
-
-
-      if (!elemento) {
-        return;
-      }
-
-
-      const status =
-        elemento.querySelector(
-          ".cliente-status"
-        );
-
-
-      if (!status) {
-        return;
-      }
-
-
-      status.textContent = texto;
-
-      status.className =
-        "cliente-status " +
-        (classe || "");
-
-    }
-
-
-    /* ============================================================
-       ATUALIZAR LISTA
-       ============================================================ */
-
-    function atualizarLista() {
-
-      listaClientes.innerHTML = "";
-
-
-      clientes.forEach(cliente => {
-
-        const item =
-          document.createElement("div");
-
-        item.className =
-          "cliente-item";
-
-        item.id =
-          "cliente-" + cliente.indice;
-
-
-        item.innerHTML = `
-
-          <div class="cliente-nome">
-            ${escaparHTML(cliente.nome)}
-          </div>
-
-          <div class="cliente-endereco">
-            ${escaparHTML(cliente.endereco)}
-          </div>
-
-          <div class="cliente-status aguardando">
-            ${escaparHTML(cliente.status)}
-          </div>
-
-        `;
-
-
-        listaClientes.appendChild(item);
-
-      });
-
-    }
-
-
-    /* ============================================================
-       ATUALIZAR INFORMAÇÕES
-       ============================================================ */
-
-    function atualizarInformacoes() {
-
-      contadorProcessados.textContent =
-        processados;
-
-      contadorEncontrados.textContent =
-        encontrados;
-
-      contadorFalhas.textContent =
-        falhas;
-
-
-      let porcentagem = 0;
-
-
-      if (clientes.length > 0) {
-
-        porcentagem =
-          Math.round(
-            (processados / clientes.length) * 100
-          );
-
-      }
-
-
-      barraProgresso.style.width =
-        porcentagem + "%";
-
-    }
-
-
-    /* ============================================================
-       CONSULTA NOMINATIM
-       ============================================================ */
-
-    async function consultarNominatim(
-      endereco
-    ) {
-
-      let enderecoCompleto =
-        String(endereco || "").trim();
-
-
-      if (!enderecoCompleto) {
-        return null;
-      }
-
-
-      /*
-       * PRIMEIRA BUSCA
-       *
-       * Mantemos o mesmo princípio da versão
-       * que estava funcionando.
-       */
-
-      if (
-        !/Brasil/i.test(enderecoCompleto)
-      ) {
-
-        enderecoCompleto += ", Brasil";
-
-      }
-
-
-      const parametros =
-        new URLSearchParams({
-
-          format: "jsonv2",
-
-          addressdetails: "1",
-
-          limit: "5",
-
-          countrycodes: "br",
-
-          "accept-language": "pt-BR",
-
-          q: enderecoCompleto
-
-        });
-
-
-      const url =
-        "https://nominatim.openstreetmap.org/search?" +
-        parametros.toString();
-
-
-      try {
-
-        const resposta =
-          await fetch(url, {
-            method: "GET"
-          });
-
-
-        if (!resposta.ok) {
-
-          throw new Error(
-            "HTTP " + resposta.status
-          );
-
-        }
-
-
-        const resultados =
-          await resposta.json();
-
-
-        if (
-          Array.isArray(resultados) &&
-          resultados.length > 0
-        ) {
-
-          /*
-           * Primeiro tentamos encontrar um resultado
-           * claramente brasileiro.
-           *
-           * Se não houver, usamos o primeiro.
-           *
-           * NÃO fazemos pontuação complexa.
-           */
-
-          const brasileiro =
-            resultados.find(resultado => {
-
-              const display =
-                String(
-                  resultado.display_name || ""
-                ).toLowerCase();
-
-              const address =
-                resultado.address || {};
-
-              const pais =
-                String(
-                  address.country || ""
-                ).toLowerCase();
-
-              const estado =
-                String(
-                  address.state || ""
-                ).toLowerCase();
-
-              return (
-                pais.includes("brasil") ||
-                display.includes("brasil") ||
-                estado.includes("rio grande do sul")
-              );
-
-            });
-
-
-          return brasileiro || resultados[0];
-
-        }
-
-
-        return null;
-
-      }
-      catch (erro) {
-
-        console.warn(
-          "Erro na primeira consulta:",
-          erro
-        );
-
-        return null;
-
-      }
-
-    }
-
-
-    /* ============================================================
-       SEGUNDA TENTATIVA
-       ============================================================ */
-
-    async function consultarNominatimFallback(
-      endereco
-    ) {
-
-      let texto =
-        String(endereco || "").trim();
-
-
-      if (!texto) {
-        return null;
-      }
-
-
-      /*
-       * A segunda tentativa é propositalmente
-       * mais simples.
-       *
-       * Ela só é usada quando a primeira busca
-       * não encontrou absolutamente nada.
-       */
-
-      const partes =
-        texto
-          .split(",")
-          .map(parte => parte.trim())
-          .filter(Boolean);
-
-
-      let enderecoSimplificado = texto;
-
-
-      if (partes.length > 2) {
-
-        enderecoSimplificado =
-          partes
-            .slice(0, 3)
-            .join(", ");
-
-      }
-
-
-      if (
-        !/Brasil/i.test(enderecoSimplificado)
-      ) {
-
-        enderecoSimplificado +=
-          ", Brasil";
-
-      }
-
-
-      const parametros =
-        new URLSearchParams({
-
-          format: "jsonv2",
-
-          addressdetails: "1",
-
-          limit: "5",
-
-          countrycodes: "br",
-
-          "accept-language": "pt-BR",
-
-          q: enderecoSimplificado
-
-        });
-
-
-      const url =
-        "https://nominatim.openstreetmap.org/search?" +
-        parametros.toString();
-
-
-      try {
-
-        const resposta =
-          await fetch(url, {
-            method: "GET"
-          });
-
-
-        if (!resposta.ok) {
-
-          throw new Error(
-            "HTTP " + resposta.status
-          );
-
-        }
-
-
-        const resultados =
-          await resposta.json();
-
-
-        if (
-          Array.isArray(resultados) &&
-          resultados.length > 0
-        ) {
-
-          return resultados[0];
-
-        }
-
-
-        return null;
-
-      }
-      catch (erro) {
-
-        console.warn(
-          "Erro na segunda consulta:",
-          erro
-        );
-
-        return null;
-
-      }
-
-    }
-
-
-    /* ============================================================
-       ADICIONAR MARCADOR
-       ============================================================ */
-
-    function adicionarMarcador(
-      cliente,
-      resultado
-    ) {
-
-      const lat =
-        Number(resultado.lat);
-
-      const lon =
-        Number(resultado.lon);
-
-
-      if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon)
-      ) {
-
-        return false;
-
-      }
-
-
-      /*
-       * Segurança para evitar coordenadas absurdas.
-       *
-       * NÃO alteramos sinal,
-       * NÃO invertimos latitude/longitude.
-       */
-
-      if (
-        lat < -90 ||
-        lat > 90 ||
-        lon < -180 ||
-        lon > 180
-      ) {
-
-        return false;
-
-      }
-
-
-      cliente.lat = lat;
-
-      cliente.lon = lon;
-
-
-      const marcador =
-        L.circleMarker(
-          [lat, lon],
-          {
-            radius: 8,
-
-            color: "#ffffff",
-
-            weight: 2,
-
-            fillColor: "#2563eb",
-
-            fillOpacity: 0.95
-
-          }
-        );
-
-
-      marcador.bindPopup(`
-
-        <div class="popup-nome">
-          ${escaparHTML(cliente.nome)}
-        </div>
-
-        <div class="popup-endereco">
-          ${escaparHTML(cliente.endereco)}
-        </div>
-
-      `);
-
-
-      marcador.addTo(
-        camadaMarcadores
+    const saved =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_KEY
+        )
       );
 
 
-      limitesMapa.extend([
-        lat,
-        lon
-      ]);
+    if(
+      Array.isArray(saved) &&
+      saved.length
+    ){
 
+      saved.forEach(
+        normalizeDelivery
+      );
 
-      return true;
+      /*
+        Atualiza registros antigos
+        acrescentando a cidade.
+      */
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(saved)
+      );
+
+      return saved;
 
     }
 
+  }catch(e){
 
-    /* ============================================================
-       LOCALIZAR UM CLIENTE
-       ============================================================ */
+    console.warn(
+      "Erro lendo dados:",
+      e
+    );
 
-    async function localizarCliente(
-      cliente
-    ) {
+  }
 
-      atualizarStatusCliente(
-        cliente,
-        "Localizando...",
-        "localizando"
-      );
 
+  /*
+    Caso não exista lista salva,
+    não inventamos endereços.
 
-      statusDetalhe.textContent =
-        cliente.nome +
-        " — " +
-        cliente.endereco;
+    O sistema continuará vazio até
+    receber a lista/importação usada
+    pelo projeto.
+  */
 
+  return [];
 
-      /*
-       * PRIMEIRA TENTATIVA
-       */
+}
 
-      let resultado =
-        await consultarNominatim(
-          cliente.endereco
-        );
 
+/* ============================================================
+   SALVA
+============================================================ */
 
-      /*
-       * Se encontrou, usamos imediatamente.
-       *
-       * Não fazemos uma segunda consulta.
-       */
+function saveData(){
 
-      if (resultado) {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(deliveries)
+  );
 
-        const sucesso =
-          adicionarMarcador(
-            cliente,
-            resultado
-          );
+}
 
 
-        if (sucesso) {
+/* ============================================================
+   DISTÂNCIA
+============================================================ */
 
-          encontrados++;
+function distanceKm(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+){
 
+  if(
+    ![
+      lat1,
+      lon1,
+      lat2,
+      lon2
+    ].every(Number.isFinite)
+  ){
 
-          atualizarStatusCliente(
-            cliente,
-            "✓ Localizado",
-            "sucesso"
-          );
+    return null;
 
+  }
 
-          atualizarInformacoes();
 
+  const R = 6371;
 
-          return true;
+  const rad =
+    Math.PI / 180;
 
-        }
+  const dLat =
+    (lat2-lat1)*rad;
 
-      }
+  const dLon =
+    (lon2-lon1)*rad;
 
 
-      /*
-       * Só chegamos aqui se a primeira busca
-       * realmente não conseguiu localizar.
-       */
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(lat1*rad) *
+    Math.cos(lat2*rad) *
+    Math.sin(dLon/2)**2;
 
-      atualizarStatusCliente(
-        cliente,
-        "Tentando segunda busca...",
-        "segunda-tentativa"
-      );
 
+  const safe =
+    Math.min(
+      1,
+      Math.max(0,a)
+    );
 
-      await esperar(1500);
 
+  return (
+    R *
+    2 *
+    Math.atan2(
+      Math.sqrt(safe),
+      Math.sqrt(1-safe)
+    )
+  );
 
-      resultado =
-        await consultarNominatimFallback(
-          cliente.endereco
-        );
+}
 
 
-      if (resultado) {
+function distanceText(km){
 
-        const sucesso =
-          adicionarMarcador(
-            cliente,
-            resultado
-          );
+  if(km === null)
+    return "";
 
+  if(km < 1){
 
-        if (sucesso) {
+    return (
+      Math.round(km*1000) +
+      " m"
+    );
 
-          encontrados++;
+  }
 
 
-          atualizarStatusCliente(
-            cliente,
-            "✓ Localizado na segunda tentativa",
-            "sucesso"
-          );
+  return (
+    km
+      .toFixed(1)
+      .replace(".",",") +
+    " km"
+  );
 
+}
 
-          atualizarInformacoes();
 
+/* ============================================================
+   NORMALIZA NOME DE RUA
+============================================================ */
 
-          return true;
+function normalizeStreetName(name){
 
-        }
+  let s =
+    String(name || "")
+      .trim();
 
-      }
 
+  /*
+    Remove códigos que costumam
+    contaminar o nome da rua.
 
-      /*
-       * Não localizado.
-       */
+    Exemplo:
 
-      falhas++;
+    LUIZ ANTUNES 00906501
 
+    vira:
 
-      atualizarStatusCliente(
-        cliente,
-        "✕ Não localizado",
-        "falha"
-      );
+    LUIZ ANTUNES
+  */
 
+  s =
+    s.replace(
+      /\b\d{5,}\b/g,
+      ""
+    );
 
-      atualizarInformacoes();
 
+  s =
+    s.replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
 
-      return false;
 
-    }
+  /*
+    Normaliza abreviações.
+  */
 
+  s =
+    s.replace(
+      /^R\.?\s+/i,
+      "Rua "
+    );
 
-    /* ============================================================
-       LOCALIZAR TODOS
-       ============================================================ */
 
-    async function localizarTodos() {
+  s =
+    s.replace(
+      /^RUA\s+/i,
+      "Rua "
+    );
 
-      if (processando) {
-        return;
-      }
 
+  s =
+    s.replace(
+      /^AV\.?\s+/i,
+      "Avenida "
+    );
 
-      if (!clientes.length) {
 
-        statusTexto.textContent =
-          "Nenhum cliente disponível.";
+  s =
+    s.replace(
+      /^AVENIDA\s+/i,
+      "Avenida "
+    );
 
-        return;
 
-      }
+  s =
+    s.replace(
+      /^TV\.?\s+/i,
+      "Travessa "
+    );
 
 
-      processando = true;
+  s =
+    s.replace(
+      /^TRAV\.?\s+/i,
+      "Travessa "
+    );
 
 
-      botaoLocalizar.disabled =
-        true;
+  s =
+    s.replace(
+      /^EST\.?\s+MUN\.?\s+/i,
+      "Estrada Municipal "
+    );
 
 
-      botaoLocalizar.textContent =
-        "⏳ LOCALIZANDO...";
+  s =
+    s.replace(
+      /^EST\.?\s+/i,
+      "Estrada "
+    );
 
 
-      encontrados = 0;
+  return s;
 
-      falhas = 0;
+}
 
-      processados = 0;
 
+/* ============================================================
+   EXTRAI COMPONENTES DO ENDEREÇO
+============================================================ */
 
-      limitesMapa =
-        L.latLngBounds([]);
+function parseAddress(d){
 
+  const raw =
+    String(
+      d.address ||
+      d.endereco ||
+      d["Endereço completo"] ||
+      ""
+    ).trim();
 
-      camadaMarcadores.clearLayers();
 
+  const city =
+    getDeliveryCity(d);
 
-      clientes.forEach(cliente => {
 
-        cliente.status =
-          "Aguardando localização...";
+  /*
+    Se a planilha tiver campos separados,
+    eles têm prioridade.
+  */
 
-        cliente.lat = null;
+  let street =
+    d.street ||
+    d.rua ||
+    d.Endereço ||
+    "";
 
-        cliente.lon = null;
 
-      });
+  let number =
+    d.number ||
+    d.numero ||
+    d.Número ||
+    "";
 
 
-      atualizarLista();
+  let neighborhood =
+    d.neighborhood ||
+    d.bairro ||
+    d.Bairro ||
+    "";
 
 
-      atualizarInformacoes();
+  /*
+    Se não houver campos separados,
+    tenta desmontar o endereço completo.
+  */
 
+  if(
+    !street ||
+    !number ||
+    !neighborhood
+  ){
 
-      statusTexto.textContent =
-        "Iniciando localização...";
+    const parts =
+      raw
+        .split(",")
+        .map(x=>x.trim())
+        .filter(Boolean);
 
 
-      statusDetalhe.textContent =
-        "Consultando os endereços um por um.";
+    if(parts.length >= 2){
 
+      if(!street)
+        street = parts[0];
 
-      for (
-        let i = 0;
-        i < clientes.length;
-        i++
-      ) {
 
-        const cliente =
-          clientes[i];
-
-
-        statusTexto.textContent =
-          "Localizando " +
-          (i + 1) +
-          " de " +
-          clientes.length;
-
-
-        await localizarCliente(
-          cliente
-        );
-
-
-        processados++;
-
-
-        atualizarInformacoes();
-
+      if(!number){
 
         /*
-         * Intervalo entre clientes.
-         *
-         * Mantemos 1,5 segundo para evitar
-         * excesso de requisições ao Nominatim.
-         */
+          O número normalmente está
+          no segundo bloco.
+        */
 
-        if (
-          i < clientes.length - 1
-        ) {
+        number =
+          parts[1]
+            .replace(
+              /[^\dA-Za-z\-]/g,
+              ""
+            );
 
-          await esperar(
-            INTERVALO_GEOCODIFICACAO
+      }
+
+
+      if(!neighborhood){
+
+        const cityIndex =
+          parts.findIndex(
+            p =>
+              normalize(p) ===
+              normalize(city)
           );
+
+
+        if(cityIndex > 2){
+
+          neighborhood =
+            parts[cityIndex-1];
 
         }
 
       }
 
+    }
 
-      /*
-       * Ajusta o mapa para mostrar todos
-       * os clientes encontrados.
-       */
+  }
 
-      if (
-        limitesMapa.isValid()
-      ) {
 
-        mapa.fitBounds(
-          limitesMapa,
+  street =
+    normalizeStreetName(
+      street
+    );
+
+
+  return {
+
+    raw,
+    street,
+    number:
+      String(number || "").trim(),
+    neighborhood:
+      String(
+        neighborhood || ""
+      ).trim(),
+    city:
+      String(
+        city || ""
+      ).trim()
+
+  };
+
+}
+
+
+/* ============================================================
+   CRIA TENTATIVAS DE BUSCA
+============================================================ */
+
+function buildQueries(d){
+
+  const p =
+    parseAddress(d);
+
+
+  const queries = [];
+
+  function add(
+    label,
+    query
+  ){
+
+    if(!query)
+      return;
+
+    const exists =
+      queries.some(
+        x =>
+          normalize(x.query) ===
+          normalize(query)
+      );
+
+
+    if(!exists){
+
+      queries.push({
+        label,
+        query
+      });
+
+    }
+
+  }
+
+
+  const city =
+    p.city;
+
+
+  const street =
+    p.street;
+
+
+  const number =
+    p.number;
+
+
+  const neighborhood =
+    p.neighborhood;
+
+
+  /*
+    1 — endereço original,
+    mas garantindo cidade.
+  */
+
+  add(
+    "Original + cidade",
+    `${p.raw}, ${city}, RS, Brasil`
+  );
+
+
+  /*
+    2 — rua normalizada + número
+        + bairro + cidade
+  */
+
+  if(
+    street &&
+    number &&
+    neighborhood
+  ){
+
+    add(
+      "Rua normalizada + bairro",
+      `${street}, ${number}, ${neighborhood}, ${city}, RS, Brasil`
+    );
+
+  }
+
+
+  /*
+    3 — remove bairro.
+  */
+
+  if(
+    street &&
+    number
+  ){
+
+    add(
+      "Rua + número + cidade",
+      `${street}, ${number}, ${city}, RS, Brasil`
+    );
+
+  }
+
+
+  /*
+    4 — nome original da rua
+        sem abreviação.
+  */
+
+  if(
+    d.address &&
+    number &&
+    city
+  ){
+
+    const originalStreet =
+      String(d.address)
+        .split(",")[0]
+        .trim();
+
+
+    add(
+      "Rua original + número + cidade",
+      `${originalStreet}, ${number}, ${city}, RS, Brasil`
+    );
+
+  }
+
+
+  /*
+    5 — somente rua + cidade.
+
+    É o fallback mais amplo.
+  */
+
+  if(
+    street &&
+    city
+  ){
+
+    add(
+      "Rua + cidade",
+      `${street}, ${city}, RS, Brasil`
+    );
+
+  }
+
+
+  /*
+    6 — sem acentos.
+  */
+
+  if(
+    street &&
+    number &&
+    city
+  ){
+
+    add(
+      "Sem acentos + cidade",
+      `${normalize(street)}, ${number}, ${normalize(city)}, RS, Brasil`
+    );
+
+  }
+
+
+  return queries;
+
+}
+
+
+/* ============================================================
+   VALIDA CIDADE DO RESULTADO
+============================================================ */
+
+function resultMatchesCity(
+  item,
+  expectedCity
+){
+
+  if(!expectedCity)
+    return true;
+
+
+  const wanted =
+    normalize(expectedCity);
+
+
+  const addr =
+    item.address || {};
+
+
+  const possible = [
+
+    addr.city,
+    addr.town,
+    addr.village,
+    addr.municipality,
+    addr.city_district,
+    addr.county
+
+  ]
+    .filter(Boolean)
+    .map(normalize);
+
+
+  /*
+    Primeiro verificamos os campos
+    estruturados do Nominatim.
+  */
+
+  if(
+    possible.some(
+      value =>
+        value === wanted ||
+        value.includes(wanted) ||
+        wanted.includes(value)
+    )
+  ){
+
+    return true;
+
+  }
+
+
+  /*
+    Segundo nível:
+    usa display_name como fallback.
+
+    Isso ajuda em cidades pequenas
+    onde o retorno pode variar.
+  */
+
+  const display =
+    normalize(
+      item.display_name || ""
+    );
+
+
+  /*
+    Exigimos a cidade inteira
+    dentro do resultado.
+  */
+
+  return display.includes(wanted);
+
+}
+
+
+/* ============================================================
+   VALIDA ESTADO
+============================================================ */
+
+function resultIsInRioGrandeDoSul(item){
+
+  const addr =
+    item.address || {};
+
+
+  const state =
+    normalize(
+      addr.state || ""
+    );
+
+
+  const iso =
+    normalize(
+      addr["ISO3166-2-lvl4"] || ""
+    );
+
+
+  if(
+    state.includes(
+      "rio grande do sul"
+    )
+  ){
+
+    return true;
+
+  }
+
+
+  if(
+    iso === "br-rs"
+  ){
+
+    return true;
+
+  }
+
+
+  /*
+    Alguns resultados não retornam
+    corretamente o campo estadual.
+    Nesse caso verificamos display_name.
+  */
+
+  const display =
+    normalize(
+      item.display_name || ""
+    );
+
+
+  return (
+    display.includes(
+      "rio grande do sul"
+    ) ||
+    display.includes(
+      " rs,"
+    )
+  );
+
+}
+
+
+/* ============================================================
+   CALCULA QUALIDADE DO RESULTADO
+============================================================ */
+
+function scoreResult(
+  item,
+  d
+){
+
+  const p =
+    parseAddress(d);
+
+
+  let score = 0;
+
+
+  const addr =
+    item.address || {};
+
+
+  const returnedCity =
+    normalize(
+      addr.city ||
+      addr.town ||
+      addr.village ||
+      addr.municipality ||
+      ""
+    );
+
+
+  const wantedCity =
+    normalize(p.city);
+
+
+  if(
+    returnedCity &&
+    wantedCity &&
+    returnedCity === wantedCity
+  ){
+
+    score += 50;
+
+  }else if(
+    returnedCity &&
+    wantedCity &&
+    (
+      returnedCity.includes(wantedCity) ||
+      wantedCity.includes(returnedCity)
+    )
+  ){
+
+    score += 35;
+
+  }
+
+
+  const returnedRoad =
+    normalize(
+      addr.road ||
+      addr.pedestrian ||
+      addr.footway ||
+      ""
+    );
+
+
+  const wantedRoad =
+    normalize(p.street)
+      .replace(
+        /^(rua|avenida|travessa|estrada|rodovia)\s+/,
+        ""
+      );
+
+
+  if(
+    returnedRoad &&
+    wantedRoad &&
+    (
+      returnedRoad.includes(wantedRoad) ||
+      wantedRoad.includes(returnedRoad)
+    )
+  ){
+
+    score += 35;
+
+  }
+
+
+  const returnedHouse =
+    normalize(
+      addr.house_number ||
+      ""
+    );
+
+
+  if(
+    p.number &&
+    returnedHouse &&
+    returnedHouse ===
+    normalize(p.number)
+  ){
+
+    score += 15;
+
+  }
+
+
+  if(
+    addr.suburb &&
+    p.neighborhood &&
+    normalize(addr.suburb) ===
+    normalize(p.neighborhood)
+  ){
+
+    score += 10;
+
+  }
+
+
+  return score;
+
+}
+
+
+/* ============================================================
+   CHAVE DO CACHE
+============================================================ */
+
+function cacheKey(
+  d,
+  query
+){
+
+  return normalize(
+    `${getDeliveryCity(d)}|${query}`
+  );
+
+}
+
+
+/* ============================================================
+   SALVA CACHE
+============================================================ */
+
+function saveGeoCache(){
+
+  localStorage.setItem(
+    CACHE_KEY,
+    JSON.stringify(
+      geocache
+    )
+  );
+
+}
+
+
+/* ============================================================
+   HISTÓRICO DA LOCALIZAÇÃO
+============================================================ */
+
+function saveGeoHistory(
+  d,
+  data
+){
+
+  geoHistory[String(d.id)] = {
+
+    address:
+      d.address,
+
+    city:
+      getDeliveryCity(d),
+
+    query:
+      data.query,
+
+    method:
+      data.method,
+
+    display:
+      data.display,
+
+    score:
+      data.score,
+
+    lat:
+      data.lat,
+
+    lon:
+      data.lon,
+
+    updatedAt:
+      new Date().toISOString()
+
+  };
+
+
+  localStorage.setItem(
+    GEO_HISTORY_KEY,
+    JSON.stringify(
+      geoHistory
+    )
+  );
+
+}
+
+
+/* ============================================================
+   CONSULTA NOMINATIM
+============================================================ */
+
+async function searchNominatim(
+  query,
+  d
+){
+
+  const url =
+    "https://nominatim.openstreetmap.org/search" +
+    "?format=jsonv2" +
+    "&limit=5" +
+    "&countrycodes=br" +
+    "&accept-language=pt-BR" +
+    "&addressdetails=1" +
+    "&q=" +
+    encodeURIComponent(query);
+
+
+  const response =
+    await fetch(
+      url,
+      {
+        headers:{
+          "Accept":
+            "application/json"
+        }
+      }
+    );
+
+
+  if(!response.ok){
+
+    throw new Error(
+      "HTTP " +
+      response.status
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  if(!Array.isArray(data))
+    return null;
+
+
+  const expectedCity =
+    getDeliveryCity(d);
+
+
+  /*
+    Filtra primeiro por cidade
+    e estado.
+  */
+
+  const valid =
+    data
+      .filter(
+        item =>
+          resultIsInRioGrandeDoSul(item) &&
+          resultMatchesCity(
+            item,
+            expectedCity
+          )
+      )
+      .map(
+        item => ({
+
+          item,
+
+          score:
+            scoreResult(
+              item,
+              d
+            )
+
+        })
+      )
+      .sort(
+        (a,b)=>
+          b.score -
+          a.score
+      );
+
+
+  if(!valid.length)
+    return null;
+
+
+  const best =
+    valid[0];
+
+
+  const lat =
+    parseFloat(
+      best.item.lat
+    );
+
+  const lon =
+    parseFloat(
+      best.item.lon
+    );
+
+
+  if(
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon)
+  ){
+
+    return null;
+
+  }
+
+
+  const coords = {
+    lat,
+    lon
+  };
+
+
+  if(
+    !normalizeCoordinates(
+      coords
+    )
+  ){
+
+    return null;
+
+  }
+
+
+  return {
+
+    lat:
+      coords.lat,
+
+    lon:
+      coords.lon,
+
+    score:
+      best.score,
+
+    display:
+      best.item.display_name ||
+      "",
+
+    address:
+      best.item.address ||
+      {}
+
+  };
+
+}
+
+
+/* ============================================================
+   GEOCODIFICA UMA ENTREGA
+============================================================ */
+
+async function geocodeOne(d){
+
+  const queries =
+    buildQueries(d);
+
+
+  /*
+    Primeiro verifica se existe
+    histórico/cache para alguma
+    das consultas.
+  */
+
+  for(
+    const attempt of queries
+  ){
+
+    const key =
+      cacheKey(
+        d,
+        attempt.query
+      );
+
+
+    const cached =
+      geocache[key];
+
+
+    if(cached){
+
+      const coords = {
+        lat:
+          cached.lat,
+        lon:
+          cached.lon
+      };
+
+
+      if(
+        normalizeCoordinates(
+          coords
+        )
+      ){
+
+        d.lat =
+          coords.lat;
+
+        d.lon =
+          coords.lon;
+
+        d.locMethod =
+          cached.method ||
+          attempt.label;
+
+        d.locQuery =
+          attempt.query;
+
+        d.locDisplay =
+          cached.display ||
+          "";
+
+        d.locScore =
+          cached.score ||
+          0;
+
+
+        return {
+
+          success:true,
+
+          method:
+            d.locMethod,
+
+          query:
+            d.locQuery,
+
+          score:
+            d.locScore
+
+        };
+
+      }
+
+    }
+
+  }
+
+
+  /*
+    Agora executamos as consultas
+    uma por uma.
+  */
+
+  for(
+    let i=0;
+    i<queries.length;
+    i++
+  ){
+
+    const attempt =
+      queries[i];
+
+
+    try{
+
+      const result =
+        await searchNominatim(
+          attempt.query,
+          d
+        );
+
+
+      if(result){
+
+        d.lat =
+          result.lat;
+
+        d.lon =
+          result.lon;
+
+        d.locMethod =
+          attempt.label;
+
+        d.locQuery =
+          attempt.query;
+
+        d.locDisplay =
+          result.display;
+
+        d.locScore =
+          result.score;
+
+
+        const key =
+          cacheKey(
+            d,
+            attempt.query
+          );
+
+
+        geocache[key] = {
+
+          lat:
+            result.lat,
+
+          lon:
+            result.lon,
+
+          method:
+            attempt.label,
+
+          display:
+            result.display,
+
+          score:
+            result.score
+
+        };
+
+
+        saveGeoCache();
+
+
+        saveGeoHistory(
+          d,
           {
-            padding: [25, 25],
 
-            maxZoom: 16
+            query:
+              attempt.query,
+
+            method:
+              attempt.label,
+
+            display:
+              result.display,
+
+            score:
+              result.score,
+
+            lat:
+              result.lat,
+
+            lon:
+              result.lon
 
           }
         );
 
+
+        return {
+
+          success:true,
+
+          method:
+            attempt.label,
+
+          query:
+            attempt.query,
+
+          score:
+            result.score
+
+        };
+
       }
 
+    }catch(error){
 
-      statusTexto.textContent =
-        "Localização concluída";
-
-
-      statusDetalhe.textContent =
-        encontrados +
-        " clientes localizados e " +
-        falhas +
-        " não localizados.";
-
-
-      botaoLocalizar.disabled =
-        false;
-
-
-      botaoLocalizar.textContent =
-        "📍 LOCALIZAR NOVAMENTE";
-
-
-      processando = false;
-
-
-      atualizarInformacoes();
+      console.warn(
+        "Erro na tentativa:",
+        attempt.query,
+        error
+      );
 
     }
-
-
-    /* ============================================================
-       EVENTO DO BOTÃO
-       ============================================================ */
-
-    botaoLocalizar.addEventListener(
-      "click",
-      localizarTodos
-    );
-
-
-    /* ============================================================
-       INICIALIZAÇÃO
-       ============================================================ */
-
-    carregarClientes();
 
 
     /*
-     * Corrige o tamanho do mapa depois
-     * que a página termina de carregar.
-     */
+      Respeita o limite do Nominatim.
+    */
 
-    setTimeout(() => {
+    await sleep(
+      1100
+    );
 
-      mapa.invalidateSize();
-
-    }, 300);
+  }
 
 
-    window.addEventListener(
-      "resize",
-      () => {
+  /*
+    Não encontrou.
+  */
 
-        mapa.invalidateSize();
+  d.lat = null;
+  d.lon = null;
+
+  d.locMethod =
+    "Não localizado";
+
+  d.locQuery = null;
+  d.locDisplay = null;
+  d.locScore = null;
+
+
+  return {
+
+    success:false,
+
+    method:
+      "Não localizado"
+
+  };
+
+}
+
+
+/* ============================================================
+   SLEEP
+============================================================ */
+
+function sleep(ms){
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
+
+}
+
+
+/* ============================================================
+   MARCADORES
+============================================================ */
+
+function createIcon(){
+
+  return L.divIcon({
+
+    className:"",
+
+    html:
+      '<div class="marker-pin" ' +
+      'style="background:#f59e0b">' +
+      '<span>📍</span>' +
+      '</div>',
+
+    iconSize:[
+      34,
+      34
+    ],
+
+    iconAnchor:[
+      10,
+      32
+    ],
+
+    popupAnchor:[
+      7,
+      -30
+    ]
+
+  });
+
+}
+
+
+function clearMarkers(){
+
+  markers.forEach(
+    marker =>
+      map.removeLayer(
+        marker
+      )
+  );
+
+  markers.clear();
+
+}
+
+
+function renderMarkers(){
+
+  clearMarkers();
+
+
+  deliveries
+    .filter(
+      d =>
+        d.status ===
+        "PENDENTE" &&
+        Number.isFinite(d.lat) &&
+        Number.isFinite(d.lon)
+    )
+    .forEach(
+      d => {
+
+        const marker =
+          L.marker(
+            [
+              d.lat,
+              d.lon
+            ],
+            {
+              icon:
+                createIcon()
+            }
+          )
+          .addTo(map);
+
+
+        const method =
+          d.locMethod
+            ? `<br><small>🔎 ${esc(d.locMethod)}</small>`
+            : "";
+
+
+        marker.bindPopup(`
+
+          <b>${esc(d.label)}</b>
+
+          <br>
+
+          ${esc(d.address)}
+
+          <br>
+
+          <small>
+            📍 ${esc(getDeliveryCity(d))}
+          </small>
+
+          ${method}
+
+          <br>
+
+          <button
+            onclick="openDelivery(${d.id})"
+            style="
+              margin-top:8px;
+              padding:8px 10px;
+              border:0;
+              border-radius:9px;
+              background:#111827;
+              color:white;
+              font-weight:700
+            "
+          >
+            Abrir entrega
+          </button>
+
+        `);
+
+
+        marker.on(
+          "click",
+          () =>
+            openDelivery(
+              d.id
+            )
+        );
+
+
+        markers.set(
+          d.id,
+          marker
+        );
 
       }
     );
 
-  </script>
+}
+
+
+/* ============================================================
+   LISTA DE MAIS PRÓXIMAS
+============================================================ */
+
+function nearby(){
+
+  const list =
+    document.getElementById(
+      "nearbyList"
+    );
+
+
+  let arr =
+    deliveries.filter(
+      d =>
+        d.status ===
+        "PENDENTE"
+    );
+
+
+  if(userPos){
+
+    arr =
+      arr
+        .map(
+          d => ({
+
+            ...d,
+
+            dist:
+              Number.isFinite(d.lat) &&
+              Number.isFinite(d.lon)
+
+                ? distanceKm(
+                    userPos.lat,
+                    userPos.lon,
+                    d.lat,
+                    d.lon
+                  )
+
+                : null
+
+          })
+        )
+        .sort(
+          (a,b)=>{
+
+            if(a.dist == null)
+              return 1;
+
+            if(b.dist == null)
+              return -1;
+
+            return (
+              a.dist -
+              b.dist
+            );
+
+          }
+        );
+
+  }
+
+
+  if(!arr.length){
+
+    list.innerHTML =
+      '<div class="empty">' +
+      'Nenhuma entrega pendente.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  const located =
+    arr.filter(
+      d =>
+        Number.isFinite(d.lat) &&
+        Number.isFinite(d.lon)
+    ).length;
+
+
+  list.innerHTML = `
+
+    <div class="notice">
+
+      Mostrando
+
+      <b>${arr.length}</b>
+
+      entrega(s) pendente(s).
+
+      ${
+        userPos
+        ?
+        "Ordenadas pela distância em linha reta."
+        :
+        "Ative sua localização para ordenar pela distância."
+      }
+
+      ${
+        located < arr.length
+        ?
+        `<br><b>${arr.length-located}</b> ainda sem coordenadas.`
+        :
+        ""
+      }
+
+    </div>
+
+  ` +
+
+  arr.map(
+    d => `
+
+      <div class="card">
+
+        <div class="card-top">
+
+          <div class="card-title">
+            ${esc(d.label)}
+          </div>
+
+          ${
+            d.dist != null
+            ?
+            `<div class="distance">
+              ${distanceText(d.dist)}
+            </div>`
+            :
+            `<div
+              class="distance"
+              style="color:#f59e0b"
+            >
+              📍 A localizar
+            </div>`
+          }
+
+        </div>
+
+
+        <div class="address">
+          ${esc(d.address)}
+        </div>
+
+
+        <div class="city">
+
+          🏙️ Cidade:
+          <b>
+            ${esc(getDeliveryCity(d))}
+          </b>
+
+        </div>
+
+
+        ${
+          d.locMethod
+          ?
+          `<div class="method">
+            🔎 ${esc(d.locMethod)}
+          </div>`
+          :
+          ""
+        }
+
+
+        <div class="card-actions">
+
+          <button
+            class="blue small"
+            onclick="openDelivery(${d.id})"
+          >
+            Ver no mapa
+          </button>
+
+          <button
+            class="light small"
+            onclick="navigateTo(${d.id})"
+          >
+            🧭 Ir
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+  ).join("");
+
+}
+
+
+/* ============================================================
+   GPS
+============================================================ */
+
+function applyUserPosition(
+  pos,
+  centerMap=false
+){
+
+  const lat =
+    Number(
+      pos.coords.latitude
+    );
+
+  const lon =
+    Number(
+      pos.coords.longitude
+    );
+
+
+  if(
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon) ||
+    Math.abs(lat)>90 ||
+    Math.abs(lon)>180
+  ){
+
+    return;
+
+  }
+
+
+  userPos = {
+
+    lat,
+    lon,
+
+    accuracy:
+      Number(
+        pos.coords.accuracy
+      ) || 0
+
+  };
+
+
+  if(userMarker)
+    map.removeLayer(
+      userMarker
+    );
+
+
+  if(accuracyCircle)
+    map.removeLayer(
+      accuracyCircle
+    );
+
+
+  const icon =
+    L.divIcon({
+
+      className:"",
+
+      html:
+        '<div class="user-dot"></div>',
+
+      iconSize:[
+        20,
+        20
+      ],
+
+      iconAnchor:[
+        10,
+        10
+      ]
+
+    });
+
+
+  userMarker =
+    L.marker(
+      [
+        lat,
+        lon
+      ],
+      {
+        icon,
+        zIndexOffset:1000
+      }
+    )
+    .addTo(map)
+    .bindPopup(
+      "📍 Você está aqui"
+    );
+
+
+  accuracyCircle =
+    L.circle(
+      [
+        lat,
+        lon
+      ],
+      {
+        radius:
+          userPos.accuracy,
+
+        weight:1,
+
+        fillOpacity:.08
+      }
+    )
+    .addTo(map);
+
+
+  if(centerMap){
+
+    map.setView(
+      [
+        lat,
+        lon
+      ],
+      15
+    );
+
+  }
+
+
+  nearby();
+
+}
+
+
+function requestLocation(){
+
+  if(!navigator.geolocation){
+
+    alert(
+      "Este navegador não disponibiliza GPS."
+    );
+
+    return;
+
+  }
+
+
+  navigator.geolocation.getCurrentPosition(
+
+    pos =>
+      applyUserPosition(
+        pos,
+        true
+      ),
+
+    err => {
+
+      alert(
+        "Não foi possível obter sua localização. " +
+        "Permita o GPS no navegador. Código: " +
+        err.code
+      );
+
+    },
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:10000
+    }
+
+  );
+
+
+  if(
+    watchId === null
+  ){
+
+    watchId =
+      navigator.geolocation.watchPosition(
+
+        pos =>
+          applyUserPosition(
+            pos,
+            false
+          ),
+
+        ()=>{},
+
+        {
+          enableHighAccuracy:true,
+          timeout:20000,
+          maximumAge:5000
+        }
+
+      );
+
+  }
+
+}
+
+
+/* ============================================================
+   ABRIR ENTREGA
+============================================================ */
+
+function openDelivery(id){
+
+  const d =
+    deliveries.find(
+      x =>
+        x.id === id
+    );
+
+
+  if(!d)
+    return;
+
+
+  selectedId =
+    id;
+
+
+  document.getElementById(
+    "modalTitle"
+  ).textContent =
+    d.label;
+
+
+  document.getElementById(
+    "modalAddress"
+  ).textContent =
+    d.address;
+
+
+  let distance = "";
+
+
+  if(
+    userPos &&
+    Number.isFinite(d.lat) &&
+    Number.isFinite(d.lon)
+  ){
+
+    distance =
+      "📏 " +
+      distanceText(
+        distanceKm(
+          userPos.lat,
+          userPos.lon,
+          d.lat,
+          d.lon
+        )
+      ) +
+      " de você";
+
+  }else if(
+    !Number.isFinite(d.lat)
+  ){
+
+    distance =
+      "📍 Coordenadas ainda não localizadas.";
+
+  }
+
+
+  document.getElementById(
+    "modalDistance"
+  ).textContent =
+    distance;
+
+
+  document.getElementById(
+    "modalDebug"
+  ).innerHTML = `
+
+    <b>🏙️ Cidade usada na busca:</b>
+
+    ${esc(getDeliveryCity(d))}
+
+    ${
+      d.locMethod
+      ?
+      `<br><b>🔎 Método:</b>
+       ${esc(d.locMethod)}`
+      :
+      ""
+    }
+
+    ${
+      d.locQuery
+      ?
+      `<br><b>🔍 Consulta:</b>
+       ${esc(d.locQuery)}`
+      :
+      ""
+    }
+
+    ${
+      d.locScore
+      ?
+      `<br><b>⭐ Pontuação:</b>
+       ${d.locScore}`
+      :
+      ""
+    }
+
+  `;
+
+
+  document.getElementById(
+    "modalBg"
+  ).style.display =
+    "flex";
+
+
+  if(
+    Number.isFinite(d.lat) &&
+    Number.isFinite(d.lon)
+  ){
+
+    map.setView(
+      [
+        d.lat,
+        d.lon
+      ],
+      16
+    );
+
+
+    const marker =
+      markers.get(id);
+
+
+    if(marker)
+      marker.openPopup();
+
+  }
+
+}
+
+
+function closeModal(){
+
+  document.getElementById(
+    "modalBg"
+  ).style.display =
+    "none";
+
+  selectedId =
+    null;
+
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+function setStatus(status){
+
+  if(!selectedId)
+    return;
+
+
+  const d =
+    deliveries.find(
+      x =>
+        x.id ===
+        selectedId
+    );
+
+
+  if(!d)
+    return;
+
+
+  d.status =
+    status;
+
+
+  d.updatedAt =
+    new Date().toISOString();
+
+
+  saveData();
+
+
+  closeModal();
+
+
+  render();
+
+}
+
+
+/* ============================================================
+   NAVEGAÇÃO
+============================================================ */
+
+function navigateTo(id){
+
+  const d =
+    deliveries.find(
+      x =>
+        x.id === id
+    );
+
+
+  if(!d)
+    return;
+
+
+  let destination;
+
+
+  if(
+    Number.isFinite(d.lat) &&
+    Number.isFinite(d.lon)
+  ){
+
+    destination =
+      `${d.lat},${d.lon}`;
+
+  }else{
+
+    destination =
+      encodeURIComponent(
+        d.address
+      );
+
+  }
+
+
+  const url =
+    "https://www.google.com/maps/dir/?api=1" +
+    "&destination=" +
+    destination;
+
+
+  window.open(
+    url,
+    "_blank"
+  );
+
+}
+
+
+/* ============================================================
+   LOCALIZAR TODOS OS PENDENTES SEM COORDENADAS
+============================================================ */
+
+async function geocodeAll(){
+
+  const btn =
+    document.getElementById(
+      "geocodeBtn"
+    );
+
+
+  btn.disabled =
+    true;
+
+
+  const pending =
+    deliveries.filter(
+      d =>
+        d.status ===
+        "PENDENTE" &&
+
+        (
+          !Number.isFinite(d.lat) ||
+          !Number.isFinite(d.lon)
+        )
+    );
+
+
+  if(!pending.length){
+
+    document.getElementById(
+      "geocodeStatus"
+    ).textContent =
+      "Todos os clientes pendentes já possuem coordenadas.";
+
+    btn.disabled =
+      false;
+
+    return;
+
+  }
+
+
+  let ok = 0;
+
+  let fail = 0;
+
+  let recovered = 0;
+
+
+  const bar =
+    document.getElementById(
+      "progressBar"
+    );
+
+
+  const status =
+    document.getElementById(
+      "geocodeStatus"
+    );
+
+
+  for(
+    let i=0;
+    i<pending.length;
+    i++
+  ){
+
+    const d =
+      pending[i];
+
+
+    const city =
+      getDeliveryCity(d);
+
+
+    status.innerHTML = `
+
+      <b>
+        Localizando ${i+1} de ${pending.length}
+      </b>
+
+      <br>
+
+      ${esc(d.address)}
+
+      <br>
+
+      🏙️ Cidade usada:
+      <b>${esc(city || "não informada")}</b>
+
+    `;
+
+
+    bar.style.width =
+      (
+        (i / pending.length) *
+        100
+      ) +
+      "%";
+
+
+    const previousMethod =
+      d.locMethod;
+
+
+    try{
+
+      const result =
+        await geocodeOne(d);
+
+
+      if(result.success){
+
+        ok++;
+
+
+        /*
+          Se conseguiu depois da
+          primeira estratégia,
+          contabiliza como recuperado.
+        */
+
+        if(
+          result.method !==
+          "Original + cidade"
+        ){
+
+          recovered++;
+
+        }
+
+      }else{
+
+        fail++;
+
+      }
+
+    }catch(error){
+
+      console.error(
+        "Erro:",
+        error
+      );
+
+      fail++;
+
+    }
+
+
+    saveData();
+
+    renderMarkers();
+
+    nearby();
+
+
+    /*
+      Pequena pausa adicional entre
+      clientes para evitar sobrecarga
+      do serviço.
+    */
+
+    await sleep(
+      300
+    );
+
+  }
+
+
+  bar.style.width =
+    "100%";
+
+
+  status.innerHTML = `
+
+    <b>✅ Localização concluída</b>
+
+    <br>
+
+    ${ok} clientes localizados.
+
+    <br>
+
+    ${recovered} recuperados
+    através das novas estratégias.
+
+    <br>
+
+    ${fail} ainda não localizados.
+
+  `;
+
+
+  btn.disabled =
+    false;
+
+
+  render();
+
+
+  const points =
+    deliveries.filter(
+      d =>
+        d.status ===
+        "PENDENTE" &&
+
+        Number.isFinite(d.lat) &&
+        Number.isFinite(d.lon)
+    );
+
+
+  if(points.length){
+
+    const bounds =
+      L.latLngBounds(
+        points.map(
+          d =>
+            [
+              d.lat,
+              d.lon
+            ]
+        )
+      );
+
+
+    if(userPos){
+
+      bounds.extend(
+        [
+          userPos.lat,
+          userPos.lon
+        ]
+      );
+
+    }
+
+
+    map.fitBounds(
+      bounds,
+      {
+        padding:[
+          30,
+          30
+        ],
+        maxZoom:15
+      }
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   ESTATÍSTICAS
+============================================================ */
+
+function updateStats(){
+
+  const total =
+    deliveries.length;
+
+
+  const done =
+    deliveries.filter(
+      d =>
+        d.status !==
+        "PENDENTE"
+    ).length;
+
+
+  document.getElementById(
+    "total"
+  ).textContent =
+    total;
+
+
+  document.getElementById(
+    "pending"
+  ).textContent =
+    total -
+    done;
+
+
+  document.getElementById(
+    "done"
+  ).textContent =
+    done;
+
+}
+
+
+/* ============================================================
+   RENDER
+============================================================ */
+
+function render(){
+
+  updateStats();
+
+  renderMarkers();
+
+  nearby();
+
+}
+
+
+/* ============================================================
+   EXPORTAÇÃO
+============================================================ */
+
+function exportCSV(){
+
+  const headers = [
+
+    "ID",
+    "Entrega",
+    "Endereco",
+    "Cidade",
+    "Status",
+    "Metodo_Localizacao",
+    "Consulta_Localizacao",
+    "Resultado_Localizacao",
+    "Pontuacao",
+    "Atualizado_em",
+    "Latitude",
+    "Longitude"
+
+  ];
+
+
+  const lines = [
+    headers.join(";")
+  ];
+
+
+  deliveries.forEach(
+    d => {
+
+      const values = [
+
+        d.id,
+
+        d.label,
+
+        d.address,
+
+        getDeliveryCity(d),
+
+        d.status,
+
+        d.locMethod || "",
+
+        d.locQuery || "",
+
+        d.locDisplay || "",
+
+        d.locScore ?? "",
+
+        d.updatedAt || "",
+
+        d.lat ?? "",
+
+        d.lon ?? ""
+
+      ];
+
+
+      lines.push(
+
+        values
+          .map(
+            value =>
+              `"${String(value)
+                .replace(
+                  /"/g,
+                  '""'
+                )}"`
+          )
+          .join(";")
+
+      );
+
+    }
+  );
+
+
+  const blob =
+    new Blob(
+      [
+        "\ufeff" +
+        lines.join("\n")
+      ],
+      {
+        type:
+          "text/csv;charset=utf-8"
+      }
+    );
+
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+
+  a.href =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  a.download =
+    "entregas_localizacao_historico.csv";
+
+
+  a.click();
+
+
+  setTimeout(
+    () =>
+      URL.revokeObjectURL(
+        a.href
+      ),
+    1000
+  );
+
+}
+
+
+/* ============================================================
+   EVENTOS
+============================================================ */
+
+document.getElementById(
+  "locBtn"
+).onclick =
+  requestLocation;
+
+
+document.getElementById(
+  "nearBtn"
+).onclick =
+  () => {
+
+    nearby();
+
+    if(userPos){
+
+      map.setView(
+        [
+          userPos.lat,
+          userPos.lon
+        ],
+        15
+      );
+
+    }
+
+  };
+
+
+document.getElementById(
+  "geocodeBtn"
+).onclick =
+  geocodeAll;
+
+
+document.getElementById(
+  "exportBtn"
+).onclick =
+  exportCSV;
+
+
+document.getElementById(
+  "closeBtn"
+).onclick =
+  closeModal;
+
+
+document.getElementById(
+  "cartaBtn"
+).onclick =
+  () =>
+    setStatus(
+      "CARTA"
+    );
+
+
+document.getElementById(
+  "naoBtn"
+).onclick =
+  () =>
+    setStatus(
+      "NAO_LOCALIZADO"
+    );
+
+
+document.getElementById(
+  "riscoBtn"
+).onclick =
+  () =>
+    setStatus(
+      "ZONA_DE_RISCO"
+    );
+
+
+document.getElementById(
+  "modalBg"
+).addEventListener(
+  "click",
+  e => {
+
+    if(
+      e.target.id ===
+      "modalBg"
+    ){
+
+      closeModal();
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   FUNÇÕES GLOBAIS
+============================================================ */
+
+window.openDelivery =
+  openDelivery;
+
+window.navigateTo =
+  navigateTo;
+
+
+/* ============================================================
+   INICIALIZAÇÃO
+============================================================ */
+
+render();
+
+
+/*
+  Não solicitamos GPS automaticamente.
+
+  O usuário pode tocar no botão
+  quando quiser.
+*/
+
+</script>
 
 </body>
 
