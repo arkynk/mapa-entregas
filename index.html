@@ -47,7 +47,7 @@ button:active{transform:translateY(1px)}
 .detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0}.debt-summary{border:1px solid var(--line);border-radius:14px;padding:11px;background:#fbfdfe}.debt-top{display:flex;align-items:end;justify-content:space-between;gap:10px}.total-debt{font-size:24px;font-weight:900;color:var(--navy);line-height:1.1}.debt-state{font-weight:900;font-size:11px;text-align:right}.debt-state.over{color:var(--red)}.debt-state.future{color:var(--green2)}.debt-state.mixed{color:#9c6500}.product-summary{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.product-chip{font-size:10px;font-weight:900;padding:6px 7px;border-radius:999px;background:#eaf2f7;color:var(--navy)}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:9px;-webkit-overflow-scrolling:touch}.debt-table{width:100%;border-collapse:collapse;font-size:11px;min-width:600px}.debt-table th{position:sticky;top:0;background:var(--navy);color:#fff;padding:8px;text-align:left;white-space:nowrap}.debt-table td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}.debt-table tr:last-child td{border-bottom:0}.days-over{color:var(--red);font-weight:900}.days-future{color:var(--green2);font-weight:900}.days-zero{color:#9c6500;font-weight:900}
 .history-box,.proposal-box{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px;background:#fff}.history-box h3,.proposal-box h3{font-size:13px;margin:0 0 6px;color:var(--navy)}.history-text{font-size:11px;line-height:1.45;color:#405866}.small-note{font-size:10px;color:var(--muted);line-height:1.35}
-.notice{background:#f4f9fb;border:1px solid #d7e8ef;border-radius:12px;padding:9px 10px;font-size:11px;color:#405866;line-height:1.45;margin-top:9px}.notice b{color:var(--navy)}
+.notice{background:#f4f9fb;border:1px solid #d7e8ef;border-radius:12px;padding:9px 10px;font-size:11px;color:#405866;line-height:1.45;margin-top:9px}.notice b{color:var(--navy)}.location-history{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px;background:#fff}.location-history h3{font-size:13px;margin:0 0 7px;color:var(--navy)}.location-record{border:1px solid var(--line);border-radius:11px;padding:9px;margin-top:7px;background:#fbfdfe}.location-record b{font-size:11px;color:var(--navy)}.location-record .small-note{margin-top:3px}.location-editor{border-top:1px solid var(--line);margin-top:9px;padding-top:9px}.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.location-grid .full{grid-column:1/-1}
 .toast{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));transform:none;background:#163041;color:#fff;padding:11px 13px;border-radius:12px;z-index:9000;display:none;font-size:12px;box-shadow:0 8px 22px rgba(0,0,0,.18);text-align:center}
 
 .import-modal-bg{position:fixed;inset:0;background:rgba(3,22,35,.72);z-index:8000;display:none;align-items:flex-end;justify-content:center;padding:0}.import-modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 12px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25)}.import-modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.import-modal-header h2{margin:0;color:var(--navy);font-size:17px}.close-modal{background:#eef3f6;color:var(--navy);padding:9px 12px;min-height:42px}.file-box input{min-height:44px}.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.map-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;background:#fff;border-top:1px solid var(--line)}.map-toolbar .btn{min-height:42px}.distance-line{font-size:11px;color:var(--muted);margin-top:5px}.distance-value{font-weight:900;color:var(--navy)}
@@ -135,6 +135,22 @@ button:active{transform:translateY(1px)}
     <div class="detail-actions">
       <button class="btn dark" id="mapClientBtn">🗺️ Ver no mapa</button>
       <button class="btn primary" id="navigateBtn">🚗 Ir para o endereço</button>
+    </div>
+
+    <div class="location-history">
+      <h3>📍 Histórico de localizações</h3>
+      <div id="locationRecords"></div>
+      <div class="location-editor">
+        <div class="small-note"><b>Adicionar / atualizar localização</b></div>
+        <div class="location-grid" style="margin-top:7px">
+          <select class="search full" id="locationTypeInput"><option value="exact">Exato</option><option value="fictitious">Fictício</option></select>
+          <input class="search" id="locationAddressInput" placeholder="Endereço"><input class="search" id="locationNumberInput" placeholder="Número">
+          <input class="search" id="locationComplementInput" placeholder="Complemento"><input class="search" id="locationBairroInput" placeholder="Bairro">
+          <input class="search" id="locationCityInput" placeholder="Cidade"><input class="search" id="locationLatInput" placeholder="Latitude"><input class="search" id="locationLonInput" placeholder="Longitude">
+        </div>
+        <div class="detail-actions" style="margin-top:7px"><button class="btn" id="useCurrentLocationBtn">📍 Usar coordenada atual</button><button class="btn primary" id="saveLocationBtn">💾 Salvar localização</button></div>
+        <div class="small-note">Para Exato, use o endereço confirmado. Para Fictício, informe o endereço alternativo usado para localizar o cliente. O endereço original da base não é apagado.</div>
+      </div>
     </div>
 
     <div class="debt-summary">
@@ -229,20 +245,14 @@ function sheetByName(wb, wanted){
 function getText(obj, idx){ return idx>=0 ? obj[idx] : ""; }
 function classifyProduct(name){ const s=norm(name); if(s.includes("CDC")) return "CDC"; if(s.includes("CP")) return "CP"; if(s.includes("CONSIGNADO INSS ONLINE")||s.includes("INSS")) return "INSS"; return "OUTRO"; }
 function addressKey(c){ return [norm(c.address),norm(c.number),norm(c.complement),norm(c.bairro),norm(c.city)].join("|"); }
-function saveLocal(){
-  const payload={clients:state.clients, debts:[...state.debtsByEc.entries()], latestActions:[...state.latestActionsByEc.entries()], proposals:[...state.proposalsByCpf.entries()]};
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
-  localStorage.setItem(COORDS_KEY,JSON.stringify(state.coords));
-  localStorage.setItem(ACTIONS_KEY,JSON.stringify(state.actionsHistory));
-}
-function loadLocal(){
-  try{
-    const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-    if(p){ state.clients=p.clients||[]; state.debtsByEc=new Map(p.debts||[]); state.latestActionsByEc=new Map(p.latestActions||[]); state.proposalsByCpf=new Map(p.proposals||[]); }
-    state.coords=JSON.parse(localStorage.getItem(COORDS_KEY)||"{}");
-    state.actionsHistory=JSON.parse(localStorage.getItem(ACTIONS_KEY)||"[]");
-  }catch(e){ console.warn(e); }
-}
+function coordRecordFromLegacy(s){ if(!s||!Number.isFinite(Number(s.lat))||!Number.isFinite(Number(s.lon)))return null; return {type:s.type==="fictitious"?"fictitious":"exact",address:s.address||"",number:s.number||"",complement:s.complement||"",bairro:s.bairro||"",city:s.city||"",addressKey:s.addressKey||"",lat:Number(s.lat),lon:Number(s.lon),confirmedAt:s.confirmedAt||new Date().toISOString()}; }
+function normalizeCoordsStore(raw){ const out={}; if(!raw||typeof raw!=="object")return out; Object.entries(raw).forEach(([ec,v])=>{ if(v&&Array.isArray(v.records))out[ec]={records:v.records.filter(r=>r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))).map(r=>({...r,type:r.type==="fictitious"?"fictitious":"exact",lat:Number(r.lat),lon:Number(r.lon)})),activeType:v.activeType||null}; else {const r=coordRecordFromLegacy(v);if(r)out[ec]={records:[r],activeType:r.type};}}); return out; }
+function getCoordStore(ec){ return state.coords[ec]||{records:[],activeType:null}; }
+function getCoordRecord(ec,type){ return getCoordStore(ec).records.find(r=>r.type===type)||null; }
+function getActiveCoord(ec){ const st=getCoordStore(ec); return st.records.find(r=>r.type===st.activeType)||st.records[0]||null; }
+function setActiveCoord(ec,type){ if(state.coords[ec]&&state.coords[ec].records.some(r=>r.type===type))state.coords[ec].activeType=type; }
+function saveLocal(){ const payload={clients:state.clients,debts:[...state.debtsByEc.entries()],latestActions:[...state.latestActionsByEc.entries()],proposals:[...state.proposalsByCpf.entries()]}; localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));localStorage.setItem(COORDS_KEY,JSON.stringify(state.coords));localStorage.setItem(ACTIONS_KEY,JSON.stringify(state.actionsHistory)); }
+function loadLocal(){ try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(p){state.clients=p.clients||[];state.debtsByEc=new Map(p.debts||[]);state.latestActionsByEc=new Map(p.latestActions||[]);state.proposalsByCpf=new Map(p.proposals||[]);}state.coords=normalizeCoordsStore(JSON.parse(localStorage.getItem(COORDS_KEY)||"{}"));state.actionsHistory=JSON.parse(localStorage.getItem(ACTIONS_KEY)||"[]");saveLocal();}catch(e){console.warn(e);} }
 function debtSummary(rows){
   let total=0; let over=0; let future=0; const byProd={};
   rows.forEach(r=>{ total+=Number(r.valueDebt)||0; const p=r.productType; byProd[p]=(byProd[p]||0)+(Number(r.valueDebt)||0); if(r.status==="future") future++; else if(r.status==="over") over++; });
@@ -314,7 +324,9 @@ function initMap(){
   window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
   window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
 }
-function openClient(ec){ const c=state.clients.find(x=>x.ec===String(ec)); if(!c)return; state.selectedEc=c.ec; $("modalName").textContent=c.name; $("modalEc").textContent="EC: "+c.ec; $("modalAddress").textContent=[c.address,c.number].filter(Boolean).join(", ") || "Endereço não informado"; $("modalCityLine").textContent=[c.complement && c.complement!=="-"?"Comp.: "+c.complement:"",c.bairro,c.city].filter(Boolean).join(" • "); const known=Number.isFinite(c.lat)&&Number.isFinite(c.lon); $("modalLocationBadge").textContent=known?(c.locationType==="real"?"📍 Localização real confirmada":c.locationType==="fictitious"?"🗺️ Localização do endereço":"📍 Localização conhecida"):"🔎 Endereço ainda não localizado"; const rows=state.debtsByEc.get(c.ec)||[]; renderDebt(c,rows); const last=state.latestActionsByEc.get(c.ec); $("lastActionText").innerHTML=last?`<b>${esc(last.action)}</b><br>${last.date?esc(fmtDate(last.date)):""}<br>${esc(last.description||"Sem descrição")}`:"Sem histórico importado para este cliente."; const prop=state.proposalsByCpf.get(digits(c.cpf)); $("proposalText").textContent=prop||"Nenhuma proposta encontrada."; updateActionCount(); $("debtDetails").classList.add("hidden"); $("clientModal").style.display="flex"; }
+function renderLocationRecords(c){ const st=getCoordStore(c.ec),el=$("locationRecords"); if(!st.records.length){el.innerHTML='<div class="small-note">Nenhuma localização registrada além do endereço da base.</div>';return;} el.innerHTML=st.records.map(r=>{const tipo=r.type==="fictitious"?"Fictício":"Exato",active=st.activeType===r.type,addr=[r.address,r.number].filter(Boolean).join(", "),line=[r.complement&&r.complement!=="-"?"Comp.: "+r.complement:"",r.bairro,r.city].filter(Boolean).join(" • ");return `<div class="location-record"><b>${tipo}${active?" • EM USO NO MAPA":""}</b><div class="small-note">${esc(addr||"Endereço não informado")}</div><div class="small-note">${esc(line)}</div><div class="small-note">${Number(r.lat).toFixed(6)}, ${Number(r.lon).toFixed(6)} • ${r.confirmedAt?esc(new Date(r.confirmedAt).toLocaleString("pt-BR")):""}</div><button class="btn" style="margin-top:6px;min-height:38px" data-use-location="${esc(r.type)}">${active?"✓ Localização em uso":"Usar esta localização no mapa"}</button></div>`;}).join("");el.querySelectorAll("[data-use-location]").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.useLocation;setActiveCoord(c.ec,type);const r=getCoordRecord(c.ec,type);if(r){c.lat=r.lat;c.lon=r.lon;c.locationType=type;saveLocal();renderLocationRecords(c);renderMarkers();renderList();toast(type==="fictitious"?"Localização fictícia selecionada para uso.":"Localização exata selecionada para uso.");}})); }
+function fillLocationEditor(c,type="exact",record=null){ $("locationTypeInput").value=type;const r=record||getCoordRecord(c.ec,type);$("locationAddressInput").value=r?.address??(type==="exact"?c.address||"":"");$("locationNumberInput").value=r?.number??(type==="exact"?c.number||"":"");$("locationComplementInput").value=r?.complement??(type==="exact"?c.complement||"":"");$("locationBairroInput").value=r?.bairro??(type==="exact"?c.bairro||"":"");$("locationCityInput").value=r?.city??(type==="exact"?c.city||"":"");$("locationLatInput").value=r?.lat??(type==="exact"&&Number.isFinite(c.lat)?c.lat:"");$("locationLonInput").value=r?.lon??(type==="exact"&&Number.isFinite(c.lon)?c.lon:""); }
+function openClient(ec){ const c=state.clients.find(x=>x.ec===String(ec));if(!c)return;state.selectedEc=c.ec;$("modalName").textContent=c.name;$("modalEc").textContent="EC: "+c.ec;$("modalAddress").textContent=[c.address,c.number].filter(Boolean).join(", ")||"Endereço não informado";$("modalCityLine").textContent=[c.complement&&c.complement!=="-"?"Comp.: "+c.complement:"",c.bairro,c.city].filter(Boolean).join(" • ");const known=Number.isFinite(c.lat)&&Number.isFinite(c.lon);$("modalLocationBadge").textContent=known?(c.locationType==="exact"?"📍 Localização exata confirmada":c.locationType==="fictitious"?"🗺️ Localização fictícia":"📍 Localização conhecida"):"🔎 Endereço ainda não localizado";renderLocationRecords(c);fillLocationEditor(c,"exact");const rows=state.debtsByEc.get(c.ec)||[];renderDebt(c,rows);const last=state.latestActionsByEc.get(c.ec);$("lastActionText").innerHTML=last?`<b>${esc(last.action)}</b><br>${last.date?esc(fmtDate(last.date)):""}<br>${esc(last.description||"Sem descrição")}`:"Sem histórico importado para este cliente.";const prop=state.proposalsByCpf.get(digits(c.cpf));$("proposalText").textContent=prop||"Nenhuma proposta encontrada.";updateActionCount();$("debtDetails").classList.add("hidden");$("clientModal").style.display="flex"; }
 function renderDebt(c,rows){ const s=debtSummary(rows); $("modalDebtTotal").textContent=money(s.total); const cls=s.state; const txt=cls==="future"?"Tem a vencer":cls==="mixed"?"Vencido + a vencer":"Tudo vencido"; const ds=$("modalDebtState"); ds.textContent=txt; ds.className="debt-state "+cls; const products=Object.entries(s.byProd).filter(([k])=>k!=="OUTRO"); $("modalProducts").innerHTML=products.length?products.map(([p,v])=>`<span class="product-chip">${esc(p)}: ${money(v)}</span>`).join(""):"<span class=\"product-chip\">Sem produto classificado</span>"; $("debtRows").innerHTML=rows.slice().sort((a,b)=>(a.dueDate?.getTime()??0)-(b.dueDate?.getTime()??0)).map(r=>{ const days=Number.isFinite(r.days)?r.days:(r.dueDate?Math.round((today.getTime()-r.dueDate.getTime())/86400000):null); const dClass=r.status==="over"?"days-over":r.status==="future"?"days-future":"days-zero"; const dText=r.status==="over"?`${Math.max(days||0,0)} dia(s) em atraso`:r.status==="future"?`A vencer em ${Math.max(-(days||0),0)} dia(s)`:"Sem atraso"; return `<tr><td>${fmtDate(r.dueDate)}</td><td>${money(r.valueDebt)}</td><td>${esc(r.productRaw)}<br><span class="small-note">${esc(r.productType)}</span></td><td class="${dClass}">${esc(dText)}</td></tr>`; }).join("") || '<tr><td colspan="4" style="text-align:center;color:#6c7f8b">Nenhuma dívida encontrada.</td></tr>'; }
 function closeModal(){ $("clientModal").style.display="none"; state.selectedEc=null; }
 function setImportStatus(html){ $("importStatus").innerHTML=html; const m=$("importStatusModal"); if(m)m.innerHTML=html; }
@@ -324,23 +336,12 @@ function distanceKm(a,b,c,d){ if(![a,b,c,d].every(Number.isFinite))return null; 
 function distanceText(km){ if(km==null)return ""; return km<1?Math.round(km*1000)+" m":km.toFixed(1).replace(".",",")+" km"; }
 function fitAll(){ const pts=state.clients.filter(c=>Number.isFinite(c.lat)&&Number.isFinite(c.lon)).map(c=>[c.lat,c.lon]); if(!pts.length)return; const b=L.latLngBounds(pts); if(state.userPos)b.extend([state.userPos.lat,state.userPos.lon]); state.map.fitBounds(b,{padding:[30,30],maxZoom:15}); }
 function requestUserLocation(){ if(!navigator.geolocation){toast("Geolocalização não disponível neste navegador.");return;} navigator.geolocation.getCurrentPosition(pos=>{state.userPos={lat:pos.coords.latitude,lon:pos.coords.longitude}; fitAll();},()=>toast("Não foi possível obter sua localização."),{enableHighAccuracy:true,timeout:10000,maximumAge:30000}); }
-async function geocodeOne(c){ const sig=addressKey(c); const saved=state.coords[c.ec]; if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"known";return true;} const q=[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", "); const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q); const res=await fetch(url,{headers:{Accept:"application/json"}}); if(!res.ok)throw new Error("HTTP "+res.status); const data=await res.json(); const expected=norm(c.city); for(const it of data){ const name=norm(it.display_name||""); if(expected && !name.includes(expected)) continue; const lat=parseFloat(it.lat),lon=parseFloat(it.lon); if(Number.isFinite(lat)&&Number.isFinite(lon)){c.lat=lat;c.lon=lon;c.locationType="known";state.coords[c.ec]={addressKey:sig,lat,lon,type:"known",confirmedAt:new Date().toISOString()};return true;} } return false; }
+function saveCoordinateRecord(c,record,makeActive=true){const st=getCoordStore(c.ec),idx=st.records.findIndex(r=>r.type===record.type);if(idx>=0)st.records[idx]={...st.records[idx],...record};else st.records.push(record);if(makeActive)st.activeType=record.type;state.coords[c.ec]=st;c.lat=record.lat;c.lon=record.lon;c.locationType=record.type;saveLocal();renderLocationRecords(c);renderMarkers();renderList();}
+function saveManualLocation(){const c=state.clients.find(x=>x.ec===state.selectedEc);if(!c)return;const type=$("locationTypeInput").value,address=$("locationAddressInput").value.trim(),number=$("locationNumberInput").value.trim(),complement=$("locationComplementInput").value.trim(),bairro=$("locationBairroInput").value.trim(),city=$("locationCityInput").value.trim(),lat=parseFloat(String($("locationLatInput").value).replace(",",".")),lon=parseFloat(String($("locationLonInput").value).replace(",","."));if(!address||!city){toast("Informe pelo menos endereço e cidade.");return;}if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){toast("Informe latitude e longitude válidas.");return;}saveCoordinateRecord(c,{type,address,number,complement,bairro,city,addressKey:addressKey({address,number,complement,bairro,city}),lat,lon,confirmedAt:new Date().toISOString()},true);fillLocationEditor(c,type);toast(type==="fictitious"?"Localização fictícia salva.":"Localização exata salva.");}
+function useCurrentLocationForEditor(){if(!state.userPos){toast("Primeiro obtenha sua localização pelo botão Minha localização.");return;}$("locationLatInput").value=state.userPos.lat;$("locationLonInput").value=state.userPos.lon;toast("Coordenada atual preenchida.");}
+async function geocodeOne(c){const sig=addressKey(c),saved=getActiveCoord(c.ec);if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"exact";return true;}const q=[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", ");const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q);const res=await fetch(url,{headers:{Accept:"application/json"}});if(!res.ok)throw new Error("HTTP "+res.status);const data=await res.json(),expected=norm(c.city);for(const it of data){const name=norm(it.display_name||"");if(expected&&!name.includes(expected))continue;const lat=parseFloat(it.lat),lon=parseFloat(it.lon);if(Number.isFinite(lat)&&Number.isFinite(lon)){saveCoordinateRecord(c,{type:"exact",address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,addressKey:sig,lat,lon,confirmedAt:new Date().toISOString()},true);return true;}}return false;}
 async function geocodeAll(){ const pend=state.clients.filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
-function exportCoordinates(){
-  const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']];
-  state.clients.forEach(c=>{
-    const s=state.coords[c.ec];
-    if(!s || !Number.isFinite(Number(s.lat)) || !Number.isFinite(Number(s.lon))) return;
-    const tipo=s.type==="fictitious" ? "Fictício" : "Exato";
-    rows.push([c.ec,c.cpf,c.name,c.address,c.number,c.complement,c.bairro,c.city,s.lat,s.lon,tipo,s.confirmedAt||'']);
-  });
-  if(rows.length===1){ toast("Nenhuma coordenada para exportar."); return; }
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');
-  XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');
-  toast(`${rows.length-1} coordenada(s) exportada(s).`);
-}
+function exportCoordinates(){const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']];state.clients.forEach(c=>getCoordStore(c.ec).records.forEach(r=>rows.push([c.ec,c.cpf,c.name,r.address||c.address,r.number||c.number,r.complement||c.complement,r.bairro||c.bairro,r.city||c.city,r.lat,r.lon,r.type==="fictitious"?"Fictício":"Exato",r.confirmedAt||''])));if(rows.length===1){toast("Nenhuma coordenada para exportar.");return;}const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');toast(`${rows.length-1} localização(ões) exportada(s).`);}
 function saveAction(){
   const c=state.clients.find(x=>x.ec===state.selectedEc);
   if(!c){ toast("Selecione um cliente."); return; }
@@ -353,10 +354,9 @@ function saveAction(){
     ec:c.ec,cpf:c.cpf||"",name:c.name||"",
     date:now.toLocaleDateString("pt-BR"),
     time:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),
-    action,observation,address:c.address||"",number:c.number||"",
-    complement:c.complement||"",bairro:c.bairro||"",city:c.city||"",
-    latitude:Number.isFinite(c.lat)?c.lat:"",
-    longitude:Number.isFinite(c.lon)?c.lon:"",
+    action,observation,address:(getActiveCoord(c.ec)?.address||c.address||""),number:(getActiveCoord(c.ec)?.number||c.number||""),
+    complement:(getActiveCoord(c.ec)?.complement||c.complement||""),bairro:(getActiveCoord(c.ec)?.bairro||c.bairro||""),city:(getActiveCoord(c.ec)?.city||c.city||""),
+    latitude:Number.isFinite(c.lat)?c.lat:"",longitude:Number.isFinite(c.lon)?c.lon:"",
     locationType:c.locationType==="fictitious"?"Fictício":"Exato"
   };
   state.actionsHistory.push(rec);
@@ -455,6 +455,9 @@ $("fitMapBtn").onclick=fitAll;
 $("searchInput").oninput=renderList;
 $("cityFilter").onchange=renderList;
 $("debtFilter").onchange=renderList;
+$("locationTypeInput").onchange=()=>{const c=state.clients.find(x=>x.ec===state.selectedEc);if(c)fillLocationEditor(c,$("locationTypeInput").value);};
+$("saveLocationBtn").onclick=saveManualLocation;
+$("useCurrentLocationBtn").onclick=useCurrentLocationForEditor;
 $("modalClose").onclick=closeModal;
 $("clientModal").addEventListener("click",e=>{if(e.target.id==="clientModal")closeModal();});
 $("debtDetailsBtn").onclick=()=>$("debtDetails").classList.toggle("hidden");
