@@ -65,7 +65,7 @@ button:active{transform:translateY(1px)}
       <div class="brand-mark">RM</div>
       <div><h1>RECEBE MAIS</h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
     </div>
-    <button class="btn" id="openImportBtn">📂 Importação</button>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="statsWalletBtn">📊 Estatísticas Carteira</button><button class="btn" id="openImportBtn">📂 Importação</button></div>
   </div>
 </header>
 
@@ -76,18 +76,6 @@ button:active{transform:translateY(1px)}
     <div class="progress"><div id="progressBar"></div></div>
   </section>
 
-  <section class="stats">
-    <div class="stat"><b id="statTotal">0</b><span>Qtd. Clientes TOTAL</span></div>
-    <div class="stat"><b id="statIncomplete">0</b><span>Endereço incompleto</span></div>
-    <div class="stat"><b id="statVisited">0</b><span>Visitas realizadas</span></div>
-    <div class="stat"><b id="statPending">0</b><span>Visitas pendentes</span></div>
-  </section>
-  <section class="stats" style="margin-top:7px">
-    <div class="stat"><b id="statLoc">0</b><span>Com localização</span></div>
-    <div class="stat"><b id="statDebt">R$ 0,00</b><span>Dívida total</span></div>
-    <div class="stat"><b id="statFuture">0</b><span>Com a vencer</span></div>
-    <div class="stat"><b id="statActions">0</b><span>Ações registradas</span></div>
-  </section>
 
   <section class="map-wrap">
     <div class="map-card"><div id="map"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
@@ -105,6 +93,18 @@ button:active{transform:translateY(1px)}
   </section>
 </main>
 
+<div class="import-modal-bg" id="statsModal">
+  <div class="import-modal">
+    <div class="import-modal-header"><h2>📊 Estatísticas Carteira</h2><button class="close-modal" id="closeStatsBtn">Fechar</button></div>
+    <div class="stats" style="margin-top:0">
+      <div class="stat"><b id="statTotal">0</b><span>Qtd. Clientes TOTAL</span></div>
+      <div class="stat"><b id="statIncomplete">0</b><span>Quantidade com endereço incompleto</span></div>
+      <div class="stat"><b id="statVisited">0</b><span>Quantidade de visitas realizadas</span></div>
+      <div class="stat"><b id="statPending">0</b><span>Quantidade de visitas pendentes</span></div>
+    </div>
+  </div>
+</div>
+
 <div class="import-modal-bg" id="importModal">
   <div class="import-modal">
     <div class="import-modal-header"><h2>📂 Importação e dados</h2><button class="close-modal" id="closeImportBtn">Fechar</button></div>
@@ -112,6 +112,7 @@ button:active{transform:translateY(1px)}
     <div class="file-box"><b>1. Base Clientes</b><span>Arquivo com as abas BASE e Carteira Analitica Divida.</span><input type="file" id="baseFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="file-box"><b>2. Base de Acionamentos</b><span>Use a base oficial completa para consulta do último acionamento.</span><input type="file" id="acoesFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="file-box"><b>3. Propostas</b><span>Formato esperado: CPF | Proposta.</span><input type="file" id="propostasFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>4. Coordenadas</b><span>Arquivo de pesquisa de coordenadas. Cruza pelo EC e mantém Exato/Fictício.</span><input type="file" id="coordenadasFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="import-actions">
       <button class="btn dark" id="importBtn">📥 Importar lote</button>
       <button class="btn primary" id="geocodeBtn" disabled>🗺️ Localizar sem coordenada</button>
@@ -266,6 +267,81 @@ function debtSummary(rows){
   rows.forEach(r=>{ total+=Number(r.valueDebt)||0; const p=r.productType; byProd[p]=(byProd[p]||0)+(Number(r.valueDebt)||0); if(r.status==="future") future++; else if(r.status==="over") over++; });
   return {total,over,future,byProd,state: future>0 && over>0 ? "mixed" : future>0 ? "future" : "over"};
 }
+function saveCoordinateRecord(c,r,setActive){
+  if(!c||!r||!Number.isFinite(Number(r.lat))||!Number.isFinite(Number(r.lon))) return;
+  const type=r.type==="fictitious"?"fictitious":"exact";
+  if(!state.coords[c.ec]) state.coords[c.ec]={records:[],activeType:null};
+  const st=state.coords[c.ec];
+  const record={...r,type,lat:Number(r.lat),lon:Number(r.lon),address:r.address||"",number:r.number||"",complement:r.complement||"",bairro:r.bairro||"",city:r.city||"",addressKey:r.addressKey||"",confirmedAt:r.confirmedAt||new Date().toISOString()};
+  const idx=st.records.findIndex(x=>x.type===type);
+  if(idx>=0) st.records[idx]=record; else st.records.push(record);
+  if(setActive || !st.activeType || !st.records.some(x=>x.type===st.activeType)) st.activeType=type;
+  c.lat=record.lat; c.lon=record.lon; c.locationType=type;
+  saveLocal();
+  renderLocationRecords(c);
+  renderMarkers();
+  renderList();
+  renderStats();
+}
+function refreshClientCoordsFromStore(){
+  state.clients.forEach(c=>{
+    const r=getActiveCoord(c.ec);
+    if(r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))){
+      c.lat=Number(r.lat); c.lon=Number(r.lon); c.locationType=r.type||"exact";
+    } else {
+      c.lat=null; c.lon=null; c.locationType=null;
+    }
+  });
+}
+function parseCoordinateWorkbook(wb){
+  const sh=sheetByName(wb,"Coordenadas") || wb.Sheets[wb.SheetNames[0]];
+  if(!sh) throw new Error("Aba de coordenadas não encontrada.");
+  const rows=makeRows(sh), h=rows[0]||[];
+  const iEC=findCol(h,["EC","Cliente EC"]);
+  const iCpf=findCol(h,["CPF","Cpf/Cnpj","CPF/CNPJ"]);
+  const iName=findCol(h,["Nome"]);
+  const iAddr=findCol(h,["Endereço Origem","Endereco Origem","Endereço","Endereco"]);
+  const iNum=findCol(h,["Número Origem","Numero Origem","Número","Numero"]);
+  const iComp=findCol(h,["Complemento Origem","Complemento"]);
+  const iBairro=findCol(h,["Bairro Origem","Bairro"]);
+  const iCity=findCol(h,["Cidade Origem","Cidade"]);
+  const iLat=findCol(h,["Latitude","Lat"]);
+  const iLon=findCol(h,["Longitude","Lon","Lng"]);
+  const iType=findCol(h,["Tipo"]);
+  const iDate=findCol(h,["Data Confirmação","Data Confirmacao","Data"]);
+  if(iEC<0||iLat<0||iLon<0) throw new Error("O arquivo de Coordenadas precisa ter EC, Latitude e Longitude.");
+  const out=[];
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r], ec=String(getText(row,iEC)).trim(), lat=Number(getText(row,iLat)), lon=Number(getText(row,iLon));
+    if(!ec||!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
+    const rawType=norm(getText(row,iType));
+    const type=rawType.includes("FICT")?"fictitious":"exact";
+    let confirmedAt=getText(row,iDate);
+    if(confirmedAt instanceof Date && !isNaN(confirmedAt)) confirmedAt=confirmedAt.toISOString();
+    else confirmedAt=String(confirmedAt||"").trim();
+    out.push({ec,cpf:digits(getText(row,iCpf)),name:String(getText(row,iName)).trim(),
+      record:{type,address:String(getText(row,iAddr)).trim(),number:String(getText(row,iNum)).trim(),
+      complement:String(getText(row,iComp)).trim(),bairro:String(getText(row,iBairro)).trim(),
+      city:String(getText(row,iCity)).trim(),addressKey:[norm(getText(row,iAddr)),norm(getText(row,iNum)),norm(getText(row,iComp)),norm(getText(row,iBairro)),norm(getText(row,iCity))].join("|"),
+      lat,lon,confirmedAt:confirmedAt||new Date().toISOString(),source:"imported"}});
+  }
+  return out;
+}
+function importCoordinateRecords(items){
+  let imported=0,matched=0;
+  items.forEach(item=>{
+    const c=state.clients.find(x=>x.ec===item.ec);
+    if(!c) return;
+    matched++;
+    saveCoordinateRecord(c,item.record,false);
+    const st=state.coords[c.ec];
+    if(!st.activeType) st.activeType=item.record.type;
+    imported++;
+  });
+  refreshClientCoordsFromStore();
+  saveLocal();
+  return {imported,matched};
+}
 function parseBaseWorkbook(wb){
   const base=sheetByName(wb,"BASE"); const debt=sheetByName(wb,"Carteira Analitica Divida");
   if(!base) throw new Error("Aba BASE não encontrada.");
@@ -370,7 +446,7 @@ function exportActions(){
 
 function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
 async function importFiles(){
-  const bf=$("baseFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0];
+  const bf=$("baseFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
   if(!bf){toast("Selecione a Base Clientes.");return;}
   const bar=$("importProgressBar"), label=$("importProgressLabel");
   const progress=(pct,text)=>{ if(bar)bar.style.width=Math.max(0,Math.min(100,pct))+"%"; if(label)label.textContent=text||""; setImportStatus(`<strong>Importando...</strong> ${esc(text||"")}`); };
@@ -400,13 +476,22 @@ async function importFiles(){
       state.proposalsByCpf=parseProposalsWorkbook(pwb);
     } else state.proposalsByCpf=new Map();
 
-    progress(86,"Salvando dados no aparelho...");
+    if(cf){
+      progress(83,"Lendo arquivo de Coordenadas...");
+      const cwb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false});
+      const cres=parseCoordinateWorkbook(cwb);
+      const cimp=importCoordinateRecords(cres);
+      progress(86,`Coordenadas importadas: ${cimp.imported}. EC encontrados na base: ${cimp.matched}.`);
+    }
+
+    refreshClientCoordsFromStore();
+    progress(88,"Salvando dados no aparelho...");
     saveLocal();
     progress(91,"Montando lista e mapa...");
     renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
     $("geocodeBtn").disabled=false;
     progress(100,"Importação concluída.");
-    setImportStatus(`<strong>Lote carregado:</strong> ${state.clients.length} clientes. Dívidas cruzadas pela coluna Cliente EC.`);
+    setImportStatus(`<strong>Lote carregado:</strong> ${state.clients.length} clientes. ${cf?"Coordenadas cruzadas pela coluna EC. ":""}Dívidas cruzadas pela coluna Cliente EC.`);
     toast(`Lote importado com ${state.clients.length} clientes.`);
   }catch(e){
     console.error(e);
@@ -425,6 +510,9 @@ $("exportActionsBtn").onclick=exportActions;
 $("saveActionBtn").onclick=saveAction;
 $("clearLotBtn").onclick=clearLot;
 $("backupBtn").onclick=backup;
+$("statsWalletBtn").onclick=()=>{ renderStats(); $("statsModal").style.display="flex"; };
+$("closeStatsBtn").onclick=()=>{ $("statsModal").style.display="none"; };
+$("statsModal").addEventListener("click",e=>{ if(e.target.id==="statsModal")$("statsModal").style.display="none"; });
 $("openImportBtn").onclick=()=>{ $("importModal").style.display="flex"; };
 $("closeImportBtn").onclick=()=>{ $("importModal").style.display="none"; };
 $("importModal").addEventListener("click",e=>{ if(e.target.id==="importModal")$("importModal").style.display="none"; });
