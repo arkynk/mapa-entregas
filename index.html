@@ -116,12 +116,18 @@ button:active{transform:translateY(1px)}
     <div class="import-actions">
       <button class="btn dark" id="importBtn">📥 Importar lote</button>
       <button class="btn primary" id="geocodeBtn" disabled>🗺️ Localizar sem coordenada</button>
+      <button class="btn" id="exportImportErrorsBtn" disabled>⚠️ Exportar erros da importação</button>
       <button class="btn" id="exportCoordsBtn">📍 Exportar coordenadas</button>
       <button class="btn" id="exportActionsBtn">📝 Exportar ações</button>
       <button class="btn" id="backupBtn">💾 Fazer backup</button>
       <button class="btn danger" id="clearLotBtn" style="grid-column:1/-1">🧹 Limpar lote atual</button>
     </div>
-    <div class="status-line" id="importStatusModal"></div><div class="import-progress"><div id="importProgressBar"></div></div><div class="import-progress-label" id="importProgressLabel">Aguardando início da importação.</div>
+    <div class="status-line" id="importStatusModal"></div>
+    <div id="importResult" style="display:none;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#f8fbfc">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><b>Resultado:</b><span id="importSuccessCount" style="font-weight:900;color:var(--green2)">Sucesso 0</span><span id="importErrorCount" style="font-weight:900;color:#b42318">Erro 0</span></div>
+      <div id="importErrorNote" class="small-note" style="margin-top:4px"></div>
+    </div>
+    <div class="import-progress"><div id="importProgressBar"></div></div><div class="import-progress-label" id="importProgressLabel">Aguardando início da importação.</div>
   </div>
 </div>
 
@@ -236,7 +242,7 @@ const ACTIONS_KEY = "recebe_mais_acoes_v1";
 const today = new Date(); today.setHours(0,0,0,0);
 
 const state = {
-  clients: [], debtsByEc: new Map(), latestActionsByEc: new Map(), proposalsByCpf: new Map(), actionsHistory: [], pendingAction: "",
+  clients: [], debtsByEc: new Map(), latestActionsByEc: new Map(), proposalsByCpf: new Map(), importErrors: [], actionsHistory: [], pendingAction: "",
   coords: {}, userPos: null, map: null, markers: new Map(), selectedEc: null, userMarker: null, accuracyCircle: null, watchId: null,
 };
 
@@ -366,28 +372,25 @@ function parseBaseWorkbook(wb){
   const base=sheetByName(wb,"BASE"); const debt=sheetByName(wb,"Carteira Analitica Divida");
   if(!base) throw new Error("Aba BASE não encontrada.");
   if(!debt) throw new Error("Aba Carteira Analitica Divida não encontrada.");
-  const b=makeRows(base); const bh=b[0]||[];
+  const b=makeRows(base), bh=b[0]||[];
   const iEC=findCol(bh,["EC","Cliente EC"]), iCpf=findCol(bh,["Cpf/Cnpj","CPF","CPF/CNPJ"]), iNome=findCol(bh,["Nome"]), iAddr=findCol(bh,["Endereço","Endereco"]), iNum=findCol(bh,["Número","Numero"]), iComp=findCol(bh,["Complemento"]), iBairro=findCol(bh,["Bairro"]), iCity=findCol(bh,["Cidade"]), iTel=findCol(bh,["Telefone"]), iContra=findCol(bh,["DataContra","Data Contrato"]);
   if(iEC<0||iNome<0||iAddr<0||iCity<0) throw new Error("A aba BASE não possui as colunas essenciais EC, Nome, Endereço e Cidade.");
-  const clients=[]; const seen=new Set();
+  const clients=[], seen=new Set(), errors=[];
   for(let r=1;r<b.length;r++){
-    const row=b[r]; const ec=String(getText(row,iEC)).trim(); if(!ec||seen.has(ec)) continue; seen.add(ec);
-    const c={ec,cpf:digits(getText(row,iCpf)),name:String(getText(row,iNome)).trim(),address:String(getText(row,iAddr)).trim(),number:String(getText(row,iNum)).trim(),complement:String(getText(row,iComp)).trim(),bairro:String(getText(row,iBairro)).trim(),city:String(getText(row,iCity)).trim(),phone:String(getText(row,iTel)).trim(),contractDate:excelDate(getText(row,iContra)),lat:null,lon:null,addressCorrected:false,originalAddress:undefined,originalNumber:undefined,originalComplement:undefined,originalBairro:undefined,originalCity:undefined};
-    const old=getActiveCoord(ec); if(old && Number.isFinite(old.lat)&&Number.isFinite(old.lon)){c.lat=old.lat;c.lon=old.lon;c.locationType=old.type||"exact";}
-    clients.push(c);
+    const row=b[r]; const ec=String(getText(row,iEC)).trim(); const cpf=digits(getText(row,iCpf)); const name=String(getText(row,iNome)).trim(); const address=String(getText(row,iAddr)).trim(); const number=String(getText(row,iNum)).trim(); const complement=String(getText(row,iComp)).trim(); const bairro=String(getText(row,iBairro)).trim(); const city=String(getText(row,iCity)).trim();
+    if(!ec&&!name&&!address&&!city) continue;
+    const reasons=[]; if(!ec) reasons.push("EC não informado"); if(!name) reasons.push("Nome não informado"); if(!address) reasons.push("Endereço não informado"); if(!city) reasons.push("Cidade não informada"); if(ec&&seen.has(ec)) reasons.push("EC duplicado");
+    if(reasons.length){ errors.push({ec,cpf,name,address,number,complement,bairro,city,reason:reasons.join("; "),row:r+1}); continue; }
+    seen.add(ec);
+    const c={ec,cpf,name,address,number,complement,bairro,city,phone:String(getText(row,iTel)).trim(),contractDate:excelDate(getText(row,iContra)),lat:null,lon:null,addressCorrected:false,originalAddress:undefined,originalNumber:undefined,originalComplement:undefined,originalBairro:undefined,originalCity:undefined};
+    const old=getActiveCoord(ec); if(old&&Number.isFinite(old.lat)&&Number.isFinite(old.lon)){c.lat=old.lat;c.lon=old.lon;c.locationType=old.type||"exact";} clients.push(c);
   }
-  const d=makeRows(debt); const dh=d[0]||[];
-  const dEC=findCol(dh,["Cliente EC","EC"]), dCpf=findCol(dh,["Cpf/Cnpj","CPF"]), dName=findCol(dh,["Nome"]), dProd=findCol(dh,["Produto"]), dVal=findCol(dh,["Valor Dívida","Valor Divida"]), dDue=findCol(dh,["Data Vencimento","DataVencimento"]), dDays=findCol(dh,["Dias_Atraso","Dias Atraso"]), dStatus=findCol(dh,["Atraso/Em dia","Atraso Em dia"]);
+  const d=makeRows(debt), dh=d[0]||[]; const dEC=findCol(dh,["Cliente EC","EC"]), dProd=findCol(dh,["Produto"]), dVal=findCol(dh,["Valor Dívida","Valor Divida"]), dDue=findCol(dh,["Data Vencimento","DataVencimento"]), dDays=findCol(dh,["Dias_Atraso","Dias Atraso"]);
   if(dEC<0||dProd<0||dVal<0||dDue<0) throw new Error("A aba Carteira Analitica Divida não possui as colunas essenciais Cliente EC, Produto, Valor Dívida e Data Vencimento.");
   const map=new Map();
-  for(let r=1;r<d.length;r++){
-    const row=d[r]; const ec=String(getText(row,dEC)).trim(); if(!ec) continue;
-    const val=Number(getText(row,dVal))||0; const due=excelDate(getText(row,dDue)); const days=Number(getText(row,dDays)); const dueState=due ? (dateOnlyTime(due)<today.getTime()?"over":"future") : ((Number.isFinite(days)&&days>0)?"over":(Number.isFinite(days)&&days<0)?"future":"over");
-    const productRaw=String(getText(row,dProd)).trim(); const productType=classifyProduct(productRaw);
-    if(!map.has(ec)) map.set(ec,[]); map.get(ec).push({valueDebt:val,dueDate:due,dueState,days,productRaw,productType,status:dueState,contract:String(getText(row,findCol(dh,["Contrato EC","Contrato"]))||"").trim()});
-  }
-  clients.forEach(c=>{ const rows=map.get(c.ec)||[]; const s=debtSummary(rows); c.debtTotal=s.total;c.debtState=s.state;c.hasFuture=s.future>0;c.products=Object.keys(s.byProd).filter(k=>k!=="OUTRO"); });
-  return {clients,debts:map};
+  for(let r=1;r<d.length;r++){ const row=d[r]; const ec=String(getText(row,dEC)).trim(); if(!ec) continue; const val=Number(getText(row,dVal))||0; const due=excelDate(getText(row,dDue)); const days=Number(getText(row,dDays)); const dueState=due?(dateOnlyTime(due)<today.getTime()?"over":"future"):((Number.isFinite(days)&&days>0)?"over":(Number.isFinite(days)&&days<0)?"future":"over"); const productRaw=String(getText(row,dProd)).trim(); const productType=classifyProduct(productRaw); if(!map.has(ec))map.set(ec,[]); map.get(ec).push({valueDebt:val,dueDate:due,dueState,days,productRaw,productType,status:dueState,contract:String(getText(row,findCol(dh,["Contrato EC","Contrato"]))||"").trim()}); }
+  clients.forEach(c=>{const rows=map.get(c.ec)||[];const ss=debtSummary(rows);c.debtTotal=ss.total;c.debtState=ss.state;c.hasFuture=ss.future>0;c.products=Object.keys(ss.byProd).filter(k=>k!=="OUTRO");});
+  return {clients,debts:map,errors};
 }
 function parseActionsWorkbook(wb){
   const sh=sheetByName(wb,"Relatório Acionamento") || wb.Sheets[wb.SheetNames[0]]; if(!sh) return new Map();
@@ -496,6 +499,9 @@ function exportActions(){
 }
 
 function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function renderImportResult(successCount,errorCount){ const box=$("importResult"),ok=$("importSuccessCount"),er=$("importErrorCount"),note=$("importErrorNote"),btn=$("exportImportErrorsBtn"); if(box)box.style.display="block"; if(ok)ok.textContent=`Sucesso ${successCount}`; if(er)er.textContent=`Erro ${errorCount}`; if(note)note.textContent=errorCount?`${errorCount} registro(s) não foram importados. Exporte a lista para corrigir a base.`:"Todos os clientes foram importados com sucesso."; if(btn)btn.disabled=!errorCount; }
+function exportImportErrors(){ const errors=state.importErrors||[]; if(!errors.length){toast("Não há erros de importação para exportar.");return;} const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação','Erro Importação']]; errors.forEach(e=>rows.push([e.ec||"",e.cpf||"",e.name||"",e.address||"",e.number||"",e.complement||"",e.bairro||"",e.city||"","","","","",e.reason||""])); const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Coordenadas'); XLSX.writeFile(wb,'Erros_Importacao_Recebe_Mais.xlsx'); toast(`${errors.length} erro(s) exportado(s).`); }
+
 async function importFiles(){
   const bf=$("baseFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
   if(!bf){toast("Selecione a Base Clientes.");return;}
@@ -510,6 +516,9 @@ async function importFiles(){
     const bwb=XLSX.read(await bf.arrayBuffer(),{type:'array',cellDates:false});
     progress(35,"Processando aba BASE...");
     const parsed=parseBaseWorkbook(bwb);
+    state.importErrors=parsed.errors||[];
+    renderImportResult(parsed.clients.length,state.importErrors.length);
+    progress(45,`Clientes processados: Sucesso ${parsed.clients.length} • Erro ${state.importErrors.length}.`);
     const previousByEc=new Map((state.clients||[]).map(c=>[String(c.ec),c]));
     parsed.clients.forEach(c=>{const old=previousByEc.get(String(c.ec));if(old&&old.addressCorrected){c.address=old.address;c.number=old.number||"";c.complement=old.complement||"";c.bairro=old.bairro||"";c.city=old.city||"";c.addressCorrected=true;c.addressCorrectedAt=old.addressCorrectedAt||null;c.originalAddress=old.originalAddress;c.originalNumber=old.originalNumber;c.originalComplement=old.originalComplement;c.originalBairro=old.originalBairro;c.originalCity=old.originalCity;}});
     state.clients=parsed.clients; state.debtsByEc=parsed.debts;
@@ -544,8 +553,9 @@ async function importFiles(){
     renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
     $("geocodeBtn").disabled=false;
     progress(100,"Importação concluída.");
-    setImportStatus(`<strong>Lote carregado:</strong> ${state.clients.length} clientes. ${cf?"Coordenadas cruzadas pela coluna EC. ":""}Dívidas cruzadas pela coluna Cliente EC.`);
-    toast(`Lote importado com ${state.clients.length} clientes.`);
+    setImportStatus(`<strong>Importação concluída:</strong> Sucesso ${state.clients.length} • Erro ${state.importErrors.length}. ${cf?"Coordenadas cruzadas pela coluna EC. ":""}Dívidas cruzadas pela coluna Cliente EC.`);
+    renderImportResult(state.clients.length,state.importErrors.length);
+    toast(`Importação concluída: Sucesso ${state.clients.length} • Erro ${state.importErrors.length}.`);
   }catch(e){
     console.error(e);
     if(bar)bar.style.width="0%";
@@ -554,7 +564,7 @@ async function importFiles(){
     setImportStatus(`<strong>Erro:</strong> ${esc(e.message)}`);
   }finally{ $("importBtn").disabled=false; }
 }
-function clearLot(){ state.clients=[];state.debtsByEc=new Map();state.latestActionsByEc=new Map();state.proposalsByCpf=new Map(); localStorage.removeItem(STORAGE_KEY); renderCities();renderStats();renderList();renderMarkers();$("geocodeBtn").disabled=true;$("progressBar").style.width="0%"; $("importProgressBar").style.width="0%"; $("importProgressLabel").textContent="Aguardando início da importação."; setImportStatus("<strong>Lote limpo.</strong> Os dados persistentes de coordenadas foram mantidos.");toast("Lote atual removido. Coordenadas preservadas."); }
+function clearLot(){ state.clients=[];state.debtsByEc=new Map();state.latestActionsByEc=new Map();state.proposalsByCpf=new Map();state.importErrors=[];renderImportResult(0,0); localStorage.removeItem(STORAGE_KEY); renderCities();renderStats();renderList();renderMarkers();$("geocodeBtn").disabled=true;$("progressBar").style.width="0%"; $("importProgressBar").style.width="0%"; $("importProgressLabel").textContent="Aguardando início da importação."; setImportStatus("<strong>Lote limpo.</strong> Os dados persistentes de coordenadas foram mantidos.");toast("Lote atual removido. Coordenadas preservadas."); }
 
 $("importBtn").onclick=importFiles;
 $("geocodeBtn").onclick=geocodeAll;
