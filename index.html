@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -16,6 +18,7 @@
   >
 
   <style>
+
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -36,11 +39,16 @@
       overflow-x: hidden;
     }
 
+    /* ==============================
+       CABEÇALHO
+       ============================== */
+
     header {
+      width: 100%;
       background: #111827;
-      color: #fff;
+      color: #ffffff;
       padding: 11px 13px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.20);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
     }
 
     .header-top {
@@ -58,6 +66,7 @@
       margin: 0;
       font-size: 19px;
       line-height: 22px;
+      font-weight: 700;
       white-space: nowrap;
     }
 
@@ -90,6 +99,10 @@
       color: #cbd5e1;
     }
 
+    /* ==============================
+       CONTEÚDO
+       ============================== */
+
     main {
       width: 100%;
       max-width: 900px;
@@ -97,36 +110,45 @@
       padding: 10px;
     }
 
+    /* ==============================
+       BOTÃO
+       ============================== */
+
     .botao-localizar {
       width: 100%;
       height: 48px;
       border: 0;
       border-radius: 11px;
       background: #2563eb;
-      color: white;
+      color: #ffffff;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
       margin-bottom: 10px;
-      box-shadow: 0 3px 8px rgba(37,99,235,.25);
+      box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
     }
 
     .botao-localizar:active {
-      transform: scale(.99);
+      transform: scale(0.99);
     }
 
     .botao-localizar:disabled {
       background: #64748b;
-      box-shadow: none;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
+    /* ==============================
+       STATUS
+       ============================== */
+
     .status {
-      background: #fff;
+      width: 100%;
+      background: #ffffff;
       border-radius: 11px;
       padding: 10px 12px;
       margin-bottom: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,.08);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
     }
 
     .status-texto {
@@ -157,8 +179,12 @@
       height: 100%;
       background: #2563eb;
       border-radius: 20px;
-      transition: width .25s ease;
+      transition: width 0.25s ease;
     }
+
+    /* ==============================
+       MAPA
+       ============================== */
 
     #map {
       width: 100%;
@@ -168,8 +194,12 @@
       border-radius: 12px;
       overflow: hidden;
       background: #dbeafe;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     }
+
+    /* ==============================
+       RESUMO
+       ============================== */
 
     .resumo {
       display: grid;
@@ -179,11 +209,11 @@
     }
 
     .resumo-item {
-      background: #fff;
+      background: #ffffff;
       border-radius: 10px;
       padding: 9px 5px;
       text-align: center;
-      box-shadow: 0 1px 5px rgba(0,0,0,.07);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
     }
 
     .resumo-numero {
@@ -200,12 +230,16 @@
       color: #64748b;
     }
 
+    /* ==============================
+       LISTA
+       ============================== */
+
     .lista-container {
       margin-top: 10px;
-      background: #fff;
+      background: #ffffff;
       border-radius: 11px;
       padding: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,.08);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
     }
 
     .lista-titulo {
@@ -251,6 +285,10 @@
       color: #2563eb;
     }
 
+    .segunda-tentativa {
+      color: #d97706;
+    }
+
     .sucesso {
       color: #15803d;
     }
@@ -259,67 +297,82 @@
       color: #dc2626;
     }
 
-    .segunda-tentativa {
-      color: #d97706;
+    /* ==============================
+       LEAFLET
+       ============================== */
+
+    .leaflet-popup-content {
+      margin: 10px 12px;
     }
 
-    .popup-titulo {
-      font-size: 14px;
+    .popup-nome {
       font-weight: 700;
+      font-size: 14px;
       margin-bottom: 5px;
     }
 
     .popup-endereco {
       font-size: 12px;
       line-height: 16px;
-    }
-
-    .popup-coordenadas {
-      margin-top: 5px;
-      color: #64748b;
-      font-size: 10px;
+      color: #475569;
     }
 
     @media (min-width: 700px) {
-      #map {
-        height: 500px;
-        max-height: 500px;
+
+      main {
+        padding: 15px;
       }
 
-      .botao-localizar {
-        width: 230px;
+      #map {
+        height: 500px;
+        max-height: none;
       }
+
+      .titulo h1 {
+        font-size: 21px;
+      }
+
     }
+
   </style>
+
 </head>
 
 <body>
 
   <header>
+
     <div class="header-top">
 
       <div class="titulo">
+
         <h1>📦 Mapa de Entregas</h1>
+
         <p>Localização dos clientes</p>
+
       </div>
 
       <div class="contador">
+
         <strong id="contadorClientes">0</strong>
+
         <span>clientes</span>
+
       </div>
 
     </div>
+
   </header>
 
 
   <main>
 
     <button
-      id="btnLocalizar"
+      id="botaoLocalizar"
       class="botao-localizar"
       type="button"
     >
-      📍 LOCALIZAR
+      📍 LOCALIZAR CLIENTES
     </button>
 
 
@@ -329,21 +382,23 @@
         id="statusTexto"
         class="status-texto"
       >
-        Pronto para localizar os clientes.
+        Aguardando início...
       </div>
 
       <div
         id="statusDetalhe"
         class="status-detalhe"
       >
-        Clique em "Localizar" para começar.
+        Toque no botão acima para iniciar a localização dos clientes.
       </div>
 
       <div class="progresso-container">
+
         <div
           id="barraProgresso"
           class="progresso"
         ></div>
+
       </div>
 
     </div>
@@ -355,42 +410,50 @@
     <div class="resumo">
 
       <div class="resumo-item">
+
         <span
-          id="infoEncontrados"
+          id="contadorProcessados"
           class="resumo-numero"
         >
           0
         </span>
 
         <span class="resumo-label">
-          LOCALIZADOS
+          Processados
         </span>
+
       </div>
 
+
       <div class="resumo-item">
+
         <span
-          id="infoFalhas"
+          id="contadorEncontrados"
           class="resumo-numero"
         >
           0
         </span>
 
         <span class="resumo-label">
-          NÃO LOCALIZADOS
+          Localizados
         </span>
+
       </div>
 
+
       <div class="resumo-item">
+
         <span
-          id="infoProcessados"
+          id="contadorFalhas"
           class="resumo-numero"
         >
           0
         </span>
 
         <span class="resumo-label">
-          PROCESSADOS
+          Não localizados
         </span>
+
       </div>
 
     </div>
@@ -398,9 +461,9 @@
 
     <div class="lista-container">
 
-      <h2 class="lista-titulo">
-        Clientes
-      </h2>
+      <div class="lista-titulo">
+        📋 Lista de clientes
+      </div>
 
       <div id="listaClientes"></div>
 
@@ -419,9 +482,9 @@
 
   <script>
 
-    /* =========================================================
-       CONFIGURAÇÃO
-       ========================================================= */
+    /* ============================================================
+       CONFIGURAÇÕES
+       ============================================================ */
 
     const CENTRO_INICIAL = [
       -29.1678,
@@ -432,16 +495,13 @@
 
     const INTERVALO_GEOCODIFICACAO = 1500;
 
-    const CHAVE_CACHE =
-      "mapa_entregas_geocache_v6";
 
-
-    /* =========================================================
+    /* ============================================================
        ELEMENTOS
-       ========================================================= */
+       ============================================================ */
 
-    const btnLocalizar =
-      document.getElementById("btnLocalizar");
+    const botaoLocalizar =
+      document.getElementById("botaoLocalizar");
 
     const statusTexto =
       document.getElementById("statusTexto");
@@ -455,31 +515,30 @@
     const contadorClientes =
       document.getElementById("contadorClientes");
 
-    const infoEncontrados =
-      document.getElementById("infoEncontrados");
+    const contadorProcessados =
+      document.getElementById("contadorProcessados");
 
-    const infoFalhas =
-      document.getElementById("infoFalhas");
+    const contadorEncontrados =
+      document.getElementById("contadorEncontrados");
 
-    const infoProcessados =
-      document.getElementById("infoProcessados");
+    const contadorFalhas =
+      document.getElementById("contadorFalhas");
 
     const listaClientes =
       document.getElementById("listaClientes");
 
 
-    /* =========================================================
+    /* ============================================================
        MAPA
-       ========================================================= */
+       ============================================================ */
 
-    const map =
-      L.map("map", {
-        zoomControl: true,
-        attributionControl: true
-      }).setView(
-        CENTRO_INICIAL,
-        ZOOM_INICIAL
-      );
+    const mapa = L.map("map", {
+      zoomControl: true,
+      attributionControl: true
+    }).setView(
+      CENTRO_INICIAL,
+      ZOOM_INICIAL
+    );
 
 
     L.tileLayer(
@@ -488,16 +547,16 @@
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap"
       }
-    ).addTo(map);
+    ).addTo(mapa);
 
 
     const camadaMarcadores =
-      L.layerGroup().addTo(map);
+      L.layerGroup().addTo(mapa);
 
 
-    /* =========================================================
+    /* ============================================================
        VARIÁVEIS
-       ========================================================= */
+       ============================================================ */
 
     let clientes = [];
 
@@ -513,9 +572,9 @@
       L.latLngBounds([]);
 
 
-    /* =========================================================
-       ESPERA
-       ========================================================= */
+    /* ============================================================
+       FUNÇÕES BÁSICAS
+       ============================================================ */
 
     function esperar(ms) {
 
@@ -526,16 +585,9 @@
     }
 
 
-    /* =========================================================
-       ESCAPAR HTML
-       ========================================================= */
-
     function escaparHTML(valor) {
 
-      if (
-        valor === null ||
-        valor === undefined
-      ) {
+      if (valor === null || valor === undefined) {
         return "";
       }
 
@@ -549,52 +601,82 @@
     }
 
 
-    /* =========================================================
-       NOME
-       ========================================================= */
+    /* ============================================================
+       PEGAR NOME
+       ============================================================ */
 
     function pegarNome(cliente) {
 
-      return (
-        cliente.nome ??
-        cliente.cliente ??
-        cliente.razao_social ??
-        cliente.razaoSocial ??
-        cliente.fantasia ??
-        cliente.nome_cliente ??
-        cliente.NOME ??
-        cliente.Nome ??
-        "Cliente"
-      );
+      if (!cliente || typeof cliente !== "object") {
+        return "Cliente";
+      }
+
+      const possibilidades = [
+        cliente.nome,
+        cliente.cliente,
+        cliente.razao_social,
+        cliente.razaoSocial,
+        cliente.fantasia,
+        cliente.nome_cliente,
+        cliente.NOME,
+        cliente.Nome
+      ];
+
+      for (const valor of possibilidades) {
+
+        if (
+          valor !== undefined &&
+          valor !== null &&
+          String(valor).trim() !== ""
+        ) {
+
+          return String(valor).trim();
+
+        }
+
+      }
+
+      return "Cliente";
 
     }
 
 
-    /* =========================================================
-       ENDEREÇO
-       ========================================================= */
+    /* ============================================================
+       PEGAR ENDEREÇO
+       ============================================================ */
 
     function pegarEndereco(cliente) {
 
-      const enderecoCompleto =
-        cliente.endereco ??
-        cliente.endereço ??
-        cliente.address ??
-        cliente.ENDERECO ??
-        cliente.Endereco;
+      if (!cliente || typeof cliente !== "object") {
+        return "";
+      }
 
 
-      if (
-        enderecoCompleto !== undefined &&
-        enderecoCompleto !== null &&
-        String(enderecoCompleto).trim() !== ""
-      ) {
+      const enderecoDireto = [
+        cliente.endereco,
+        cliente.endereço,
+        cliente.address,
+        cliente.ENDERECO,
+        cliente.Endereco
+      ];
 
-        return String(
-          enderecoCompleto
-        ).trim();
+
+      for (const valor of enderecoDireto) {
+
+        if (
+          valor !== undefined &&
+          valor !== null &&
+          String(valor).trim() !== ""
+        ) {
+
+          return String(valor).trim();
+
+        }
 
       }
+
+
+      const partes = [];
 
 
       const rua =
@@ -602,24 +684,31 @@
         cliente.Rua ??
         cliente.logradouro ??
         cliente.Logradouro ??
+        cliente.ENDERECO_RUA ??
         "";
+
 
       const numero =
         cliente.numero ??
-        cliente.número ??
         cliente.Numero ??
-        cliente.Número ??
+        cliente.n ??
+        cliente.N ??
         "";
+
 
       const bairro =
         cliente.bairro ??
         cliente.Bairro ??
         "";
 
+
       const cidade =
         cliente.cidade ??
         cliente.Cidade ??
+        cliente.municipio ??
+        cliente.Municipio ??
         "";
+
 
       const uf =
         cliente.uf ??
@@ -629,27 +718,28 @@
         "";
 
 
-      const partes = [];
-
-
-      if (rua) {
-        partes.push(String(rua));
+      if (String(rua).trim() !== "") {
+        partes.push(String(rua).trim());
       }
 
-      if (numero) {
-        partes.push(String(numero));
+
+      if (String(numero).trim() !== "") {
+        partes.push(String(numero).trim());
       }
 
-      if (bairro) {
-        partes.push(String(bairro));
+
+      if (String(bairro).trim() !== "") {
+        partes.push(String(bairro).trim());
       }
 
-      if (cidade) {
-        partes.push(String(cidade));
+
+      if (String(cidade).trim() !== "") {
+        partes.push(String(cidade).trim());
       }
 
-      if (uf) {
-        partes.push(String(uf));
+
+      if (String(uf).trim() !== "") {
+        partes.push(String(uf).trim());
       }
 
 
@@ -658,262 +748,13 @@
     }
 
 
-    /* =========================================================
-       CIDADE
-       ========================================================= */
-
-    function pegarCidade(cliente) {
-
-      return (
-        cliente.cidade ??
-        cliente.Cidade ??
-        cliente.municipio ??
-        cliente.Municipio ??
-        "Caxias do Sul"
-      );
-
-    }
-
-
-    /* =========================================================
-       CACHE
-       ========================================================= */
-
-    function carregarCache() {
-
-      try {
-
-        const dados =
-          localStorage.getItem(
-            CHAVE_CACHE
-          );
-
-
-        if (!dados) {
-          return {};
-        }
-
-
-        const cache =
-          JSON.parse(dados);
-
-
-        if (
-          typeof cache !== "object" ||
-          cache === null
-        ) {
-          return {};
-        }
-
-
-        return cache;
-
-      } catch (erro) {
-
-        console.warn(
-          "Não foi possível carregar o cache.",
-          erro
-        );
-
-        return {};
-
-      }
-
-    }
-
-
-    function salvarCache(
-      cache
-    ) {
-
-      try {
-
-        localStorage.setItem(
-          CHAVE_CACHE,
-          JSON.stringify(cache)
-        );
-
-      } catch (erro) {
-
-        console.warn(
-          "Não foi possível salvar o cache.",
-          erro
-        );
-
-      }
-
-    }
-
-
-    const cacheGeocodificacao =
-      carregarCache();
-
-
-    /* =========================================================
-       CHAVE DO ENDEREÇO
-       ========================================================= */
-
-    function criarChaveEndereco(
-      endereco
-    ) {
-
-      return String(
-        endereco || ""
-      )
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(
-          /[\u0300-\u036f]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          " "
-        )
-        .trim();
-
-    }
-
-
-    /* =========================================================
-       PREPARAR CONSULTA COMPLETA
-       ========================================================= */
-
-    function consultaCompleta(
-      cliente
-    ) {
-
-      let consulta =
-        cliente.endereco.trim();
-
-
-      const cidade =
-        pegarCidade(
-          cliente.original
-        );
-
-
-      if (
-        cidade &&
-        !consulta
-          .toLowerCase()
-          .includes(
-            String(cidade).toLowerCase()
-          )
-      ) {
-
-        consulta +=
-          ", " + cidade;
-
-      }
-
-
-      if (
-        !consulta
-          .toLowerCase()
-          .includes("rio grande do sul")
-      ) {
-
-        consulta +=
-          ", RS";
-
-      }
-
-
-      if (
-        !consulta
-          .toLowerCase()
-          .includes("brasil")
-      ) {
-
-        consulta +=
-          ", Brasil";
-
-      }
-
-
-      return consulta;
-
-    }
-
-
-    /* =========================================================
-       CONSULTA SIMPLIFICADA
-       ========================================================= */
-
-    function consultaSimplificada(
-      cliente
-    ) {
-
-      let endereco =
-        cliente.endereco
-          .trim();
-
-
-      const cidade =
-        pegarCidade(
-          cliente.original
-        );
-
-
-      /*
-        Remove algumas informações muito
-        específicas que podem atrapalhar
-        a primeira busca.
-      */
-
-      endereco =
-        endereco
-          .replace(
-            /\bcep\b\s*:?\s*\d{5}-?\d{3}/gi,
-            ""
-          )
-          .replace(
-            /\d{5}-\d{3}/g,
-            ""
-          )
-          .replace(
-            /\s+/g,
-            " "
-          )
-          .trim();
-
-
-      let consulta =
-        endereco;
-
-
-      if (
-        cidade &&
-        !consulta
-          .toLowerCase()
-          .includes(
-            String(cidade).toLowerCase()
-          )
-      ) {
-
-        consulta +=
-          ", " + cidade;
-
-      }
-
-
-      consulta +=
-        ", RS, Brasil";
-
-
-      return consulta;
-
-    }
-
-
-    /* =========================================================
-       PREPARAR CLIENTES
-       ========================================================= */
+    /* ============================================================
+       CARREGAR CLIENTES
+       ============================================================ */
 
     function carregarClientes() {
 
-      let fonte = null;
+      let dados = null;
 
 
       if (
@@ -921,179 +762,106 @@
         Array.isArray(CLIENTES)
       ) {
 
-        fonte = CLIENTES;
+        dados = CLIENTES;
 
       }
-
-
-      if (
-        !fonte &&
+      else if (
         typeof clientes !== "undefined" &&
         Array.isArray(clientes)
       ) {
 
-        fonte = clientes;
+        dados = clientes;
 
       }
-
-
-      if (
-        !fonte &&
+      else if (
         typeof dadosClientes !== "undefined" &&
         Array.isArray(dadosClientes)
       ) {
 
-        fonte = dadosClientes;
+        dados = dadosClientes;
 
       }
-
-
-      if (
-        !fonte &&
+      else if (
         typeof dados !== "undefined" &&
         Array.isArray(dados)
       ) {
 
-        fonte = dados;
+        dados = dados;
 
       }
 
 
-      if (!fonte) {
+      if (!Array.isArray(dados)) {
 
-        throw new Error(
-          "Não encontrei uma lista de clientes no clientes.js."
-        );
+        statusTexto.textContent =
+          "Erro ao carregar clientes.";
 
-      }
-
-
-      clientes =
-        fonte
-          .map(
-            (cliente, indice) => {
-
-              return {
-
-                original: cliente,
-
-                indice: indice,
-
-                nome:
-                  pegarNome(cliente),
-
-                endereco:
-                  pegarEndereco(cliente),
-
-                status:
-                  "aguardando",
-
-                tentativa:
-                  0,
-
-                lat:
-                  null,
-
-                lon:
-                  null
-
-              };
-
-            }
-          )
-          .filter(
-            cliente =>
-              cliente.endereco &&
-              cliente.endereco.trim() !== ""
-          );
-
-
-      contadorClientes.textContent =
-        clientes.length;
-
-
-      montarLista();
-
-    }
-
-
-    /* =========================================================
-       LISTA
-       ========================================================= */
-
-    function montarLista() {
-
-      listaClientes.innerHTML = "";
-
-
-      if (
-        clientes.length === 0
-      ) {
-
-        listaClientes.innerHTML = `
-          <div class="cliente-item">
-            <div class="cliente-status falha">
-              Nenhum cliente com endereço encontrado.
-            </div>
-          </div>
-        `;
+        statusDetalhe.textContent =
+          "Não foi encontrada uma lista válida no arquivo clientes.js.";
 
         return;
 
       }
 
 
-      clientes.forEach(
-        cliente => {
+      clientes = dados
+        .map((cliente, indice) => {
 
-          const item =
-            document.createElement(
-              "div"
-            );
+          return {
 
+            original: cliente,
 
-          item.className =
-            "cliente-item";
+            indice: indice,
 
+            nome: pegarNome(cliente),
 
-          item.id =
-            "cliente-" +
-            cliente.indice;
+            endereco: pegarEndereco(cliente),
 
+            status: "Aguardando localização...",
 
-          item.innerHTML = `
+            lat: null,
 
-            <div class="cliente-nome">
-              ${escaparHTML(cliente.nome)}
-            </div>
+            lon: null
 
-            <div class="cliente-endereco">
-              ${escaparHTML(cliente.endereco)}
-            </div>
+          };
 
-            <div
-              class="cliente-status aguardando"
-              id="status-cliente-${cliente.indice}"
-            >
-              Aguardando localização...
-            </div>
+        })
+        .filter(cliente => {
 
-          `;
-
-
-          listaClientes.appendChild(
-            item
+          return (
+            cliente.endereco &&
+            cliente.endereco.trim() !== ""
           );
 
-        }
-      );
+        });
+
+
+      contadorClientes.textContent =
+        clientes.length;
+
+
+      atualizarLista();
+
+
+      atualizarInformacoes();
+
+
+      if (clientes.length === 0) {
+
+        statusTexto.textContent =
+          "Nenhum cliente encontrado.";
+
+        statusDetalhe.textContent =
+          "Verifique o conteúdo do arquivo clientes.js.";
+
+      }
 
     }
 
 
-    /* =========================================================
-       STATUS DO CLIENTE
-       ========================================================= */
+    /* ============================================================
+       ATUALIZAR STATUS DO CLIENTE
+       ============================================================ */
 
     function atualizarStatusCliente(
       cliente,
@@ -1101,10 +869,11 @@
       classe
     ) {
 
+      cliente.status = texto;
+
       const elemento =
         document.getElementById(
-          "status-cliente-" +
-          cliente.indice
+          "cliente-" + cliente.indice
         );
 
 
@@ -1113,398 +882,438 @@
       }
 
 
-      elemento.textContent =
-        texto;
+      const status =
+        elemento.querySelector(
+          ".cliente-status"
+        );
 
 
-      elemento.className =
+      if (!status) {
+        return;
+      }
+
+
+      status.textContent = texto;
+
+      status.className =
         "cliente-status " +
-        classe;
+        (classe || "");
 
     }
 
 
-    /* =========================================================
-       RESUMO
-       ========================================================= */
+    /* ============================================================
+       ATUALIZAR LISTA
+       ============================================================ */
 
-    function atualizarResumo() {
+    function atualizarLista() {
 
-      infoEncontrados.textContent =
-        encontrados;
+      listaClientes.innerHTML = "";
 
-      infoFalhas.textContent =
-        falhas;
 
-      infoProcessados.textContent =
+      clientes.forEach(cliente => {
+
+        const item =
+          document.createElement("div");
+
+        item.className =
+          "cliente-item";
+
+        item.id =
+          "cliente-" + cliente.indice;
+
+
+        item.innerHTML = `
+
+          <div class="cliente-nome">
+            ${escaparHTML(cliente.nome)}
+          </div>
+
+          <div class="cliente-endereco">
+            ${escaparHTML(cliente.endereco)}
+          </div>
+
+          <div class="cliente-status aguardando">
+            ${escaparHTML(cliente.status)}
+          </div>
+
+        `;
+
+
+        listaClientes.appendChild(item);
+
+      });
+
+    }
+
+
+    /* ============================================================
+       ATUALIZAR INFORMAÇÕES
+       ============================================================ */
+
+    function atualizarInformacoes() {
+
+      contadorProcessados.textContent =
         processados;
 
-    }
+      contadorEncontrados.textContent =
+        encontrados;
+
+      contadorFalhas.textContent =
+        falhas;
 
 
-    /* =========================================================
-       PROGRESSO
-       ========================================================= */
+      let porcentagem = 0;
 
-    function atualizarProgresso() {
 
-      if (
-        clientes.length === 0
-      ) {
+      if (clientes.length > 0) {
 
-        barraProgresso.style.width =
-          "0%";
-
-        return;
+        porcentagem =
+          Math.round(
+            (processados / clientes.length) * 100
+          );
 
       }
 
 
-      const percentual =
-        (
-          processados /
-          clientes.length
-        ) * 100;
-
-
       barraProgresso.style.width =
-        percentual + "%";
+        porcentagem + "%";
 
     }
 
 
-    /* =========================================================
-       NOMINATIM
-       ========================================================= */
+    /* ============================================================
+       CONSULTA NOMINATIM
+       ============================================================ */
 
     async function consultarNominatim(
-      consulta
+      endereco
     ) {
 
-      const url =
-        "https://nominatim.openstreetmap.org/search?" +
-        new URLSearchParams({
+      let enderecoCompleto =
+        String(endereco || "").trim();
 
-          q: consulta,
+
+      if (!enderecoCompleto) {
+        return null;
+      }
+
+
+      /*
+       * PRIMEIRA BUSCA
+       *
+       * Mantemos o mesmo princípio da versão
+       * que estava funcionando.
+       */
+
+      if (
+        !/Brasil/i.test(enderecoCompleto)
+      ) {
+
+        enderecoCompleto += ", Brasil";
+
+      }
+
+
+      const parametros =
+        new URLSearchParams({
 
           format: "jsonv2",
 
           addressdetails: "1",
 
-          limit: "8",
+          limit: "5",
 
           countrycodes: "br",
 
-          "accept-language": "pt-BR"
+          "accept-language": "pt-BR",
+
+          q: enderecoCompleto
 
         });
 
 
-      const resposta =
-        await fetch(
-          url
+      const url =
+        "https://nominatim.openstreetmap.org/search?" +
+        parametros.toString();
+
+
+      try {
+
+        const resposta =
+          await fetch(url, {
+            method: "GET"
+          });
+
+
+        if (!resposta.ok) {
+
+          throw new Error(
+            "HTTP " + resposta.status
+          );
+
+        }
+
+
+        const resultados =
+          await resposta.json();
+
+
+        if (
+          Array.isArray(resultados) &&
+          resultados.length > 0
+        ) {
+
+          /*
+           * Primeiro tentamos encontrar um resultado
+           * claramente brasileiro.
+           *
+           * Se não houver, usamos o primeiro.
+           *
+           * NÃO fazemos pontuação complexa.
+           */
+
+          const brasileiro =
+            resultados.find(resultado => {
+
+              const display =
+                String(
+                  resultado.display_name || ""
+                ).toLowerCase();
+
+              const address =
+                resultado.address || {};
+
+              const pais =
+                String(
+                  address.country || ""
+                ).toLowerCase();
+
+              const estado =
+                String(
+                  address.state || ""
+                ).toLowerCase();
+
+              return (
+                pais.includes("brasil") ||
+                display.includes("brasil") ||
+                estado.includes("rio grande do sul")
+              );
+
+            });
+
+
+          return brasileiro || resultados[0];
+
+        }
+
+
+        return null;
+
+      }
+      catch (erro) {
+
+        console.warn(
+          "Erro na primeira consulta:",
+          erro
         );
-
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          "HTTP " +
-          resposta.status
-        );
-
-      }
-
-
-      const resultados =
-        await resposta.json();
-
-
-      if (
-        !Array.isArray(resultados) ||
-        resultados.length === 0
-      ) {
-
-        return [];
-
-      }
-
-
-      return resultados;
-
-    }
-
-
-    /* =========================================================
-       PONTUAÇÃO DO RESULTADO
-       ========================================================= */
-
-    function pontuarResultado(
-      resultado,
-      cliente
-    ) {
-
-      let pontos = 0;
-
-
-      const display =
-        String(
-          resultado.display_name || ""
-        ).toLowerCase();
-
-
-      const cidade =
-        String(
-          pegarCidade(
-            cliente.original
-          )
-        ).toLowerCase();
-
-
-      const endereco =
-        String(
-          cliente.endereco
-        ).toLowerCase();
-
-
-      /*
-        Resultado brasileiro.
-      */
-
-      if (
-        display.includes("brasil")
-      ) {
-
-        pontos += 10;
-
-      }
-
-
-      /*
-        Rio Grande do Sul.
-      */
-
-      if (
-        display.includes(
-          "rio grande do sul"
-        )
-      ) {
-
-        pontos += 15;
-
-      }
-
-
-      /*
-        Cidade.
-      */
-
-      if (
-        cidade &&
-        display.includes(cidade)
-      ) {
-
-        pontos += 30;
-
-      }
-
-
-      /*
-        Rua/avenida/logradouro.
-      */
-
-      const rua =
-        cliente.original.rua ??
-        cliente.original.Rua ??
-        cliente.original.logradouro ??
-        cliente.original.Logradouro ??
-        "";
-
-
-      if (
-        rua &&
-        display.includes(
-          String(rua).toLowerCase()
-        )
-      ) {
-
-        pontos += 35;
-
-      }
-
-
-      /*
-        Número.
-      */
-
-      const numero =
-        cliente.original.numero ??
-        cliente.original.número ??
-        cliente.original.Numero ??
-        cliente.original.Número ??
-        "";
-
-
-      if (
-        numero &&
-        display.includes(
-          String(numero).toLowerCase()
-        )
-      ) {
-
-        pontos += 20;
-
-      }
-
-
-      /*
-        Bairro.
-      */
-
-      const bairro =
-        cliente.original.bairro ??
-        cliente.original.Bairro ??
-        "";
-
-
-      if (
-        bairro &&
-        display.includes(
-          String(bairro).toLowerCase()
-        )
-      ) {
-
-        pontos += 20;
-
-      }
-
-
-      /*
-        Resultado de endereço.
-      */
-
-      const tipo =
-        String(
-          resultado.type || ""
-        ).toLowerCase();
-
-
-      if (
-        tipo === "house" ||
-        tipo === "residential"
-      ) {
-
-        pontos += 15;
-
-      }
-
-
-      return pontos;
-
-    }
-
-
-    /* =========================================================
-       ESCOLHER MELHOR RESULTADO
-       ========================================================= */
-
-    function escolherMelhorResultado(
-      resultados,
-      cliente
-    ) {
-
-      if (
-        !resultados ||
-        resultados.length === 0
-      ) {
 
         return null;
 
       }
 
-
-      const avaliados =
-        resultados.map(
-          resultado => {
-
-            return {
-
-              resultado:
-                resultado,
-
-              pontos:
-                pontuarResultado(
-                  resultado,
-                  cliente
-                )
-
-            };
-
-          }
-        );
-
-
-      avaliados.sort(
-        (a, b) =>
-          b.pontos -
-          a.pontos
-      );
-
-
-      return avaliados[0].resultado;
-
     }
 
 
-    /* =========================================================
-       VALIDAR COORDENADAS
-       ========================================================= */
+    /* ============================================================
+       SEGUNDA TENTATIVA
+       ============================================================ */
 
-    function coordenadasValidas(
-      lat,
-      lon
+    async function consultarNominatimFallback(
+      endereco
     ) {
 
-      return (
-        Number.isFinite(lat) &&
-        Number.isFinite(lon) &&
-        lat >= -90 &&
-        lat <= 90 &&
-        lon >= -180 &&
-        lon <= 180
-      );
+      let texto =
+        String(endereco || "").trim();
+
+
+      if (!texto) {
+        return null;
+      }
+
+
+      /*
+       * A segunda tentativa é propositalmente
+       * mais simples.
+       *
+       * Ela só é usada quando a primeira busca
+       * não encontrou absolutamente nada.
+       */
+
+      const partes =
+        texto
+          .split(",")
+          .map(parte => parte.trim())
+          .filter(Boolean);
+
+
+      let enderecoSimplificado = texto;
+
+
+      if (partes.length > 2) {
+
+        enderecoSimplificado =
+          partes
+            .slice(0, 3)
+            .join(", ");
+
+      }
+
+
+      if (
+        !/Brasil/i.test(enderecoSimplificado)
+      ) {
+
+        enderecoSimplificado +=
+          ", Brasil";
+
+      }
+
+
+      const parametros =
+        new URLSearchParams({
+
+          format: "jsonv2",
+
+          addressdetails: "1",
+
+          limit: "5",
+
+          countrycodes: "br",
+
+          "accept-language": "pt-BR",
+
+          q: enderecoSimplificado
+
+        });
+
+
+      const url =
+        "https://nominatim.openstreetmap.org/search?" +
+        parametros.toString();
+
+
+      try {
+
+        const resposta =
+          await fetch(url, {
+            method: "GET"
+          });
+
+
+        if (!resposta.ok) {
+
+          throw new Error(
+            "HTTP " + resposta.status
+          );
+
+        }
+
+
+        const resultados =
+          await resposta.json();
+
+
+        if (
+          Array.isArray(resultados) &&
+          resultados.length > 0
+        ) {
+
+          return resultados[0];
+
+        }
+
+
+        return null;
+
+      }
+      catch (erro) {
+
+        console.warn(
+          "Erro na segunda consulta:",
+          erro
+        );
+
+        return null;
+
+      }
 
     }
 
 
-    /* =========================================================
+    /* ============================================================
        ADICIONAR MARCADOR
-       ========================================================= */
+       ============================================================ */
 
     function adicionarMarcador(
       cliente,
-      lat,
-      lon,
-      vindoDoCache = false
+      resultado
     ) {
+
+      const lat =
+        Number(resultado.lat);
+
+      const lon =
+        Number(resultado.lon);
+
+
+      if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lon)
+      ) {
+
+        return false;
+
+      }
+
+
+      /*
+       * Segurança para evitar coordenadas absurdas.
+       *
+       * NÃO alteramos sinal,
+       * NÃO invertimos latitude/longitude.
+       */
+
+      if (
+        lat < -90 ||
+        lat > 90 ||
+        lon < -180 ||
+        lon > 180
+      ) {
+
+        return false;
+
+      }
+
+
+      cliente.lat = lat;
+
+      cliente.lon = lon;
+
 
       const marcador =
         L.circleMarker(
           [lat, lon],
           {
-
             radius: 8,
-
-            weight: 2,
 
             color: "#ffffff",
 
-            fillColor:
-              vindoDoCache
-                ? "#16a34a"
-                : "#2563eb",
+            weight: 2,
 
-            fillOpacity: .95
+            fillColor: "#2563eb",
+
+            fillOpacity: 0.95
 
           }
         );
@@ -1512,16 +1321,12 @@
 
       marcador.bindPopup(`
 
-        <div class="popup-titulo">
+        <div class="popup-nome">
           ${escaparHTML(cliente.nome)}
         </div>
 
         <div class="popup-endereco">
           ${escaparHTML(cliente.endereco)}
-        </div>
-
-        <div class="popup-coordenadas">
-          ${lat.toFixed(6)}, ${lon.toFixed(6)}
         </div>
 
       `);
@@ -1532,189 +1337,30 @@
       );
 
 
-      limitesMapa.extend(
-        [lat, lon]
-      );
+      limitesMapa.extend([
+        lat,
+        lon
+      ]);
+
+
+      return true;
 
     }
 
 
-    /* =========================================================
-       PROCURAR NO CACHE
-       ========================================================= */
-
-    function procurarNoCache(
-      cliente
-    ) {
-
-      const chave =
-        criarChaveEndereco(
-          cliente.endereco
-        );
-
-
-      if (
-        !chave ||
-        !cacheGeocodificacao[chave]
-      ) {
-
-        return null;
-
-      }
-
-
-      const dados =
-        cacheGeocodificacao[chave];
-
-
-      const lat =
-        Number(dados.lat);
-
-
-      const lon =
-        Number(dados.lon);
-
-
-      if (
-        !coordenadasValidas(
-          lat,
-          lon
-        )
-      ) {
-
-        return null;
-
-      }
-
-
-      return {
-        lat: lat,
-        lon: lon
-      };
-
-    }
-
-
-    /* =========================================================
-       SALVAR NO CACHE
-       ========================================================= */
-
-    function salvarCoordenadaCache(
-      cliente,
-      lat,
-      lon
-    ) {
-
-      const chave =
-        criarChaveEndereco(
-          cliente.endereco
-        );
-
-
-      if (!chave) {
-        return;
-      }
-
-
-      cacheGeocodificacao[chave] = {
-
-        lat: lat,
-
-        lon: lon,
-
-        nome: cliente.nome,
-
-        endereco: cliente.endereco,
-
-        atualizado:
-          new Date().toISOString()
-
-      };
-
-
-      salvarCache(
-        cacheGeocodificacao
-      );
-
-    }
-
-
-    /* =========================================================
-       LOCALIZAR CLIENTE
-       ========================================================= */
+    /* ============================================================
+       LOCALIZAR UM CLIENTE
+       ============================================================ */
 
     async function localizarCliente(
       cliente
     ) {
 
-      /*
-        PRIMEIRO: CACHE
-      */
-
-      const cache =
-        procurarNoCache(
-          cliente
-        );
-
-
-      if (cache) {
-
-        cliente.lat =
-          cache.lat;
-
-        cliente.lon =
-          cache.lon;
-
-        cliente.status =
-          "encontrado";
-
-        cliente.tentativa =
-          0;
-
-
-        adicionarMarcador(
-          cliente,
-          cache.lat,
-          cache.lon,
-          true
-        );
-
-
-        encontrados++;
-
-
-        atualizarStatusCliente(
-          cliente,
-          "🟢 Localizado — coordenada salva",
-          "sucesso"
-        );
-
-
-        return;
-
-      }
-
-
-      /*
-        PRIMEIRA TENTATIVA
-      */
-
-      cliente.tentativa =
-        1;
-
-
       atualizarStatusCliente(
         cliente,
-        "🔎 Tentativa 1 — procurando...",
+        "Localizando...",
         "localizando"
       );
-
-
-      statusTexto.textContent =
-        "Localizando " +
-        (cliente.indice + 1) +
-        " de " +
-        clientes.length;
 
 
       statusDetalhe.textContent =
@@ -1723,365 +1369,130 @@
         cliente.endereco;
 
 
-      try {
+      /*
+       * PRIMEIRA TENTATIVA
+       */
 
-        const consulta1 =
-          consultaCompleta(
-            cliente
-          );
-
-
-        const resultados1 =
-          await consultarNominatim(
-            consulta1
-          );
-
-
-        let resultado =
-          escolherMelhorResultado(
-            resultados1,
-            cliente
-          );
-
-
-        /*
-          Se encontrou um resultado,
-          verificamos as coordenadas.
-        */
-
-        if (resultado) {
-
-          const lat =
-            Number(
-              resultado.lat
-            );
-
-          const lon =
-            Number(
-              resultado.lon
-            );
-
-
-          if (
-            coordenadasValidas(
-              lat,
-              lon
-            )
-          ) {
-
-            cliente.lat =
-              lat;
-
-            cliente.lon =
-              lon;
-
-            cliente.status =
-              "encontrado";
-
-
-            salvarCoordenadaCache(
-              cliente,
-              lat,
-              lon
-            );
-
-
-            adicionarMarcador(
-              cliente,
-              lat,
-              lon
-            );
-
-
-            encontrados++;
-
-
-            atualizarStatusCliente(
-              cliente,
-              "🟢 Localizado",
-              "sucesso"
-            );
-
-
-            return;
-
-          }
-
-        }
-
-
-        /*
-          SEGUNDA TENTATIVA
-        */
-
-        cliente.tentativa =
-          2;
-
-
-        atualizarStatusCliente(
-          cliente,
-          "🟠 Tentativa 2 — buscando endereço simplificado...",
-          "segunda-tentativa"
+      let resultado =
+        await consultarNominatim(
+          cliente.endereco
         );
 
 
-        statusDetalhe.textContent =
-          cliente.nome +
-          " — segunda tentativa";
+      /*
+       * Se encontrou, usamos imediatamente.
+       *
+       * Não fazemos uma segunda consulta.
+       */
 
+      if (resultado) {
 
-        /*
-          Respeitamos o intervalo antes
-          da segunda consulta.
-        */
-
-        await esperar(
-          INTERVALO_GEOCODIFICACAO
-        );
-
-
-        const consulta2 =
-          consultaSimplificada(
-            cliente
+        const sucesso =
+          adicionarMarcador(
+            cliente,
+            resultado
           );
 
 
-        const resultados2 =
-          await consultarNominatim(
-            consulta2
-          );
+        if (sucesso) {
 
-
-        resultado =
-          escolherMelhorResultado(
-            resultados2,
-            cliente
-          );
-
-
-        if (resultado) {
-
-          const lat =
-            Number(
-              resultado.lat
-            );
-
-          const lon =
-            Number(
-              resultado.lon
-            );
-
-
-          if (
-            coordenadasValidas(
-              lat,
-              lon
-            )
-          ) {
-
-            cliente.lat =
-              lat;
-
-            cliente.lon =
-              lon;
-
-            cliente.status =
-              "encontrado";
-
-
-            salvarCoordenadaCache(
-              cliente,
-              lat,
-              lon
-            );
-
-
-            adicionarMarcador(
-              cliente,
-              lat,
-              lon
-            );
-
-
-            encontrados++;
-
-
-            atualizarStatusCliente(
-              cliente,
-              "🟢 Localizado — 2ª tentativa",
-              "sucesso"
-            );
-
-
-            return;
-
-          }
-
-        }
-
-
-        /*
-          Não encontrou.
-        */
-
-        cliente.status =
-          "falha";
-
-
-        falhas++;
-
-
-        atualizarStatusCliente(
-          cliente,
-          "🔴 Não localizado após 2 tentativas",
-          "falha"
-        );
-
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao localizar cliente:",
-          cliente,
-          erro
-        );
-
-
-        /*
-          Mesmo se houver erro na primeira
-          tentativa, fazemos a segunda tentativa
-          simplificada.
-        */
-
-        try {
-
-          cliente.tentativa =
-            2;
+          encontrados++;
 
 
           atualizarStatusCliente(
             cliente,
-            "🟠 Tentativa alternativa...",
-            "segunda-tentativa"
+            "✓ Localizado",
+            "sucesso"
           );
 
 
-          await esperar(
-            INTERVALO_GEOCODIFICACAO
-          );
+          atualizarInformacoes();
 
 
-          const consulta2 =
-            consultaSimplificada(
-              cliente
-            );
-
-
-          const resultados2 =
-            await consultarNominatim(
-              consulta2
-            );
-
-
-          const resultado =
-            escolherMelhorResultado(
-              resultados2,
-              cliente
-            );
-
-
-          if (resultado) {
-
-            const lat =
-              Number(
-                resultado.lat
-              );
-
-            const lon =
-              Number(
-                resultado.lon
-              );
-
-
-            if (
-              coordenadasValidas(
-                lat,
-                lon
-              )
-            ) {
-
-              cliente.lat =
-                lat;
-
-              cliente.lon =
-                lon;
-
-              cliente.status =
-                "encontrado";
-
-
-              salvarCoordenadaCache(
-                cliente,
-                lat,
-                lon
-              );
-
-
-              adicionarMarcador(
-                cliente,
-                lat,
-                lon
-              );
-
-
-              encontrados++;
-
-
-              atualizarStatusCliente(
-                cliente,
-                "🟢 Localizado — tentativa alternativa",
-                "sucesso"
-              );
-
-
-              return;
-
-            }
-
-          }
-
-
-        } catch (erro2) {
-
-          console.error(
-            "Segunda tentativa falhou:",
-            erro2
-          );
+          return true;
 
         }
 
-
-        cliente.status =
-          "falha";
+      }
 
 
-        falhas++;
+      /*
+       * Só chegamos aqui se a primeira busca
+       * realmente não conseguiu localizar.
+       */
+
+      atualizarStatusCliente(
+        cliente,
+        "Tentando segunda busca...",
+        "segunda-tentativa"
+      );
 
 
-        atualizarStatusCliente(
-          cliente,
-          "🔴 Não localizado",
-          "falha"
+      await esperar(1500);
+
+
+      resultado =
+        await consultarNominatimFallback(
+          cliente.endereco
         );
 
+
+      if (resultado) {
+
+        const sucesso =
+          adicionarMarcador(
+            cliente,
+            resultado
+          );
+
+
+        if (sucesso) {
+
+          encontrados++;
+
+
+          atualizarStatusCliente(
+            cliente,
+            "✓ Localizado na segunda tentativa",
+            "sucesso"
+          );
+
+
+          atualizarInformacoes();
+
+
+          return true;
+
+        }
+
       }
+
+
+      /*
+       * Não localizado.
+       */
+
+      falhas++;
+
+
+      atualizarStatusCliente(
+        cliente,
+        "✕ Não localizado",
+        "falha"
+      );
+
+
+      atualizarInformacoes();
+
+
+      return false;
 
     }
 
 
-    /* =========================================================
+    /* ============================================================
        LOCALIZAR TODOS
-       ========================================================= */
+       ============================================================ */
 
     async function localizarTodos() {
 
@@ -2090,38 +1501,25 @@
       }
 
 
-      if (
-        clientes.length === 0
-      ) {
+      if (!clientes.length) {
 
         statusTexto.textContent =
           "Nenhum cliente disponível.";
-
-        statusDetalhe.textContent =
-          "Verifique o clientes.js.";
 
         return;
 
       }
 
 
-      processando =
+      processando = true;
+
+
+      botaoLocalizar.disabled =
         true;
 
 
-      btnLocalizar.disabled =
-        true;
-
-
-      btnLocalizar.textContent =
+      botaoLocalizar.textContent =
         "⏳ LOCALIZANDO...";
-
-
-      camadaMarcadores.clearLayers();
-
-
-      limitesMapa =
-        L.latLngBounds([]);
 
 
       encontrados = 0;
@@ -2131,40 +1529,38 @@
       processados = 0;
 
 
-      atualizarResumo();
-
-      atualizarProgresso();
-
-
-      clientes.forEach(
-        cliente => {
-
-          cliente.status =
-            "aguardando";
-
-          cliente.tentativa =
-            0;
-
-          cliente.lat =
-            null;
-
-          cliente.lon =
-            null;
+      limitesMapa =
+        L.latLngBounds([]);
 
 
-          atualizarStatusCliente(
-            cliente,
-            "Aguardando localização...",
-            "aguardando"
-          );
-
-        }
-      );
+      camadaMarcadores.clearLayers();
 
 
-      /*
-        PROCESSAMENTO SEQUENCIAL
-      */
+      clientes.forEach(cliente => {
+
+        cliente.status =
+          "Aguardando localização...";
+
+        cliente.lat = null;
+
+        cliente.lon = null;
+
+      });
+
+
+      atualizarLista();
+
+
+      atualizarInformacoes();
+
+
+      statusTexto.textContent =
+        "Iniciando localização...";
+
+
+      statusDetalhe.textContent =
+        "Consultando os endereços um por um.";
+
 
       for (
         let i = 0;
@@ -2176,6 +1572,13 @@
           clientes[i];
 
 
+        statusTexto.textContent =
+          "Localizando " +
+          (i + 1) +
+          " de " +
+          clientes.length;
+
+
         await localizarCliente(
           cliente
         );
@@ -2184,20 +1587,18 @@
         processados++;
 
 
-        atualizarResumo();
-
-        atualizarProgresso();
+        atualizarInformacoes();
 
 
         /*
-          Pequeno intervalo entre clientes.
-          Além do intervalo das tentativas,
-          isso mantém a interface respirando.
-        */
+         * Intervalo entre clientes.
+         *
+         * Mantemos 1,5 segundo para evitar
+         * excesso de requisições ao Nominatim.
+         */
 
         if (
-          i <
-          clientes.length - 1
+          i < clientes.length - 1
         ) {
 
           await esperar(
@@ -2210,19 +1611,21 @@
 
 
       /*
-        Ajusta o mapa para mostrar
-        todos os pontos encontrados.
-      */
+       * Ajusta o mapa para mostrar todos
+       * os clientes encontrados.
+       */
 
       if (
-        encontrados > 0 &&
         limitesMapa.isValid()
       ) {
 
-        map.fitBounds(
+        mapa.fitBounds(
           limitesMapa,
           {
-            padding: [25, 25]
+            padding: [25, 25],
+
+            maxZoom: 16
+
           }
         );
 
@@ -2230,112 +1633,66 @@
 
 
       statusTexto.textContent =
-        "✅ Localização concluída";
+        "Localização concluída";
 
 
       statusDetalhe.textContent =
         encontrados +
-        " localizados • " +
+        " clientes localizados e " +
         falhas +
-        " não localizados";
+        " não localizados.";
 
 
-      btnLocalizar.disabled =
+      botaoLocalizar.disabled =
         false;
 
 
-      btnLocalizar.textContent =
+      botaoLocalizar.textContent =
         "📍 LOCALIZAR NOVAMENTE";
 
 
-      processando =
-        false;
+      processando = false;
+
+
+      atualizarInformacoes();
 
     }
 
 
-    /* =========================================================
-       BOTÃO
-       ========================================================= */
+    /* ============================================================
+       EVENTO DO BOTÃO
+       ============================================================ */
 
-    btnLocalizar.addEventListener(
+    botaoLocalizar.addEventListener(
       "click",
       localizarTodos
     );
 
 
-    /* =========================================================
+    /* ============================================================
        INICIALIZAÇÃO
-       ========================================================= */
+       ============================================================ */
 
-    try {
-
-      carregarClientes();
+    carregarClientes();
 
 
-      statusTexto.textContent =
-        "Pronto para localizar os clientes.";
+    /*
+     * Corrige o tamanho do mapa depois
+     * que a página termina de carregar.
+     */
 
+    setTimeout(() => {
 
-      statusDetalhe.textContent =
-        clientes.length +
-        " clientes carregados. " +
-        'Clique em "Localizar" para começar.';
+      mapa.invalidateSize();
 
-
-    } catch (erro) {
-
-      console.error(
-        erro
-      );
-
-
-      statusTexto.textContent =
-        "❌ Erro ao carregar clientes";
-
-
-      statusDetalhe.textContent =
-        erro.message;
-
-
-      contadorClientes.textContent =
-        "0";
-
-
-      listaClientes.innerHTML = `
-
-        <div class="cliente-item">
-
-          <div class="cliente-status falha">
-            ${escaparHTML(erro.message)}
-          </div>
-
-        </div>
-
-      `;
-
-    }
-
-
-    /* =========================================================
-       AJUSTE DO MAPA
-       ========================================================= */
-
-    setTimeout(
-      () => {
-
-        map.invalidateSize();
-
-      },
-      300
-    );
+    }, 300);
 
 
     window.addEventListener(
       "resize",
       () => {
 
-        map.invalidateSize();
+        mapa.invalidateSize();
 
       }
     );
@@ -2343,4 +1700,5 @@
   </script>
 
 </body>
+
   </html>
