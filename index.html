@@ -2,27 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <title>Mapa de Entregas</title>
 
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
-  >
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+    integrity="sha256-p4NxAoJBhIINfQ3V6r1mQ0nL7m0eN9M2rY8rYxK8Zs="
+    crossorigin=""
   >
 
   <style>
@@ -34,1101 +22,1092 @@
     body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      min-height: 100%;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f1f3f6;
+      background: #eef1f5;
       color: #172033;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     body {
-      overflow-x: hidden;
+      min-height: 100vh;
     }
 
-    /* =========================================================
+    /* =========================
        CABEÇALHO
-    ========================================================= */
+    ========================= */
 
-    .header {
-      background: #111827;
+    header {
+      background: #101827;
       color: white;
-      padding: 14px 18px 12px;
+      padding: 12px 14px 10px;
     }
 
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .title-area h1 {
+    .title-area {
+      min-width: 0;
+    }
+
+    .title {
       margin: 0;
-      font-size: 27px;
-      line-height: 1.1;
+      font-size: 25px;
+      line-height: 1.05;
+      font-weight: 800;
     }
 
-    .title-area p {
-      margin: 5px 0 0;
-      font-size: 16px;
-      color: #cbd5e1;
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #c8d0dd;
     }
 
     .counter {
       flex-shrink: 0;
-      min-width: 68px;
+      min-width: 74px;
       height: 58px;
-      border-radius: 18px;
-      background: #2563eb;
+      border-radius: 17px;
+      background: #2864e8;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 800;
     }
 
-    /* =========================================================
+    /* =========================
        BOTÕES
-    ========================================================= */
+    ========================= */
 
-    .actions {
+    .toolbar {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-top: 10px;
     }
 
-    .action-btn {
+    .toolbar button {
       border: 0;
-      border-radius: 14px;
-      min-height: 52px;
-      padding: 8px 12px;
-      color: white;
-      font-size: 17px;
+      border-radius: 13px;
+      min-height: 48px;
+      padding: 7px 5px;
+      font-size: 14px;
       font-weight: 800;
+      color: white;
       cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .action-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
     }
 
     .btn-localizar {
-      background: #2563eb;
+      background: #2864e8;
     }
 
     .btn-gps {
-      background: #059669;
+      background: #079c6c;
     }
 
     .btn-falhas {
-      background: #ea8a00;
+      background: #f08a00;
     }
 
     .btn-exportar {
-      background: #475569;
+      background: #526174;
     }
 
-    /* =========================================================
-       MAPA
-    ========================================================= */
-
-    .map-section {
-      width: 100%;
-      background: #d1d5db;
-      padding: 0;
+    .toolbar button:disabled {
+      opacity: 0.55;
     }
 
-    .map-shell {
+    /* =========================
+       ÁREA DO MAPA
+    ========================= */
+
+    .map-wrapper {
       position: relative;
-      width: 100%;
-      height: 31vh;
-      min-height: 230px;
-      max-height: 340px;
-      overflow: hidden;
-      transition: height 0.25s ease;
-      background: #d1d5db;
-    }
-
-    .map-shell.expanded {
-      height: 70vh;
-      min-height: 420px;
-      max-height: none;
+      background: #dce1e8;
     }
 
     #map {
       width: 100%;
-      height: 100%;
-      background: #d1d5db;
+      height: 330px;
+      transition: height 0.25s ease;
+    }
+
+    .map-wrapper.expanded #map {
+      height: calc(100vh - 40px);
     }
 
     .map-toggle {
       position: absolute;
+      z-index: 1000;
       top: 12px;
       right: 12px;
-      z-index: 1000;
 
       border: 0;
       border-radius: 14px;
-
       background: white;
       color: #172033;
 
       padding: 12px 15px;
-
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
 
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.20);
-
-      cursor: pointer;
-      touch-action: manipulation;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.22);
     }
 
-    .leaflet-control-zoom {
-      margin-left: 10px !important;
-      margin-top: 10px !important;
-    }
-
-    .leaflet-control-zoom a {
-      width: 44px !important;
-      height: 44px !important;
-      line-height: 42px !important;
-      font-size: 28px !important;
-    }
-
-    /* =========================================================
+    /* =========================
        PROGRESSO
-    ========================================================= */
+    ========================= */
 
     .progress-section {
       background: white;
-      padding: 12px 18px 14px;
-      border-bottom: 1px solid #d9dee7;
+      padding: 12px 14px;
+      border-bottom: 1px solid #d7dce4;
     }
 
-    .status-main {
-      font-size: 17px;
+    #geocodeStatus {
+      font-size: 16px;
       font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    #geocodeDetail {
+      font-size: 13px;
+      color: #697386;
+      min-height: 18px;
       margin-bottom: 7px;
     }
 
-    .status-detail {
-      font-size: 14px;
-      color: #64748b;
-      min-height: 18px;
-      margin-bottom: 8px;
-    }
-
-    .progress {
+    .progress-bg {
       width: 100%;
-      height: 10px;
-      background: #e5e7eb;
-      border-radius: 999px;
+      height: 9px;
+      border-radius: 20px;
+      background: #e3e7ee;
       overflow: hidden;
     }
 
-    .progress-bar {
+    #progressBar {
       width: 0%;
       height: 100%;
-      background: #2563eb;
-      border-radius: 999px;
+      background: #2864e8;
       transition: width 0.2s ease;
     }
 
-    /* =========================================================
+    /* =========================
        LISTA
-    ========================================================= */
+    ========================= */
 
-    .list-section {
-      background: #f1f3f6;
-      padding-bottom: 30px;
-    }
-
-    .list-title {
+    .list-header {
       background: white;
-      padding: 14px 18px;
-      border-bottom: 1px solid #d9dee7;
-      font-size: 20px;
-      font-weight: 800;
+      padding: 14px;
+      border-bottom: 1px solid #d7dce4;
     }
 
-    .delivery-list {
-      padding: 10px 10px 30px;
+    .list-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    #nearbyList {
+      padding: 10px;
     }
 
     .delivery-card {
       background: white;
-      border-radius: 17px;
-      margin-bottom: 11px;
-      padding: 15px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-      border-left: 6px solid #2563eb;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      padding: 13px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 5px solid #2864e8;
     }
 
-    .delivery-card.status-carta {
-      border-left-color: #059669;
-    }
-
-    .delivery-card.status-nao-localizado {
-      border-left-color: #f59e0b;
-    }
-
-    .delivery-card.status-risco {
-      border-left-color: #dc2626;
-    }
-
-    .delivery-head {
+    .delivery-top {
       display: flex;
-      justify-content: space-between;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 10px;
     }
 
     .delivery-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
     }
 
     .distance {
-      color: #2563eb;
-      font-size: 18px;
+      color: #2864e8;
       font-weight: 800;
       white-space: nowrap;
     }
 
-    .delivery-address {
-      margin-top: 9px;
-      color: #4b5563;
-      font-size: 16px;
+    .address {
+      margin-top: 8px;
+      color: #4d5869;
+      font-size: 14px;
       line-height: 1.4;
     }
 
-    .corrected-neighborhood {
-      margin-top: 7px;
-      color: #059669;
-      font-size: 14px;
+    .corrected-address {
+      margin-top: 6px;
+      color: #07865e;
+      font-size: 13px;
       font-weight: 700;
     }
 
-    .delivery-buttons {
+    .card-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      margin-top: 11px;
     }
 
-    .card-btn {
+    .card-buttons button {
       border: 0;
-      border-radius: 13px;
-      min-height: 48px;
-      color: white;
-      font-size: 16px;
+      border-radius: 11px;
+      padding: 11px 8px;
+      font-size: 14px;
       font-weight: 800;
-      cursor: pointer;
-      touch-action: manipulation;
+      color: white;
     }
 
     .navigate-btn {
-      background: #2563eb;
+      background: #2864e8;
     }
 
     .status-btn {
-      background: #6b7280;
+      background: #687384;
     }
 
     .empty {
-      padding: 30px 18px;
-      text-align: center;
-      color: #64748b;
-      font-size: 17px;
       background: white;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      color: #687384;
     }
 
-    /* =========================================================
+    /* =========================
        MODAL
-    ========================================================= */
+    ========================= */
 
-    .modal-backdrop {
+    .modal {
       display: none;
-
       position: fixed;
       inset: 0;
-
       z-index: 5000;
-
-      background: rgba(15, 23, 42, 0.58);
-
+      background: rgba(0,0,0,0.55);
       align-items: flex-end;
       justify-content: center;
     }
 
-    .modal-backdrop.show {
+    .modal.show {
       display: flex;
     }
 
-    .modal {
+    .modal-box {
       width: 100%;
-      max-width: 560px;
-
+      max-width: 600px;
       background: white;
-
-      border-radius: 22px 22px 0 0;
-
-      padding: 20px;
-
-      box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.25);
+      border-radius: 20px 20px 0 0;
+      padding: 18px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
-    .modal h2 {
-      margin: 0 0 8px;
-      font-size: 22px;
+    .modal-box h3 {
+      margin: 0 0 6px;
+      font-size: 21px;
     }
 
     .modal-address {
-      color: #64748b;
-      font-size: 15px;
+      color: #687384;
+      font-size: 14px;
       line-height: 1.4;
       margin-bottom: 15px;
     }
 
     .status-options {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px;
+      gap: 8px;
     }
 
-    .status-option {
+    .status-options button {
       border: 0;
-      border-radius: 13px;
-      min-height: 52px;
+      border-radius: 12px;
+      padding: 14px;
       color: white;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
-      cursor: pointer;
     }
 
-    .status-carta-btn {
-      background: #059669;
+    .status-carta {
+      background: #079c6c;
     }
 
-    .status-nao-btn {
-      background: #f59e0b;
+    .status-nao {
+      background: #f08a00;
     }
 
-    .status-risco-btn {
-      background: #dc2626;
+    .status-risco {
+      background: #d9363e;
+    }
+
+    .status-pendente {
+      background: #2864e8;
     }
 
     .close-modal {
       margin-top: 10px;
       width: 100%;
-      min-height: 48px;
       border: 0;
-      border-radius: 13px;
-      background: #e5e7eb;
-      font-size: 16px;
+      border-radius: 12px;
+      padding: 13px;
+      background: #e5e8ed;
       font-weight: 800;
+      font-size: 15px;
     }
 
-    /* =========================================================
-       CLUSTER
-    ========================================================= */
+    /* =========================
+       MOBILE
+    ========================= */
 
-    .marker-cluster-small {
-      background: rgba(37, 99, 235, 0.35);
-    }
+    @media (max-width: 520px) {
 
-    .marker-cluster-small div {
-      background: #2563eb;
-      color: white;
-      font-weight: 800;
-    }
-
-    .marker-cluster-medium {
-      background: rgba(234, 138, 0, 0.35);
-    }
-
-    .marker-cluster-medium div {
-      background: #ea8a00;
-      color: white;
-      font-weight: 800;
-    }
-
-    .marker-cluster-large {
-      background: rgba(220, 38, 38, 0.35);
-    }
-
-    .marker-cluster-large div {
-      background: #dc2626;
-      color: white;
-      font-weight: 800;
-    }
-
-    /* =========================================================
-       DESKTOP
-    ========================================================= */
-
-    @media (min-width: 800px) {
-      .header {
-        padding-left: 28px;
-        padding-right: 28px;
+      header {
+        padding: 10px 12px 9px;
       }
 
-      .actions {
-        grid-template-columns: repeat(4, 1fr);
+      .title {
+        font-size: 22px;
       }
 
-      .delivery-list {
-        max-width: 900px;
-        margin: auto;
+      .subtitle {
+        font-size: 12px;
+      }
+
+      .counter {
+        min-width: 67px;
+        height: 52px;
+        font-size: 19px;
+      }
+
+      .toolbar {
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .toolbar button {
+        min-height: 45px;
+        font-size: 13px;
+        border-radius: 11px;
+      }
+
+      #map {
+        height: 310px;
+      }
+
+      .map-wrapper.expanded #map {
+        height: calc(100vh - 30px);
+      }
+
+      .map-toggle {
+        padding: 10px 12px;
+        font-size: 14px;
       }
     }
+
   </style>
 </head>
 
 <body>
 
-  <!-- =======================================================
-       CABEÇALHO
-  ======================================================== -->
+<header>
 
-  <header class="header">
+  <div class="header-top">
 
-    <div class="header-top">
-
-      <div class="title-area">
-        <h1>📦 Mapa de Entregas</h1>
-        <p>Localização inteligente dos clientes</p>
-      </div>
-
-      <div class="counter" id="counter">
-        0/0
-      </div>
-
+    <div class="title-area">
+      <h1 class="title">📦 Mapa de Entregas</h1>
+      <div class="subtitle">Localização inteligente dos clientes</div>
     </div>
 
-    <div class="actions">
-
-      <button
-        class="action-btn btn-localizar"
-        id="geocodeBtn"
-      >
-        🗺️ Localizar
-      </button>
-
-      <button
-        class="action-btn btn-gps"
-        id="gpsBtn"
-      >
-        📍 GPS
-      </button>
-
-      <button
-        class="action-btn btn-falhas"
-        id="retryBtn"
-      >
-        🔄 Falhas
-      </button>
-
-      <button
-        class="action-btn btn-exportar"
-        id="exportBtn"
-      >
-        📤 Exportar
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- =======================================================
-       MAPA
-  ======================================================== -->
-
-  <section class="map-section">
-
-    <div
-      class="map-shell"
-      id="mapShell"
-    >
-
-      <div id="map"></div>
-
-      <button
-        class="map-toggle"
-        id="mapToggle"
-      >
-        ⛶ Expandir mapa
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <!-- =======================================================
-       PROGRESSO
-  ======================================================== -->
-
-  <section class="progress-section">
-
-    <div
-      class="status-main"
-      id="geocodeStatus"
-    >
-      Preparando...
-    </div>
-
-    <div
-      class="status-detail"
-      id="geocodeDetail"
-    >
-      Aguarde.
-    </div>
-
-    <div class="progress">
-      <div
-        class="progress-bar"
-        id="progressBar"
-      ></div>
-    </div>
-
-  </section>
-
-
-  <!-- =======================================================
-       LISTA
-  ======================================================== -->
-
-  <section class="list-section">
-
-    <div
-      class="list-title"
-      id="listTitle"
-    >
-      📍 Entregas pendentes — 0 clientes
-    </div>
-
-    <div
-      class="delivery-list"
-      id="deliveryList"
-    >
-    </div>
-
-  </section>
-
-
-  <!-- =======================================================
-       MODAL DE STATUS
-  ======================================================== -->
-
-  <div
-    class="modal-backdrop"
-    id="modalBackdrop"
-  >
-
-    <div class="modal">
-
-      <h2 id="modalTitle">
-        Status da entrega
-      </h2>
-
-      <div
-        class="modal-address"
-        id="modalAddress"
-      >
-      </div>
-
-      <div class="status-options">
-
-        <button
-          class="status-option status-carta-btn"
-          data-status="CARTA"
-        >
-          ✉️ Carta
-        </button>
-
-        <button
-          class="status-option status-nao-btn"
-          data-status="NAO_LOCALIZADO"
-        >
-          🔎 Não localizado
-        </button>
-
-        <button
-          class="status-option status-risco-btn"
-          data-status="ZONA_RISCO"
-        >
-          ⚠️ Zona de risco
-        </button>
-
-      </div>
-
-      <button
-        class="close-modal"
-        id="closeModal"
-      >
-        Fechar
-      </button>
-
+    <div class="counter" id="counter">
+      0/0
     </div>
 
   </div>
 
+  <div class="toolbar">
 
-  <!-- =======================================================
-       SCRIPTS
-  ======================================================== -->
+    <button
+      id="geocodeBtn"
+      class="btn-localizar">
+      🗺️ Localizar
+    </button>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <button
+      id="gpsBtn"
+      class="btn-gps">
+      📍 GPS
+    </button>
 
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <button
+      id="retryBtn"
+      class="btn-falhas">
+      🔄 Falhas
+    </button>
 
-  <script src="./clientes.js"></script>
+    <button
+      id="exportBtn"
+      class="btn-exportar">
+      📤 Exportar
+    </button>
 
+  </div>
 
-  <script>
-
-    /* =========================================================
-       CONFIGURAÇÃO
-    ========================================================= */
-
-    const STORAGE_KEY = "mapa_entregas_clientes_v5";
-
-    const OLD_STORAGE_KEYS = [
-      "mapa_entregas_clientes_v4",
-      "mapa_entregas_clientes_v3",
-      "mapa_entregas_clientes_v2"
-    ];
-
-    const CACHE_KEY = "mapa_entregas_geocache_v5";
-
-    const DEFAULT_CENTER = [
-      -29.1678,
-      -51.1794
-    ];
-
-    const NOMINATIM_DELAY = 1200;
-
-    const NOMINATIM_TIMEOUT = 8000;
+</header>
 
 
-    /* =========================================================
-       ELEMENTOS
-    ========================================================= */
+<div class="map-wrapper" id="mapWrapper">
 
-    const counterEl =
-      document.getElementById("counter");
+  <button
+    id="mapToggle"
+    class="map-toggle">
+    ⛶ Expandir mapa
+  </button>
 
-    const geocodeBtn =
-      document.getElementById("geocodeBtn");
+  <div id="map"></div>
 
-    const gpsBtn =
-      document.getElementById("gpsBtn");
-
-    const retryBtn =
-      document.getElementById("retryBtn");
-
-    const exportBtn =
-      document.getElementById("exportBtn");
-
-    const mapShell =
-      document.getElementById("mapShell");
-
-    const mapToggle =
-      document.getElementById("mapToggle");
-
-    const geocodeStatus =
-      document.getElementById("geocodeStatus");
-
-    const geocodeDetail =
-      document.getElementById("geocodeDetail");
-
-    const progressBar =
-      document.getElementById("progressBar");
-
-    const listTitle =
-      document.getElementById("listTitle");
-
-    const deliveryList =
-      document.getElementById("deliveryList");
-
-    const modalBackdrop =
-      document.getElementById("modalBackdrop");
-
-    const modalTitle =
-      document.getElementById("modalTitle");
-
-    const modalAddress =
-      document.getElementById("modalAddress");
-
-    const closeModal =
-      document.getElementById("closeModal");
+</div>
 
 
-    /* =========================================================
-       DADOS
-    ========================================================= */
+<section class="progress-section">
 
-    const CLIENTES_ORIGINAIS =
-      Array.isArray(window.CLIENTES)
-        ? window.CLIENTES
-        : [];
+  <div id="geocodeStatus">
+    Preparando...
+  </div>
 
+  <div id="geocodeDetail">
+    Carregando clientes...
+  </div>
 
-    let deliveries = [];
+  <div class="progress-bg">
+    <div id="progressBar"></div>
+  </div>
 
-    let geocache = {};
-
-    let userPosition = null;
-
-    let currentModalId = null;
-
-    let lastNominatimRequest = 0;
+</section>
 
 
-    /* =========================================================
-       FUNÇÕES BÁSICAS
-    ========================================================= */
+<section class="list-header">
 
-    function normalize(value) {
+  <h2 id="listTitle">
+    📍 Entregas pendentes — 0 clientes
+  </h2>
 
-      return String(value || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/\s+/g, " ")
-        .trim();
+</section>
+
+
+<div id="nearbyList"></div>
+
+
+<!-- =========================
+     MODAL DE STATUS
+========================= -->
+
+<div
+  id="modal"
+  class="modal">
+
+  <div class="modal-box">
+
+    <h3 id="modalTitle">
+      Entrega
+    </h3>
+
+    <div
+      id="modalAddress"
+      class="modal-address">
+    </div>
+
+    <div class="status-options">
+
+      <button
+        class="status-carta"
+        data-status="CARTA">
+        ✉️ Carta entregue
+      </button>
+
+      <button
+        class="status-nao"
+        data-status="NAO_LOCALIZADO">
+        ❌ Não localizado
+      </button>
+
+      <button
+        class="status-risco"
+        data-status="ZONA_DE_RISCO">
+        ⚠️ Zona de risco
+      </button>
+
+      <button
+        class="status-pendente"
+        data-status="PENDENTE">
+        🔵 Voltar para pendente
+      </button>
+
+    </div>
+
+    <button
+      id="closeModal"
+      class="close-modal">
+      Fechar
+    </button>
+
+  </div>
+
+</div>
+
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin="">
+</script>
+
+
+<!--
+  IMPORTANTE:
+  O clientes.js precisa vir ANTES do código abaixo.
+-->
+<script src="./clientes.js?v=20261006"></script>
+
+
+<script>
+
+  /* ============================================================
+     CLIENTES
+     ============================================================ */
+
+  /*
+    CORREÇÃO IMPORTANTE:
+
+    Não usamos window.CLIENTES.
+
+    Seu clientes.js possui:
+
+      const CLIENTES = [...]
+
+    Então usamos typeof CLIENTES.
+  */
+
+  const CLIENTES_CARREGADOS =
+    typeof CLIENTES !== "undefined" && Array.isArray(CLIENTES)
+      ? CLIENTES
+      : [];
+
+
+  /* ============================================================
+     CONFIGURAÇÕES
+     ============================================================ */
+
+  const STORAGE_KEY =
+    "mapa_entregas_clientes_v4";
+
+  const OLD_STORAGE_KEYS = [
+    "mapa_entregas_clientes_v3",
+    "mapa_entregas_clientes_v2"
+  ];
+
+  const CACHE_KEY =
+    "mapa_entregas_geocache_v4";
+
+  const DEFAULT_CENTER = [
+    -29.1678,
+    -51.1794
+  ];
+
+
+  /* ============================================================
+     VARIÁVEIS
+     ============================================================ */
+
+  let deliveries = [];
+
+  let geocache = {};
+
+  let userPosition = null;
+
+  let userMarker = null;
+
+  let currentModalId = null;
+
+  let markerById = {};
+
+  let mapExpanded = false;
+
+  let lastNominatimRequest = 0;
+
+
+  /* ============================================================
+     ELEMENTOS
+     ============================================================ */
+
+  const counter =
+    document.getElementById("counter");
+
+  const geocodeBtn =
+    document.getElementById("geocodeBtn");
+
+  const retryBtn =
+    document.getElementById("retryBtn");
+
+  const gpsBtn =
+    document.getElementById("gpsBtn");
+
+  const exportBtn =
+    document.getElementById("exportBtn");
+
+  const geocodeStatus =
+    document.getElementById("geocodeStatus");
+
+  const geocodeDetail =
+    document.getElementById("geocodeDetail");
+
+  const progressBar =
+    document.getElementById("progressBar");
+
+  const listTitle =
+    document.getElementById("listTitle");
+
+  const nearbyList =
+    document.getElementById("nearbyList");
+
+  const modal =
+    document.getElementById("modal");
+
+  const modalTitle =
+    document.getElementById("modalTitle");
+
+  const modalAddress =
+    document.getElementById("modalAddress");
+
+  const closeModal =
+    document.getElementById("closeModal");
+
+  const mapWrapper =
+    document.getElementById("mapWrapper");
+
+  const mapToggle =
+    document.getElementById("mapToggle");
+
+
+  /* ============================================================
+     MAPA
+     ============================================================ */
+
+  const map = L.map("map", {
+    zoomControl: true
+  }).setView(
+    DEFAULT_CENTER,
+    12
+  );
+
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution:
+        '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(map);
+
+
+  const markerLayer =
+    L.layerGroup().addTo(map);
+
+
+  /* ============================================================
+     FUNÇÕES BÁSICAS
+     ============================================================ */
+
+  function wait(ms) {
+    return new Promise(resolve =>
+      setTimeout(resolve, ms)
+    );
+  }
+
+
+  function normalizeText(value) {
+
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function validCoordinates(lat, lon) {
+
+    return Number.isFinite(
+      Number(lat)
+    ) &&
+    Number.isFinite(
+      Number(lon)
+    );
+
+  }
+
+
+  function distanceKm(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+  ) {
+
+    const R = 6371;
+
+    const dLat =
+      (lat2 - lat1) *
+      Math.PI / 180;
+
+    const dLon =
+      (lon2 - lon1) *
+      Math.PI / 180;
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+
+    return R *
+      2 *
+      Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+      );
+
+  }
+
+
+  /* ============================================================
+     ENDEREÇO
+     ============================================================ */
+
+  function getAddress(cliente) {
+
+    if (cliente.address) {
+      return cliente.address;
+    }
+
+    if (cliente.endereco) {
+      return cliente.endereco;
+    }
+
+    const parts = [];
+
+    if (cliente.rua) {
+      parts.push(cliente.rua);
+    }
+
+    if (cliente.numero) {
+      parts.push(cliente.numero);
+    }
+
+    if (cliente.bairro) {
+      parts.push(cliente.bairro);
+    }
+
+    if (cliente.cidade) {
+      parts.push(cliente.cidade);
+    }
+
+    if (cliente.uf) {
+      parts.push(cliente.uf);
+    }
+
+    return parts.join(", ");
+
+  }
+
+
+  function getAddressParts(cliente) {
+
+    const address =
+      getAddress(cliente);
+
+    const raw =
+      address
+        .split(",")
+        .map(x => x.trim())
+        .filter(Boolean);
+
+
+    let rua =
+      cliente.rua ||
+      raw[0] ||
+      "";
+
+    let numero =
+      cliente.numero ||
+      "";
+
+    let bairro =
+      cliente.bairro ||
+      "";
+
+
+    if (!numero && raw[1]) {
+
+      const match =
+        raw[1].match(/\d+[A-Za-z]?/);
+
+      if (match) {
+        numero = match[0];
+      }
 
     }
 
 
-    function escapeHtml(value) {
-
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
+    if (!bairro && raw[2]) {
+      bairro = raw[2];
     }
 
 
-    function validCoordinate(lat, lon) {
+    return {
+      rua,
+      numero: String(numero),
+      bairro
+    };
 
-      return Number.isFinite(Number(lat)) &&
-             Number.isFinite(Number(lon));
+  }
+
+
+  /* ============================================================
+     STORAGE
+     ============================================================ */
+
+  function readJson(key) {
+
+    try {
+
+      const raw =
+        localStorage.getItem(key);
+
+      if (!raw) {
+        return null;
+      }
+
+      return JSON.parse(raw);
+
+    } catch (e) {
+
+      return null;
 
     }
 
+  }
 
-    function distanceKm(
-      lat1,
-      lon1,
-      lat2,
-      lon2
-    ) {
 
-      const R = 6371;
+  function saveData() {
 
-      const dLat =
-        (lat2 - lat1) *
-        Math.PI /
-        180;
+    try {
 
-      const dLon =
-        (lon2 - lon1) *
-        Math.PI /
-        180;
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(deliveries)
+      );
 
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) ** 2;
+    } catch (e) {
 
-      return (
-        R *
-        2 *
-        Math.atan2(
-          Math.sqrt(a),
-          Math.sqrt(1 - a)
-        )
+      console.warn(
+        "Não foi possível salvar:",
+        e
       );
 
     }
 
+  }
 
-    function wait(ms) {
 
-      return new Promise(resolve => {
-        setTimeout(resolve, ms);
+  function saveCache() {
+
+    try {
+
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify(geocache)
+      );
+
+    } catch (e) {
+
+      console.warn(
+        "Não foi possível salvar cache:",
+        e
+      );
+
+    }
+
+  }
+
+
+  /* ============================================================
+     CARREGAR CLIENTES
+     ============================================================ */
+
+  function loadData() {
+
+    let saved =
+      readJson(STORAGE_KEY);
+
+
+    if (!Array.isArray(saved)) {
+
+      for (
+        const oldKey of OLD_STORAGE_KEYS
+      ) {
+
+        const oldData =
+          readJson(oldKey);
+
+        if (Array.isArray(oldData)) {
+
+          saved = oldData;
+
+          break;
+
+        }
+
+      }
+
+    }
+
+
+    const savedById = {};
+
+    if (Array.isArray(saved)) {
+
+      saved.forEach(item => {
+
+        if (
+          item &&
+          item.id !== undefined
+        ) {
+
+          savedById[
+            String(item.id)
+          ] = item;
+
+        }
+
       });
 
     }
 
 
-    /* =========================================================
-       ENDEREÇO
-    ========================================================= */
-
-    function getAddress(cliente) {
-
-      if (cliente.address) {
-        return cliente.address;
-      }
-
-      if (cliente.endereco) {
-        return cliente.endereco;
-      }
-
-      const parts = [];
-
-      if (cliente.rua) {
-        parts.push(cliente.rua);
-      }
-
-      if (cliente.numero) {
-        parts.push(cliente.numero);
-      }
-
-      if (cliente.bairro) {
-        parts.push(cliente.bairro);
-      }
-
-      if (cliente.cidade) {
-        parts.push(cliente.cidade);
-      }
-
-      if (cliente.uf) {
-        parts.push(cliente.uf);
-      }
-
-      return parts.join(", ");
-
-    }
-
-
-    function parseAddress(address) {
-
-      const parts =
-        String(address || "")
-          .split(",")
-          .map(item => item.trim())
-          .filter(Boolean);
-
-      let street = parts[0] || "";
-
-      let number = "";
-
-      let neighborhood = "";
-
-      const numberMatch =
-        String(parts[1] || "")
-          .match(/\d+[A-Za-z]?/);
-
-      if (numberMatch) {
-        number = numberMatch[0];
-      }
-
-      if (parts.length >= 3) {
-        neighborhood = parts[2];
-      }
-
-      return {
-        street,
-        number,
-        neighborhood
-      };
-
-    }
-
-
-    /* =========================================================
-       STORAGE
-    ========================================================= */
-
-    function readJson(key) {
-
-      try {
-
-        const value =
-          localStorage.getItem(key);
-
-        if (!value) {
-          return null;
-        }
-
-        return JSON.parse(value);
-
-      } catch (error) {
-
-        console.warn(
-          "Erro lendo storage:",
-          key,
-          error
-        );
-
-        return null;
-
-      }
-
-    }
-
-
-    function saveData() {
-
-      try {
-
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify(deliveries)
-        );
-
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify(geocache)
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "Não foi possível salvar:",
-          error
-        );
-
-      }
-
-    }
-
-
-    function loadData() {
-
-      let saved =
-        readJson(STORAGE_KEY);
-
-      if (!Array.isArray(saved)) {
-
-        for (const oldKey of OLD_STORAGE_KEYS) {
-
-          const old =
-            readJson(oldKey);
-
-          if (Array.isArray(old)) {
-
-            saved = old;
-
-            break;
-
-          }
-
-        }
-
-      }
-
-      const savedById =
-        new Map();
-
-      if (Array.isArray(saved)) {
-
-        saved.forEach(item => {
-
-          if (item && item.id != null) {
-
-            savedById.set(
-              Number(item.id),
-              item
-            );
-
-          }
-
-        });
-
-      }
-
-
-      const cache =
-        readJson(CACHE_KEY);
-
-      if (cache && typeof cache === "object") {
-
-        geocache = cache;
-
-      }
-
-
-      deliveries =
-        CLIENTES_ORIGINAIS.map(cliente => {
+    deliveries =
+      CLIENTES_CARREGADOS.map(
+        cliente => {
 
           const id =
-            Number(cliente.id);
+            cliente.id;
 
           const old =
-            savedById.get(id) || {};
+            savedById[
+              String(id)
+            ] || {};
+
 
           const address =
             getAddress(cliente);
 
-          return {
+
+          const item = {
+
+            ...old,
 
             id,
 
             label:
+              cliente.label ||
               old.label ||
-              cliente.nome ||
-              ("Entrega " + id),
+              "Entrega " + id,
 
             address,
 
+            endereco:
+              cliente.endereco ||
+              old.endereco ||
+              address,
+
             status:
               old.status ||
+              cliente.status ||
               "PENDENTE",
 
             lat:
-              validCoordinate(
-                old.lat,
-                old.lon
+              validCoordinates(
+                cliente.lat,
+                cliente.lon
               )
-                ? Number(old.lat)
-                : validCoordinate(
-                    cliente.lat,
-                    cliente.lon
+                ? Number(cliente.lat)
+                : validCoordinates(
+                    old.lat,
+                    old.lon
                   )
-                  ? Number(cliente.lat)
-                  : null,
+                    ? Number(old.lat)
+                    : null,
 
             lon:
-              validCoordinate(
-                old.lat,
-                old.lon
+              validCoordinates(
+                cliente.lat,
+                cliente.lon
               )
-                ? Number(old.lon)
-                : validCoordinate(
-                    cliente.lat,
-                    cliente.lon
+                ? Number(cliente.lon)
+                : validCoordinates(
+                    old.lat,
+                    old.lon
                   )
-                  ? Number(cliente.lon)
-                  : null,
+                    ? Number(old.lon)
+                    : null,
 
             updatedAt:
-              old.updatedAt || null,
+              old.updatedAt ||
+              null,
 
             correctedNeighborhood:
-              old.correctedNeighborhood || "",
-
-            geocodeSource:
-              old.geocodeSource || "",
-
-            geocodeError:
-              old.geocodeError || "",
+              old.correctedNeighborhood ||
+              "",
 
             geocodeDisplayName:
-              old.geocodeDisplayName || "",
+              old.geocodeDisplayName ||
+              "",
+
+            geocodeSource:
+              old.geocodeSource ||
+              "",
+
+            geocodeError:
+              old.geocodeError ||
+              "",
 
             actions:
               Array.isArray(old.actions)
@@ -1137,669 +1116,555 @@
 
           };
 
-        });
 
-
-      /*
-       * Recupera coordenadas do cache.
-       */
-
-      deliveries.forEach(d => {
-
-        if (
-          !validCoordinate(
-            d.lat,
-            d.lon
-          )
-        ) {
-
-          const cacheKey =
-            normalize(d.address);
-
-          const cached =
-            geocache[cacheKey];
-
-          if (
-            cached &&
-            validCoordinate(
-              cached.lat,
-              cached.lon
-            )
-          ) {
-
-            d.lat =
-              Number(cached.lat);
-
-            d.lon =
-              Number(cached.lon);
-
-            d.correctedNeighborhood =
-              cached.correctedNeighborhood || "";
-
-            d.geocodeSource =
-              cached.geocodeSource || "cache";
-
-            d.geocodeDisplayName =
-              cached.displayName || "";
-
-          }
+          return item;
 
         }
-
-      });
-
-
-      saveData();
-
-    }
-
-
-    /* =========================================================
-       MAPA
-    ========================================================= */
-
-    const map =
-      L.map("map", {
-        zoomControl: true,
-        preferCanvas: true
-      }).setView(
-        DEFAULT_CENTER,
-        12
       );
 
 
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        maxZoom: 19,
-        attribution:
-          "&copy; OpenStreetMap contributors"
-      }
-    ).addTo(map);
+    geocache =
+      readJson(CACHE_KEY) || {};
 
 
-    let markerLayer;
+    /*
+      Tenta recuperar coordenadas
+      existentes no cache pelo endereço.
+    */
 
-    if (
-      typeof L.markerClusterGroup === "function"
-    ) {
+    deliveries.forEach(d => {
 
-      markerLayer =
-        L.markerClusterGroup({
+      if (
+        !validCoordinates(
+          d.lat,
+          d.lon
+        )
+      ) {
 
-          maxClusterRadius: 45,
-
-          disableClusteringAtZoom: 16,
-
-          spiderfyOnMaxZoom: true,
-
-          showCoverageOnHover: false,
-
-          zoomToBoundsOnClick: true
-
-        });
-
-    } else {
-
-      markerLayer =
-        L.layerGroup();
-
-    }
-
-
-    map.addLayer(markerLayer);
-
-
-    const markerById =
-      new Map();
-
-
-    /* =========================================================
-       MAPA COMPACTO / EXPANDIDO
-    ========================================================= */
-
-    function refreshMapSize() {
-
-      setTimeout(() => {
-
-        map.invalidateSize({
-          pan: false
-        });
-
-      }, 50);
-
-
-      setTimeout(() => {
-
-        map.invalidateSize({
-          pan: false
-        });
-
-      }, 350);
-
-    }
-
-
-    mapToggle.addEventListener(
-      "click",
-      () => {
-
-        const expanded =
-          mapShell.classList.toggle(
-            "expanded"
+        const key =
+          normalizeText(
+            d.address
           );
 
-        mapToggle.textContent =
-          expanded
-            ? "↙ Fechar mapa"
-            : "⛶ Expandir mapa";
+        const cached =
+          geocache[key];
 
-        refreshMapSize();
+        if (
+          cached &&
+          validCoordinates(
+            cached.lat,
+            cached.lon
+          )
+        ) {
+
+          d.lat =
+            Number(cached.lat);
+
+          d.lon =
+            Number(cached.lon);
+
+          d.correctedNeighborhood =
+            cached.correctedNeighborhood ||
+            "";
+
+          d.geocodeDisplayName =
+            cached.displayName ||
+            "";
+
+          d.geocodeSource =
+            cached.source ||
+            "cache";
+
+        }
 
       }
-    );
+
+    });
 
 
-    window.addEventListener(
-      "resize",
-      refreshMapSize
-    );
+    saveData();
+
+    renderAll();
+
+  }
 
 
-    window.addEventListener(
-      "orientationchange",
-      () => {
+  /* ============================================================
+     RENDERIZAÇÃO
+     ============================================================ */
 
-        setTimeout(
-          refreshMapSize,
-          300
-        );
+  function renderAll() {
 
-      }
-    );
+    renderSummary();
+
+    renderMarkers();
+
+    renderNearby();
+
+  }
 
 
-    /* =========================================================
-       MARCADORES
-    ========================================================= */
+  function renderSummary() {
 
-    function markerColor(status) {
+    const total =
+      deliveries.length;
 
-      if (status === "CARTA") {
-        return "#059669";
-      }
+    const pending =
+      deliveries.filter(
+        d => d.status === "PENDENTE"
+      ).length;
 
-      if (status === "NAO_LOCALIZADO") {
-        return "#f59e0b";
-      }
 
-      if (status === "ZONA_RISCO") {
-        return "#dc2626";
-      }
+    counter.textContent =
+      `${pending}/${total}`;
 
-      return "#2563eb";
+
+    listTitle.textContent =
+      `📍 Entregas pendentes — ${pending} clientes`;
+
+
+    if (total === 0) {
+
+      geocodeStatus.textContent =
+        "Nenhum cliente carregado.";
+
+      geocodeDetail.textContent =
+        "Verifique se o clientes.js está publicado corretamente.";
+
+      progressBar.style.width =
+        "0%";
+
+      return;
 
     }
 
 
-    function renderMarkers() {
+    if (pending === 0) {
 
-      markerLayer.clearLayers();
+      geocodeStatus.textContent =
+        "Todas as entregas pendentes já possuem localização.";
 
-      markerById.clear();
+      geocodeDetail.textContent =
+        "Nenhuma nova localização necessária.";
+
+      progressBar.style.width =
+        "100%";
+
+    }
+
+  }
 
 
-      deliveries.forEach(d => {
+  /* ============================================================
+     MARCADORES
+     ============================================================ */
 
-        if (
-          !validCoordinate(
+  function markerColor(status) {
+
+    if (status === "CARTA") {
+      return "#079c6c";
+    }
+
+    if (status === "NAO_LOCALIZADO") {
+      return "#f08a00";
+    }
+
+    if (status === "ZONA_DE_RISCO") {
+      return "#d9363e";
+    }
+
+    return "#2864e8";
+
+  }
+
+
+  function renderMarkers() {
+
+    markerLayer.clearLayers();
+
+    markerById = {};
+
+
+    deliveries.forEach(d => {
+
+      if (
+        !validCoordinates(
+          d.lat,
+          d.lon
+        )
+      ) {
+        return;
+      }
+
+
+      const marker =
+        L.circleMarker(
+          [
+            Number(d.lat),
+            Number(d.lon)
+          ],
+          {
+            radius: 9,
+            color: "#ffffff",
+            weight: 3,
+            fillColor:
+              markerColor(d.status),
+            fillOpacity: 1
+          }
+        );
+
+
+      const corrected =
+        d.correctedNeighborhood
+          ? `<br><b>Bairro encontrado:</b> ${escapeHtml(d.correctedNeighborhood)}`
+          : "";
+
+
+      marker.bindPopup(`
+        <div style="min-width:220px">
+          <b>Entrega ${escapeHtml(d.id)}</b><br>
+          ${escapeHtml(d.address)}
+          ${corrected}
+          <br><br>
+          <button
+            onclick="openStatus(${Number(d.id)})"
+            style="
+              border:0;
+              border-radius:8px;
+              padding:9px 12px;
+              background:#2864e8;
+              color:white;
+              font-weight:700;
+            ">
+            Status
+          </button>
+        </div>
+      `);
+
+
+      marker.addTo(markerLayer);
+
+      markerById[
+        String(d.id)
+      ] = marker;
+
+    });
+
+  }
+
+
+  /* ============================================================
+     LISTA
+     ============================================================ */
+
+  function renderNearby() {
+
+    nearbyList.innerHTML = "";
+
+
+    const pending =
+      deliveries.filter(
+        d =>
+          d.status === "PENDENTE" &&
+          validCoordinates(
             d.lat,
             d.lon
           )
-        ) {
-          return;
-        }
+      );
 
 
-        const color =
-          markerColor(d.status);
+    if (pending.length === 0) {
+
+      const withoutLocation =
+        deliveries.filter(
+          d =>
+            d.status === "PENDENTE" &&
+            !validCoordinates(
+              d.lat,
+              d.lon
+            )
+        );
 
 
-        const marker =
-          L.circleMarker(
-            [
+      if (
+        withoutLocation.length > 0
+      ) {
+
+        nearbyList.innerHTML = `
+          <div class="empty">
+            <b>${withoutLocation.length}</b>
+            clientes ainda precisam ser localizados.
+            <br><br>
+            Toque em <b>🗺️ Localizar</b>.
+          </div>
+        `;
+
+      } else {
+
+        nearbyList.innerHTML = `
+          <div class="empty">
+            Todas as entregas pendentes
+            possuem localização.
+          </div>
+        `;
+
+      }
+
+      return;
+
+    }
+
+
+    let originLat =
+      DEFAULT_CENTER[0];
+
+    let originLon =
+      DEFAULT_CENTER[1];
+
+
+    if (userPosition) {
+
+      originLat =
+        userPosition.lat;
+
+      originLon =
+        userPosition.lon;
+
+    }
+
+
+    const sorted =
+      pending
+        .map(d => ({
+
+          delivery: d,
+
+          distance:
+            distanceKm(
+              originLat,
+              originLon,
               Number(d.lat),
               Number(d.lon)
-            ],
-            {
-              radius: 9,
-              color: "#ffffff",
-              weight: 3,
-              fillColor: color,
-              fillOpacity: 1
-            }
-          );
+            )
+
+        }))
+        .sort(
+          (a,b) =>
+            a.distance -
+            b.distance
+        );
 
 
-        const corrected =
-          d.correctedNeighborhood
-            ? `
-              <div style="
-                margin-top:5px;
-                color:#059669;
-                font-weight:700;
-              ">
-                Bairro encontrado:
-                ${escapeHtml(
-                  d.correctedNeighborhood
-                )}
-              </div>
-            `
-            : "";
+    /*
+      IMPORTANTE:
+
+      Não existe mais .slice(0, 5).
+
+      A lista inteira será exibida.
+    */
 
 
-        marker.bindPopup(`
-          <div style="min-width:210px">
+    sorted.forEach(item => {
 
-            <strong style="font-size:18px">
-              ${escapeHtml(d.label)}
-            </strong>
+      const d =
+        item.delivery;
 
-            <div style="
-              margin-top:7px;
-              line-height:1.35;
-            ">
-              ${escapeHtml(d.address)}
+
+      const distance =
+        item.distance < 1
+          ? `${Math.round(item.distance * 1000)} m`
+          : `${item.distance.toFixed(1)} km`;
+
+
+      const corrected =
+        d.correctedNeighborhood
+          ? `
+            <div class="corrected-address">
+              📍 Bairro localizado:
+              ${escapeHtml(
+                d.correctedNeighborhood
+              )}
             </div>
+          `
+          : "";
 
-            ${corrected}
 
-            <button
-              onclick="navigateToDelivery(${d.id})"
-              style="
-                margin-top:10px;
-                width:100%;
-                min-height:42px;
-                border:0;
-                border-radius:9px;
-                background:#2563eb;
-                color:white;
-                font-weight:800;
-              "
-            >
-              🧭 Navegar
-            </button>
+      const card =
+        document.createElement(
+          "div"
+        );
 
+
+      card.className =
+        "delivery-card";
+
+
+      card.innerHTML = `
+
+        <div class="delivery-top">
+
+          <div class="delivery-title">
+            Entrega ${escapeHtml(d.id)}
           </div>
-        `);
+
+          <div class="distance">
+            ${distance}
+          </div>
+
+        </div>
+
+        <div class="address">
+          ${escapeHtml(d.address)}
+        </div>
+
+        ${corrected}
+
+        <div class="card-buttons">
+
+          <button
+            class="navigate-btn"
+            data-nav="${escapeHtml(d.id)}">
+            🧭 Navegar
+          </button>
+
+          <button
+            class="status-btn"
+            data-status-id="${escapeHtml(d.id)}">
+            📋 Status
+          </button>
+
+        </div>
+      `;
 
 
-        marker.on(
+      card
+        .querySelector(
+          "[data-nav]"
+        )
+        .addEventListener(
           "click",
           () => {
 
-            setTimeout(
-              refreshMapSize,
-              50
+            navigateTo(d);
+
+          }
+        );
+
+
+      card
+        .querySelector(
+          "[data-status-id]"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            openStatus(
+              d.id
             );
 
           }
         );
 
 
-        markerLayer.addLayer(marker);
+      nearbyList.appendChild(
+        card
+      );
 
-        markerById.set(
-          d.id,
-          marker
+    });
+
+  }
+
+
+  /* ============================================================
+     NAVEGAÇÃO
+     ============================================================ */
+
+  function navigateTo(d) {
+
+    if (
+      !validCoordinates(
+        d.lat,
+        d.lon
+      )
+    ) {
+
+      alert(
+        "Este cliente ainda não possui coordenadas."
+      );
+
+      return;
+
+    }
+
+
+    const url =
+      "https://www.google.com/maps/dir/?api=1&destination=" +
+      encodeURIComponent(
+        `${d.lat},${d.lon}`
+      );
+
+
+    window.open(
+      url,
+      "_blank"
+    );
+
+  }
+
+
+  /* ============================================================
+     GPS
+     ============================================================ */
+
+  gpsBtn.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !navigator.geolocation
+      ) {
+
+        alert(
+          "Seu navegador não oferece GPS."
         );
-
-      });
-
-
-      refreshMapSize();
-
-    }
-
-
-    /* =========================================================
-       RESUMO
-    ========================================================= */
-
-    function updateSummary() {
-
-      const total =
-        deliveries.length;
-
-      const pending =
-        deliveries.filter(
-          d => d.status === "PENDENTE"
-        ).length;
-
-      counterEl.textContent =
-        pending + "/" + total;
-
-      listTitle.textContent =
-        "📍 Entregas pendentes — " +
-        pending +
-        " clientes";
-
-    }
-
-
-    /* =========================================================
-       LISTA DE CLIENTES
-    ========================================================= */
-
-    function getSortOrigin() {
-
-      if (userPosition) {
-
-        return {
-          lat: userPosition.lat,
-          lon: userPosition.lon
-        };
-
-      }
-
-      const center =
-        map.getCenter();
-
-      return {
-        lat: center.lat,
-        lon: center.lng
-      };
-
-    }
-
-
-    function renderDeliveryList() {
-
-      deliveryList.innerHTML = "";
-
-
-      const pending =
-        deliveries.filter(
-          d => d.status === "PENDENTE"
-        );
-
-
-      if (!pending.length) {
-
-        deliveryList.innerHTML = `
-          <div class="empty">
-            🎉 Não existem entregas pendentes.
-          </div>
-        `;
 
         return;
 
       }
 
 
-      const origin =
-        getSortOrigin();
+      gpsBtn.disabled = true;
+
+      gpsBtn.textContent =
+        "📍 Obtendo...";
 
 
-      const sorted =
-        pending.map(d => {
+      navigator.geolocation.getCurrentPosition(
 
-          let distance = null;
+        position => {
 
-          if (
-            validCoordinate(
-              d.lat,
-              d.lon
-            )
-          ) {
+          userPosition = {
 
-            distance =
-              distanceKm(
-                origin.lat,
-                origin.lon,
-                Number(d.lat),
-                Number(d.lon)
-              );
+            lat:
+              position.coords.latitude,
 
-          }
+            lon:
+              position.coords.longitude
 
-          return {
-            delivery: d,
-            distance
           };
 
-        });
 
+          if (userMarker) {
 
-      sorted.sort(
-        (a, b) => {
+            map.removeLayer(
+              userMarker
+            );
 
-          if (
-            a.distance == null &&
-            b.distance == null
-          ) {
-            return a.delivery.id -
-                   b.delivery.id;
           }
 
-          if (a.distance == null) {
-            return 1;
-          }
 
-          if (b.distance == null) {
-            return -1;
-          }
-
-          return (
-            a.distance -
-            b.distance
-          );
-
-        }
-      );
-
-
-      /*
-       * IMPORTANTE:
-       *
-       * Não existe slice(0, 5).
-       * A lista mostra TODOS.
-       */
-
-      sorted.forEach(item => {
-
-        const d =
-          item.delivery;
-
-        const card =
-          document.createElement("div");
-
-
-        let statusClass = "";
-
-        if (d.status === "CARTA") {
-          statusClass = "status-carta";
-        }
-
-        if (
-          d.status === "NAO_LOCALIZADO"
-        ) {
-          statusClass =
-            "status-nao-localizado";
-        }
-
-        if (
-          d.status === "ZONA_RISCO"
-        ) {
-          statusClass =
-            "status-risco";
-        }
-
-
-        card.className =
-          "delivery-card " +
-          statusClass;
-
-
-        const distanceText =
-          item.distance == null
-            ? "Sem localização"
-            : item.distance < 1
-              ? Math.round(
-                  item.distance * 1000
-                ) + " m"
-              : item.distance.toFixed(1) +
-                " km";
-
-
-        const corrected =
-          d.correctedNeighborhood
-            ? `
-              <div class="corrected-neighborhood">
-                📍 Bairro localizado:
-                ${escapeHtml(
-                  d.correctedNeighborhood
-                )}
-              </div>
-            `
-            : "";
-
-
-        card.innerHTML = `
-
-          <div class="delivery-head">
-
-            <div class="delivery-title">
-              ${escapeHtml(d.label)}
-            </div>
-
-            <div class="distance">
-              ${distanceText}
-            </div>
-
-          </div>
-
-          <div class="delivery-address">
-            ${escapeHtml(d.address)}
-          </div>
-
-          ${corrected}
-
-          <div class="delivery-buttons">
-
-            <button
-              class="card-btn navigate-btn"
-              data-action="navigate"
-              data-id="${d.id}"
-            >
-              🧭 Navegar
-            </button>
-
-            <button
-              class="card-btn status-btn"
-              data-action="status"
-              data-id="${d.id}"
-            >
-              📋 Status
-            </button>
-
-          </div>
-
-        `;
-
-
-        deliveryList.appendChild(card);
-
-      });
-
-    }
-
-
-    deliveryList.addEventListener(
-      "click",
-      event => {
-
-        const button =
-          event.target.closest(
-            "button[data-action]"
-          );
-
-        if (!button) {
-          return;
-        }
-
-
-        const id =
-          Number(
-            button.dataset.id
-          );
-
-
-        const action =
-          button.dataset.action;
-
-
-        if (action === "navigate") {
-
-          navigateToDelivery(id);
-
-        }
-
-
-        if (action === "status") {
-
-          openStatusModal(id);
-
-        }
-
-      }
-    );
-
-
-    /* =========================================================
-       GPS
-    ========================================================= */
-
-    gpsBtn.addEventListener(
-      "click",
-      () => {
-
-        if (
-          !navigator.geolocation
-        ) {
-
-          geocodeStatus.textContent =
-            "GPS não disponível.";
-
-          return;
-
-        }
-
-
-        gpsBtn.disabled = true;
-
-        geocodeStatus.textContent =
-          "Obtendo sua localização...";
-
-        geocodeDetail.textContent =
-          "Permita o acesso à localização do celular.";
-
-
-        navigator.geolocation.getCurrentPosition(
-
-          position => {
-
-            userPosition = {
-
-              lat:
-                position.coords.latitude,
-
-              lon:
-                position.coords.longitude
-
-            };
-
-
+          userMarker =
             L.circleMarker(
               [
                 userPosition.lat,
@@ -1809,589 +1674,527 @@
                 radius: 10,
                 color: "#ffffff",
                 weight: 3,
-                fillColor: "#2563eb",
+                fillColor: "#2864e8",
                 fillOpacity: 1
               }
             )
             .addTo(map)
             .bindPopup(
-              "📍 Você está aqui."
+              "📍 Você está aqui"
             );
 
 
-            map.setView(
-              [
-                userPosition.lat,
-                userPosition.lon
-              ],
-              14
-            );
-
-
-            renderDeliveryList();
-
-
-            geocodeStatus.textContent =
-              "Localização atualizada.";
-
-            geocodeDetail.textContent =
-              "A lista está ordenada pela distância até você.";
-
-
-            gpsBtn.disabled = false;
-
-          },
-
-          error => {
-
-            console.warn(
-              "GPS:",
-              error
-            );
-
-
-            geocodeStatus.textContent =
-              "Não foi possível obter o GPS.";
-
-            geocodeDetail.textContent =
-              "Confira a permissão de localização do navegador.";
-
-
-            gpsBtn.disabled = false;
-
-          },
-
-          {
-            enableHighAccuracy: true,
-            timeout: 12000,
-            maximumAge: 30000
-          }
-
-        );
-
-      }
-    );
-
-
-    /* =========================================================
-       NAVEGAÇÃO
-    ========================================================= */
-
-    window.navigateToDelivery =
-      function(id) {
-
-        const d =
-          deliveries.find(
-            item =>
-              Number(item.id) ===
-              Number(id)
+          map.setView(
+            [
+              userPosition.lat,
+              userPosition.lon
+            ],
+            14
           );
 
 
-        if (!d) {
-          return;
+          gpsBtn.disabled =
+            false;
+
+          gpsBtn.textContent =
+            "📍 GPS";
+
+
+          geocodeStatus.textContent =
+            "Localização atualizada.";
+
+          geocodeDetail.textContent =
+            "A lista agora está ordenada pela distância até você.";
+
+
+          renderNearby();
+
+        },
+
+        error => {
+
+          gpsBtn.disabled =
+            false;
+
+          gpsBtn.textContent =
+            "📍 GPS";
+
+
+          alert(
+            "Não foi possível obter sua localização."
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 30000
         }
 
-
-        if (
-          validCoordinate(
-            d.lat,
-            d.lon
-          )
-        ) {
-
-          const url =
-            "https://www.google.com/maps/dir/?api=1&destination=" +
-            encodeURIComponent(
-              Number(d.lat) +
-              "," +
-              Number(d.lon)
-            );
-
-          window.open(
-            url,
-            "_blank"
-          );
-
-          return;
-
-        }
-
-
-        const url =
-          "https://www.google.com/maps/search/?api=1&query=" +
-          encodeURIComponent(
-            d.address
-          );
-
-        window.open(
-          url,
-          "_blank"
-        );
-
-      };
-
-
-    /* =========================================================
-       MODAL
-    ========================================================= */
-
-    function openStatusModal(id) {
-
-      const d =
-        deliveries.find(
-          item =>
-            Number(item.id) ===
-            Number(id)
-        );
-
-
-      if (!d) {
-        return;
-      }
-
-
-      currentModalId =
-        Number(id);
-
-
-      modalTitle.textContent =
-        d.label;
-
-
-      modalAddress.textContent =
-        d.address;
-
-
-      modalBackdrop.classList.add(
-        "show"
       );
 
     }
+  );
 
 
-    function closeStatusModal() {
+  /* ============================================================
+     EXPANDIR MAPA
+     ============================================================ */
 
-      currentModalId = null;
+  mapToggle.addEventListener(
+    "click",
+    () => {
 
-      modalBackdrop.classList.remove(
-        "show"
+      mapExpanded =
+        !mapExpanded;
+
+
+      if (mapExpanded) {
+
+        mapWrapper.classList.add(
+          "expanded"
+        );
+
+        mapToggle.textContent =
+          "↙ Fechar mapa";
+
+      } else {
+
+        mapWrapper.classList.remove(
+          "expanded"
+        );
+
+        mapToggle.textContent =
+          "⛶ Expandir mapa";
+
+      }
+
+
+      setTimeout(
+        () => {
+
+          map.invalidateSize();
+
+        },
+        300
       );
 
     }
+  );
 
 
-    closeModal.addEventListener(
-      "click",
-      closeStatusModal
-    );
+  /* ============================================================
+     NOMINATIM
+     ============================================================ */
+
+  async function waitNominatimGap() {
+
+    const now =
+      Date.now();
+
+    const elapsed =
+      now -
+      lastNominatimRequest;
 
 
-    modalBackdrop.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          modalBackdrop
-        ) {
-
-          closeStatusModal();
-
-        }
-
-      }
-    );
+    const minimumGap =
+      1200;
 
 
-    document
-      .querySelectorAll(
-        ".status-option"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const status =
-              button.dataset.status;
-
-
-            const d =
-              deliveries.find(
-                item =>
-                  Number(item.id) ===
-                  Number(currentModalId)
-              );
-
-
-            if (!d) {
-              return;
-            }
-
-
-            d.status =
-              status;
-
-            d.updatedAt =
-              new Date().toISOString();
-
-
-            if (!Array.isArray(d.actions)) {
-              d.actions = [];
-            }
-
-
-            d.actions.push({
-
-              timestamp:
-                d.updatedAt,
-
-              status,
-
-              lat:
-                d.lat,
-
-              lon:
-                d.lon
-
-            });
-
-
-            saveData();
-
-            renderMarkers();
-
-            updateSummary();
-
-            renderDeliveryList();
-
-            closeStatusModal();
-
-
-            geocodeStatus.textContent =
-              "Status atualizado.";
-
-            geocodeDetail.textContent =
-              d.label +
-              " marcado como " +
-              status;
-
-          }
-        );
-
-      });
-
-
-    /* =========================================================
-       GEOCODIFICAÇÃO
-    ========================================================= */
-
-    async function fetchWithTimeout(
-      url,
-      timeoutMs
+    if (
+      elapsed <
+      minimumGap
     ) {
 
-      const controller =
-        new AbortController();
-
-
-      const timeout =
-        setTimeout(
-          () => controller.abort(),
-          timeoutMs
-        );
-
-
-      try {
-
-        const response =
-          await fetch(
-            url,
-            {
-              method: "GET",
-
-              headers: {
-                "Accept":
-                  "application/json"
-              },
-
-              signal:
-                controller.signal
-            }
-          );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            "HTTP " +
-            response.status
-          );
-
-        }
-
-
-        return await response.json();
-
-      } finally {
-
-        clearTimeout(timeout);
-
-      }
+      await wait(
+        minimumGap -
+        elapsed
+      );
 
     }
 
+  }
 
-    async function respectNominatimDelay() {
 
-      const now =
-        Date.now();
+  async function fetchNominatim(
+    query
+  ) {
 
-      const elapsed =
-        now -
-        lastNominatimRequest;
+    await waitNominatimGap();
+
+
+    lastNominatimRequest =
+      Date.now();
+
+
+    const controller =
+      new AbortController();
+
+
+    const timeout =
+      setTimeout(
+        () => {
+          controller.abort();
+        },
+        9000
+      );
+
+
+    const url =
+      "https://nominatim.openstreetmap.org/search" +
+      "?format=jsonv2" +
+      "&addressdetails=1" +
+      "&limit=8" +
+      "&countrycodes=br" +
+      "&accept-language=pt-BR" +
+      "&q=" +
+      encodeURIComponent(
+        query
+      );
+
+
+    try {
+
+      const response =
+        await fetch(
+          url,
+          {
+            signal:
+              controller.signal,
+
+            headers: {
+              "Accept":
+                "application/json"
+            }
+          }
+        );
 
 
       if (
-        elapsed <
-        NOMINATIM_DELAY
+        response.status === 429
       ) {
 
-        await wait(
-          NOMINATIM_DELAY -
-          elapsed
+        await wait(4000);
+
+        throw new Error(
+          "Limite do serviço de localização atingido."
         );
 
       }
 
 
-      lastNominatimRequest =
-        Date.now();
+      if (
+        !response.ok
+      ) {
 
-    }
+        throw new Error(
+          "HTTP " +
+          response.status
+        );
+
+      }
 
 
-    function getResultNeighborhood(result) {
+      return await response.json();
 
-      const a =
-        result.address || {};
+    } finally {
 
-
-      return (
-        a.neighbourhood ||
-        a.suburb ||
-        a.quarter ||
-        a.residential ||
-        a.city_district ||
-        ""
+      clearTimeout(
+        timeout
       );
 
     }
 
-
-    function resultIsCaxias(result) {
-
-      const a =
-        result.address || {};
+  }
 
 
-      const city =
-        normalize(
-          a.city ||
-          a.town ||
-          a.municipality ||
-          a.village ||
-          ""
-        );
+  /* ============================================================
+     COMPARAÇÃO DE RESULTADOS
+     ============================================================ */
+
+  function tokenOverlap(
+    a,
+    b
+  ) {
+
+    const A =
+      new Set(
+        normalizeText(a)
+          .split(" ")
+          .filter(x => x.length > 1)
+      );
 
 
-      const state =
-        normalize(
-          a.state ||
-          ""
-        );
+    const B =
+      new Set(
+        normalizeText(b)
+          .split(" ")
+          .filter(x => x.length > 1)
+      );
 
 
-      const display =
-        normalize(
-          result.display_name ||
-          ""
-        );
+    if (
+      A.size === 0
+    ) {
 
-
-      const cityOk =
-        city.includes(
-          "caxias do sul"
-        ) ||
-        display.includes(
-          "caxias do sul"
-        );
-
-
-      const stateOk =
-        !state ||
-        state.includes(
-          "rio grande do sul"
-        ) ||
-        state === "rs" ||
-        display.includes(
-          "rio grande do sul"
-        );
-
-
-      return cityOk && stateOk;
+      return 0;
 
     }
 
 
-    function tokenOverlap(
-      expected,
-      actual
-    ) {
-
-      const a =
-        new Set(
-          normalize(expected)
-            .split(" ")
-            .filter(
-              token =>
-                token.length > 2
-            )
-        );
+    let matches = 0;
 
 
-      const b =
-        new Set(
-          normalize(actual)
-            .split(" ")
-            .filter(
-              token =>
-                token.length > 2
-            )
-        );
+    A.forEach(
+      token => {
 
+        if (
+          B.has(token)
+        ) {
 
-      if (!a.size) {
-        return 0;
-      }
-
-
-      let matches = 0;
-
-
-      a.forEach(token => {
-
-        if (b.has(token)) {
           matches++;
+
         }
 
-      });
+      }
+    );
 
 
-      return matches / a.size;
+    return (
+      matches /
+      A.size
+    );
+
+  }
+
+
+  function resultCityOK(
+    result
+  ) {
+
+    const a =
+      result.address ||
+      {};
+
+
+    const city =
+      normalizeText(
+        a.city ||
+        a.town ||
+        a.municipality ||
+        a.village ||
+        ""
+      );
+
+
+    const state =
+      normalizeText(
+        a.state ||
+        ""
+      );
+
+
+    const display =
+      normalizeText(
+        result.display_name ||
+        ""
+      );
+
+
+    const cityOK =
+      city.includes(
+        "caxias do sul"
+      ) ||
+      display.includes(
+        "caxias do sul"
+      );
+
+
+    const stateOK =
+      state === "" ||
+      state.includes(
+        "rio grande do sul"
+      ) ||
+      state === "rs" ||
+      display.includes(
+        "rio grande do sul"
+      );
+
+
+    return cityOK && stateOK;
+
+  }
+
+
+  function getResultNeighborhood(
+    result
+  ) {
+
+    const a =
+      result.address ||
+      {};
+
+
+    return (
+      a.neighbourhood ||
+      a.suburb ||
+      a.quarter ||
+      a.residential ||
+      a.city_district ||
+      ""
+    );
+
+  }
+
+
+  function chooseBestResult(
+    results,
+    parts
+  ) {
+
+    if (
+      !Array.isArray(results)
+    ) {
+
+      return null;
 
     }
 
 
-    function chooseBestResult(
-      results,
-      parts
+    const valid =
+      results.filter(
+        result =>
+          resultCityOK(
+            result
+          )
+      );
+
+
+    if (
+      valid.length === 0
     ) {
 
-      const valid =
-        results.filter(
-          result =>
-            resultIsCaxias(result)
-        );
+      return null;
+
+    }
 
 
-      if (!valid.length) {
-        return null;
-      }
-
-
-      const scored =
-        valid.map(result => {
+    const scored =
+      valid.map(
+        result => {
 
           const a =
-            result.address || {};
+            result.address ||
+            {};
 
 
           const road =
-            a.road || "";
+            a.road ||
+            a.pedestrian ||
+            a.residential ||
+            "";
 
 
           const houseNumber =
             String(
-              a.house_number || ""
-            ).replace(
-              /\D/g,
+              a.house_number ||
               ""
             );
 
 
-          const requestedNumber =
+          const inputNumber =
             String(
-              parts.number || ""
+              parts.numero ||
+              ""
             ).replace(
               /\D/g,
               ""
             );
 
 
-          const numberMatch =
-            requestedNumber &&
-            houseNumber &&
-            requestedNumber ===
-            houseNumber;
-
-
-          const roadScore =
-            tokenOverlap(
-              parts.street,
-              road ||
-              result.display_name
-            );
-
-
-          const neighborhoodScore =
-            tokenOverlap(
-              parts.neighborhood,
-              getResultNeighborhood(
-                result
-              ) ||
-              result.display_name
+          const resultNumber =
+            houseNumber.replace(
+              /\D/g,
+              ""
             );
 
 
           let score = 0;
 
 
-          score += 100;
-
-          score +=
-            roadScore * 40;
-
-
-          score +=
-            neighborhoodScore * 55;
+          const roadScore =
+            tokenOverlap(
+              parts.rua,
+              road ||
+              result.display_name
+            );
 
 
-          if (numberMatch) {
-            score += 80;
+          const neighborhood =
+            getResultNeighborhood(
+              result
+            );
+
+
+          const neighborhoodScore =
+            tokenOverlap(
+              parts.bairro,
+              neighborhood ||
+              result.display_name
+            );
+
+
+          if (
+            roadScore > 0
+          ) {
+
+            score +=
+              roadScore * 40;
+
           }
 
 
           if (
-            result.type === "house" ||
-            result.type === "building"
+            inputNumber &&
+            resultNumber &&
+            inputNumber === resultNumber
+          ) {
+
+            score += 55;
+
+          }
+
+
+          if (
+            neighborhoodScore > 0
+          ) {
+
+            score +=
+              neighborhoodScore * 45;
+
+          }
+
+
+          if (
+            result.type === "house"
           ) {
 
             score += 15;
 
           }
+
+
+          if (
+            result.type === "building"
+          ) {
+
+            score += 10;
+
+          }
+
+
+          score += 100;
 
 
           return {
@@ -2402,491 +2205,470 @@
 
             neighborhoodScore,
 
-            numberMatch
+            roadScore
 
           };
 
-        });
-
-
-      scored.sort(
-        (a, b) =>
-          b.score -
-          a.score
+        }
       );
 
 
-      return scored[0];
-
-    }
-
-
-    async function searchNominatim(
-      query,
-      parts
-    ) {
-
-      await respectNominatimDelay();
+    scored.sort(
+      (a,b) =>
+        b.score -
+        a.score
+    );
 
 
-      const url =
-        "https://nominatim.openstreetmap.org/search" +
-        "?format=jsonv2" +
-        "&addressdetails=1" +
-        "&limit=8" +
-        "&countrycodes=br" +
-        "&accept-language=pt-BR" +
-        "&q=" +
-        encodeURIComponent(query);
+    return scored[0];
+
+  }
 
 
-      const results =
-        await fetchWithTimeout(
-          url,
-          NOMINATIM_TIMEOUT
-        );
+  /* ============================================================
+     GEOCODIFICAÇÃO
+     ============================================================ */
 
+  async function geocodeOne(
+    delivery,
+    detailCallback
+  ) {
 
-      return chooseBestResult(
-        results,
-        parts
+    const cacheKey =
+      normalizeText(
+        delivery.address
       );
 
-    }
 
+    /*
+      1. CACHE
+    */
 
-    async function geocodeOne(
-      d,
-      progressCallback
+    if (
+      geocache[cacheKey] &&
+      validCoordinates(
+        geocache[cacheKey].lat,
+        geocache[cacheKey].lon
+      )
     ) {
-
-      const cacheKey =
-        normalize(d.address);
-
-
-      /*
-       * Primeiro tenta cache.
-       */
 
       const cached =
         geocache[cacheKey];
 
 
-      if (
-        cached &&
-        validCoordinate(
-          cached.lat,
-          cached.lon
-        )
-      ) {
+      delivery.lat =
+        Number(cached.lat);
 
-        d.lat =
-          Number(cached.lat);
+      delivery.lon =
+        Number(cached.lon);
 
-        d.lon =
-          Number(cached.lon);
+      delivery.correctedNeighborhood =
+        cached.correctedNeighborhood ||
+        "";
 
-        d.correctedNeighborhood =
-          cached.correctedNeighborhood ||
-          "";
+      delivery.geocodeDisplayName =
+        cached.displayName ||
+        "";
 
-        d.geocodeSource =
-          cached.geocodeSource ||
-          "cache";
+      delivery.geocodeSource =
+        cached.source ||
+        "cache";
 
-        d.geocodeDisplayName =
-          cached.displayName ||
-          "";
 
-        return {
-          ok: true,
-          source: "cache"
-        };
-
-      }
-
-
-      const parts =
-        parseAddress(
-          d.address
-        );
-
-
-      const queries = [];
-
-
-      if (
-        parts.street &&
-        parts.number
-      ) {
-
-        queries.push({
-
-          label:
-            "rua + número",
-
-          query:
-            parts.street +
-            ", " +
-            parts.number +
-            ", Caxias do Sul, RS, Brasil"
-
-        });
-
-
-        if (
-          parts.neighborhood
-        ) {
-
-          queries.push({
-
-            label:
-              "rua + número + bairro",
-
-            query:
-              parts.street +
-              ", " +
-              parts.number +
-              ", " +
-              parts.neighborhood +
-              ", Caxias do Sul, RS, Brasil"
-
-          });
-
-        }
-
-      }
-
-
-      queries.push({
-
-        label:
-          "endereço original",
-
-        query:
-          d.address
-
-      });
-
-
-      let firstResult = null;
-
-
-      for (
-        let i = 0;
-        i < queries.length;
-        i++
-      ) {
-
-        const attempt =
-          queries[i];
-
-
-        progressCallback(
-          attempt.label
-        );
-
-
-        try {
-
-          const best =
-            await searchNominatim(
-              attempt.query,
-              parts
-            );
-
-
-          if (best) {
-
-            /*
-             * Guarda a primeira opção.
-             */
-
-            if (!firstResult) {
-
-              firstResult = {
-
-                ...best,
-
-                source:
-                  attempt.label
-
-              };
-
-            }
-
-
-            /*
-             * Se o bairro bateu muito bem,
-             * essa é a melhor opção.
-             */
-
-            if (
-              best.neighborhoodScore >=
-              0.5
-            ) {
-
-              const result =
-                best.result;
-
-
-              const lat =
-                Number(result.lat);
-
-              const lon =
-                Number(result.lon);
-
-
-              if (
-                validCoordinate(
-                  lat,
-                  lon
-                )
-              ) {
-
-                const neighborhood =
-                  getResultNeighborhood(
-                    result
-                  );
-
-
-                d.lat = lat;
-
-                d.lon = lon;
-
-                d.correctedNeighborhood =
-                  neighborhood || "";
-
-                d.geocodeSource =
-                  attempt.label;
-
-                d.geocodeDisplayName =
-                  result.display_name ||
-                  "";
-
-
-                geocache[cacheKey] = {
-
-                  lat,
-
-                  lon,
-
-                  correctedNeighborhood:
-                    neighborhood || "",
-
-                  geocodeSource:
-                    attempt.label,
-
-                  displayName:
-                    result.display_name ||
-                    "",
-
-                  savedAt:
-                    new Date().toISOString()
-
-                };
-
-
-                saveData();
-
-
-                return {
-                  ok: true,
-                  source:
-                    attempt.label
-                };
-
-              }
-
-            }
-
-          }
-
-        } catch (error) {
-
-          console.warn(
-            "Falha na busca:",
-            attempt.query,
-            error
-          );
-
-          d.geocodeError =
-            error.message ||
-            "Erro na busca";
-
-        }
-
-      }
-
-
-      /*
-       * Se nenhuma busca teve bairro
-       * perfeito, aceita o melhor resultado
-       * encontrado em Caxias.
-       */
-
-      if (firstResult) {
-
-        const result =
-          firstResult.result;
-
-
-        const lat =
-          Number(result.lat);
-
-        const lon =
-          Number(result.lon);
-
-
-        if (
-          validCoordinate(
-            lat,
-            lon
-          )
-        ) {
-
-          const neighborhood =
-            getResultNeighborhood(
-              result
-            );
-
-
-          d.lat = lat;
-
-          d.lon = lon;
-
-          d.correctedNeighborhood =
-            neighborhood || "";
-
-          d.geocodeSource =
-            firstResult.source;
-
-          d.geocodeDisplayName =
-            result.display_name ||
-            "";
-
-
-          geocache[cacheKey] = {
-
-            lat,
-
-            lon,
-
-            correctedNeighborhood:
-              neighborhood || "",
-
-            geocodeSource:
-              firstResult.source,
-
-            displayName:
-              result.display_name ||
-              "",
-
-            savedAt:
-              new Date().toISOString()
-
-          };
-
-
-          saveData();
-
-
-          return {
-            ok: true,
-            source:
-              firstResult.source
-          };
-
-        }
-
-      }
-
-
-      return {
-        ok: false,
-        source: "não localizado"
-      };
+      return true;
 
     }
 
 
-    /* =========================================================
-       LOCALIZAR TODOS
-    ========================================================= */
+    const parts =
+      getAddressParts(
+        delivery
+      );
 
-    async function geocodeAll(
-      onlyFailures = false
+
+    const queries = [];
+
+
+    /*
+      TENTATIVA 1
+      Rua + número
+    */
+
+    if (
+      parts.rua &&
+      parts.numero
     ) {
 
-      const button =
-        onlyFailures
-          ? retryBtn
-          : geocodeBtn;
+      queries.push({
+
+        label:
+          "Rua + número",
+
+        query:
+          `${parts.rua}, ${parts.numero}, Caxias do Sul, RS, Brasil`
+
+      });
+
+    }
 
 
-      button.disabled = true;
+    /*
+      TENTATIVA 2
+      Rua + número + bairro
+    */
+
+    if (
+      parts.rua &&
+      parts.numero &&
+      parts.bairro
+    ) {
+
+      queries.push({
+
+        label:
+          "Rua + número + bairro",
+
+        query:
+          `${parts.rua}, ${parts.numero}, ${parts.bairro}, Caxias do Sul, RS, Brasil`
+
+      });
+
+    }
 
 
-      const pending =
-        deliveries.filter(d => {
+    /*
+      TENTATIVA 3
+      Endereço original
+    */
 
-          if (
-            d.status !== "PENDENTE"
-          ) {
+    queries.push({
 
-            return false;
+      label:
+        "Endereço original",
 
-          }
+      query:
+        `${delivery.address}, Caxias do Sul, RS, Brasil`
 
-
-          if (onlyFailures) {
-
-            return (
-              d.geocodeError ||
-              !validCoordinate(
-                d.lat,
-                d.lon
-              )
-            );
-
-          }
+    });
 
 
-          return !validCoordinate(
-            d.lat,
-            d.lon
-          );
-
-        });
+    let firstResult =
+      null;
 
 
-      if (!pending.length) {
+    for (
+      let i = 0;
+      i < queries.length;
+      i++
+    ) {
 
-        geocodeStatus.textContent =
-          "Todas as entregas pendentes já possuem localização.";
-
-        geocodeDetail.textContent =
-          "Nenhuma nova localização necessária.";
-
-        progressBar.style.width =
-          "100%";
+      const attempt =
+        queries[i];
 
 
-        button.disabled = false;
+      if (
+        detailCallback
+      ) {
 
-        return;
+        detailCallback(
+          `${attempt.label}: ${attempt.query}`
+        );
 
       }
 
 
-      let success = 0;
+      try {
 
-      let failed = 0;
+        const results =
+          await fetchNominatim(
+            attempt.query
+          );
 
+
+        const best =
+          chooseBestResult(
+            results,
+            parts
+          );
+
+
+        if (best) {
+
+          if (
+            !firstResult
+          ) {
+
+            firstResult = {
+
+              ...best,
+
+              label:
+                attempt.label
+
+            };
+
+          }
+
+
+          /*
+            Se estamos usando o bairro,
+            damos preferência ao resultado
+            que realmente combina com ele.
+          */
+
+          if (
+            attempt.label ===
+              "Rua + número + bairro"
+          ) {
+
+            if (
+              best.neighborhoodScore >=
+              0.4
+            ) {
+
+              return applyGeocode(
+                delivery,
+                best.result,
+                attempt.label
+              );
+
+            }
+
+          } else if (
+            !parts.bairro &&
+            attempt.label ===
+              "Rua + número"
+          ) {
+
+            return applyGeocode(
+              delivery,
+              best.result,
+              attempt.label
+            );
+
+          }
+
+        }
+
+      } catch (error) {
+
+        console.warn(
+          "Falha ao localizar:",
+          attempt.query,
+          error
+        );
+
+      }
+
+    }
+
+
+    /*
+      Se alguma tentativa encontrou
+      um resultado válido, usamos ele.
+    */
+
+    if (
+      firstResult
+    ) {
+
+      return applyGeocode(
+        delivery,
+        firstResult.result,
+        firstResult.label
+      );
+
+    }
+
+
+    delivery.geocodeError =
+      "Nenhuma localização encontrada.";
+
+
+    return false;
+
+  }
+
+
+  function applyGeocode(
+    delivery,
+    result,
+    source
+  ) {
+
+    const lat =
+      Number(
+        result.lat
+      );
+
+    const lon =
+      Number(
+        result.lon
+      );
+
+
+    if (
+      !validCoordinates(
+        lat,
+        lon
+      )
+    ) {
+
+      return false;
+
+    }
+
+
+    const neighborhood =
+      getResultNeighborhood(
+        result
+      );
+
+
+    delivery.lat =
+      lat;
+
+    delivery.lon =
+      lon;
+
+    delivery.correctedNeighborhood =
+      neighborhood ||
+      "";
+
+    delivery.geocodeDisplayName =
+      result.display_name ||
+      "";
+
+    delivery.geocodeSource =
+      source;
+
+    delivery.geocodeError =
+      "";
+
+
+    geocache[
+      normalizeText(
+        delivery.address
+      )
+    ] = {
+
+      lat,
+
+      lon,
+
+      correctedNeighborhood:
+        neighborhood || "",
+
+      displayName:
+        result.display_name || "",
+
+      source,
+
+      savedAt:
+        new Date().toISOString()
+
+    };
+
+
+    saveCache();
+
+
+    return true;
+
+  }
+
+
+  /* ============================================================
+     LOCALIZAR TODOS
+     ============================================================ */
+
+  async function geocodeAll(
+    retryOnly = false
+  ) {
+
+    if (
+      CLIENTES_CARREGADOS.length === 0
+    ) {
+
+      alert(
+        "Nenhum cliente foi carregado.\n\nVerifique se o arquivo clientes.js está no mesmo repositório e se o nome está exatamente como:\n\nclientes.js"
+      );
+
+      return;
+
+    }
+
+
+    let pending;
+
+
+    if (retryOnly) {
+
+      pending =
+        deliveries.filter(
+          d =>
+            d.status === "PENDENTE" &&
+            !validCoordinates(
+              d.lat,
+              d.lon
+            )
+        );
+
+    } else {
+
+      pending =
+        deliveries.filter(
+          d =>
+            d.status === "PENDENTE" &&
+            !validCoordinates(
+              d.lat,
+              d.lon
+            )
+        );
+
+    }
+
+
+    if (
+      pending.length === 0
+    ) {
+
+      geocodeStatus.textContent =
+        "Todos os clientes pendentes já possuem localização.";
+
+      geocodeDetail.textContent =
+        "Nenhuma nova localização necessária.";
 
       progressBar.style.width =
-        "0%";
+        "100%";
 
+      renderAll();
+
+      return;
+
+    }
+
+
+    geocodeBtn.disabled =
+      true;
+
+    retryBtn.disabled =
+      true;
+
+    gpsBtn.disabled =
+      true;
+
+
+    let success = 0;
+
+    let failed = 0;
+
+
+    progressBar.style.width =
+      "0%";
+
+
+    try {
 
       for (
         let i = 0;
@@ -2898,48 +2680,27 @@
           pending[i];
 
 
-        const position =
-          i + 1;
-
-
         geocodeStatus.textContent =
-          "Localizando " +
-          position +
-          " de " +
-          pending.length;
+          `Localizando ${i + 1} de ${pending.length}`;
 
 
         geocodeDetail.textContent =
           d.address;
 
 
-        progressBar.style.width =
-          (
-            i /
-            pending.length *
-            100
-          ) +
-          "%";
-
-
-        d.geocodeError = "";
-
-
-        const result =
+        const ok =
           await geocodeOne(
             d,
-            attempt => {
+            detail => {
 
               geocodeDetail.textContent =
-                d.address +
-                " — " +
-                attempt;
+                detail;
 
             }
           );
 
 
-        if (result.ok) {
+        if (ok) {
 
           success++;
 
@@ -2950,342 +2711,518 @@
         }
 
 
-        saveData();
-
-        renderMarkers();
-
-        updateSummary();
-
-        renderDeliveryList();
+        const percent =
+          ((i + 1) /
+            pending.length) *
+          100;
 
 
         progressBar.style.width =
-          (
-            (
-              i + 1
-            ) /
-            pending.length *
-            100
-          ) +
-          "%";
+          percent + "%";
+
+
+        saveData();
+
+        renderAll();
+
+
+        await wait(200);
 
       }
-
-
-      progressBar.style.width =
-        "100%";
 
 
       geocodeStatus.textContent =
-        "Localização concluída.";
-
+        `Concluído: ${success} localizados, ${failed} não localizados.`;
 
       geocodeDetail.textContent =
-        success +
-        " localizados • " +
-        failed +
-        " não localizados.";
+        failed > 0
+          ? "Os que falharam podem ser tentados novamente pelo botão 🔄 Falhas."
+          : "Todos os clientes foram localizados.";
 
-
-      button.disabled = false;
-
+    } finally {
 
       /*
-       * Depois da busca, atualiza tudo.
-       */
+        MUITO IMPORTANTE:
 
-      renderMarkers();
+        O botão sempre volta a ficar
+        disponível, mesmo se alguma
+        consulta apresentar erro.
+      */
 
-      updateSummary();
+      geocodeBtn.disabled =
+        false;
 
-      renderDeliveryList();
+      retryBtn.disabled =
+        false;
+
+      gpsBtn.disabled =
+        false;
 
     }
 
+  }
 
-    geocodeBtn.addEventListener(
-      "click",
-      () => {
 
-        geocodeAll(false);
+  /* ============================================================
+     BOTÕES
+     ============================================================ */
 
-      }
+  geocodeBtn.addEventListener(
+    "click",
+    () => {
+
+      geocodeAll(
+        false
+      );
+
+    }
+  );
+
+
+  retryBtn.addEventListener(
+    "click",
+    () => {
+
+      geocodeAll(
+        true
+      );
+
+    }
+  );
+
+
+  /* ============================================================
+     STATUS
+     ============================================================ */
+
+  function openStatus(id) {
+
+    const delivery =
+      deliveries.find(
+        d =>
+          String(d.id) ===
+          String(id)
+      );
+
+
+    if (!delivery) {
+      return;
+    }
+
+
+    currentModalId =
+      delivery.id;
+
+
+    modalTitle.textContent =
+      `Entrega ${delivery.id}`;
+
+
+    modalAddress.textContent =
+      delivery.address;
+
+
+    modal.classList.add(
+      "show"
     );
 
-
-    retryBtn.addEventListener(
-      "click",
-      () => {
-
-        geocodeAll(true);
-
-      }
-    );
+  }
 
 
-    /* =========================================================
-       EXPORTAÇÃO
-    ========================================================= */
+  window.openStatus =
+    openStatus;
 
-    function csvEscape(value) {
 
-      const text =
-        String(
-          value == null
-            ? ""
-            : value
+  closeModal.addEventListener(
+    "click",
+    () => {
+
+      modal.classList.remove(
+        "show"
+      );
+
+      currentModalId =
+        null;
+
+    }
+  );
+
+
+  modal.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target === modal
+      ) {
+
+        modal.classList.remove(
+          "show"
         );
 
-
-      return '"' +
-        text.replace(
-          /"/g,
-          '""'
-        ) +
-        '"';
+      }
 
     }
+  );
 
 
-    function downloadFile(
-      content,
-      filename
-    ) {
+  document
+    .querySelectorAll(
+      ".status-options button"
+    )
+    .forEach(
+      button => {
 
-      const blob =
-        new Blob(
-          [
-            "\uFEFF" +
-            content
-          ],
-          {
-            type:
-              "text/csv;charset=utf-8;"
+        button.addEventListener(
+          "click",
+          () => {
+
+            if (
+              currentModalId === null
+            ) {
+
+              return;
+
+            }
+
+
+            const delivery =
+              deliveries.find(
+                d =>
+                  String(d.id) ===
+                  String(currentModalId)
+              );
+
+
+            if (!delivery) {
+              return;
+            }
+
+
+            const newStatus =
+              button.dataset.status;
+
+
+            delivery.status =
+              newStatus;
+
+
+            delivery.updatedAt =
+              new Date().toISOString();
+
+
+            /*
+              Estrutura preparada para
+              o futuro histórico completo
+              das ações.
+            */
+
+            if (
+              !Array.isArray(
+                delivery.actions
+              )
+            ) {
+
+              delivery.actions = [];
+
+            }
+
+
+            delivery.actions.push({
+
+              status:
+                newStatus,
+
+              timestamp:
+                new Date().toISOString(),
+
+              address:
+                delivery.address,
+
+              lat:
+                validCoordinates(
+                  delivery.lat,
+                  delivery.lon
+                )
+                  ? Number(delivery.lat)
+                  : null,
+
+              lon:
+                validCoordinates(
+                  delivery.lat,
+                  delivery.lon
+                )
+                  ? Number(delivery.lon)
+                  : null
+
+            });
+
+
+            saveData();
+
+            renderAll();
+
+
+            modal.classList.remove(
+              "show"
+            );
+
+
+            currentModalId =
+              null;
+
           }
         );
 
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
+      }
+    );
 
 
-      const a =
-        document.createElement(
-          "a"
-        );
+  /* ============================================================
+     EXPORTAR
+     ============================================================ */
 
+  function csvEscape(value) {
 
-      a.href = url;
-
-      a.download =
-        filename;
-
-
-      document.body.appendChild(a);
-
-      a.click();
-
-      a.remove();
-
-
-      setTimeout(
-        () =>
-          URL.revokeObjectURL(url),
-        1000
+    const text =
+      String(
+        value === null ||
+        value === undefined
+          ? ""
+          : value
       );
 
-    }
+
+    return '"' +
+      text
+        .replace(
+          /"/g,
+          '""'
+        ) +
+      '"';
+
+  }
 
 
-    exportBtn.addEventListener(
-      "click",
-      () => {
+  function exportCSV() {
 
-        const headers = [
+    const headers = [
 
-          "ID",
+      "ID",
 
-          "Entrega",
+      "Endereco",
 
-          "Endereco",
+      "Status",
 
-          "Status",
+      "Atualizado_em",
 
-          "Atualizado_em",
+      "Latitude",
 
-          "Latitude",
+      "Longitude",
 
-          "Longitude",
+      "Bairro_corrigido",
 
-          "Bairro_corrigido",
+      "Endereco_localizado",
 
-          "Fonte_localizacao",
+      "Fonte_localizacao"
 
-          "Nome_localizacao"
-
-        ];
+    ];
 
 
-        const rows = [
+    const rows =
+      deliveries.map(
+        d => [
 
-          headers.map(
-            csvEscape
-          ).join(";")
+          d.id,
 
-        ];
+          d.address,
+
+          d.status,
+
+          d.updatedAt || "",
+
+          validCoordinates(
+            d.lat,
+            d.lon
+          )
+            ? d.lat
+            : "",
+
+          validCoordinates(
+            d.lat,
+            d.lon
+          )
+            ? d.lon
+            : "",
+
+          d.correctedNeighborhood ||
+            "",
+
+          d.geocodeDisplayName ||
+            "",
+
+          d.geocodeSource ||
+            ""
+
+        ]
+      );
 
 
-        deliveries.forEach(d => {
+    let csv =
+      headers
+        .map(csvEscape)
+        .join(";") +
+      "\n";
 
-          rows.push(
 
-            [
+    rows.forEach(
+      row => {
 
-              d.id,
-
-              d.label,
-
-              d.address,
-
-              d.status,
-
-              d.updatedAt || "",
-
-              validCoordinate(
-                d.lat,
-                d.lon
-              )
-                ? d.lat
-                : "",
-
-              validCoordinate(
-                d.lat,
-                d.lon
-              )
-                ? d.lon
-                : "",
-
-              d.correctedNeighborhood ||
-                "",
-
-              d.geocodeSource ||
-                "",
-
-              d.geocodeDisplayName ||
-                ""
-
-            ]
+        csv +=
+          row
             .map(csvEscape)
-            .join(";")
-
-          );
-
-        });
-
-
-        const now =
-          new Date();
-
-
-        const filename =
-          "entregas_corrigidas_" +
-          now.getFullYear() +
-          "-" +
-          String(
-            now.getMonth() + 1
-          ).padStart(2, "0") +
-          "-" +
-          String(
-            now.getDate()
-          ).padStart(2, "0") +
-          ".csv";
-
-
-        downloadFile(
-          rows.join("\n"),
-          filename
-        );
-
-
-        geocodeStatus.textContent =
-          "Exportação concluída.";
-
-        geocodeDetail.textContent =
-          "Arquivo com todos os clientes e coordenadas.";
+            .join(";") +
+          "\n";
 
       }
     );
 
 
-    /* =========================================================
-       INICIALIZAÇÃO
-    ========================================================= */
-
-    function initialize() {
-
-      loadData();
-
-      updateSummary();
-
-      renderMarkers();
-
-      renderDeliveryList();
+    const blob =
+      new Blob(
+        [
+          "\ufeff" +
+          csv
+        ],
+        {
+          type:
+            "text/csv;charset=utf-8;"
+        }
+      );
 
 
-      geocodeStatus.textContent =
-        "Pronto.";
-
-      geocodeDetail.textContent =
-        deliveries.length +
-        " clientes carregados.";
+    const url =
+      URL.createObjectURL(
+        blob
+      );
 
 
-      progressBar.style.width =
-        "100%";
+    const a =
+      document.createElement(
+        "a"
+      );
 
+
+    a.href = url;
+
+    a.download =
+      "clientes_corrigidos.csv";
+
+
+    document.body.appendChild(
+      a
+    );
+
+    a.click();
+
+    a.remove();
+
+
+    URL.revokeObjectURL(
+      url
+    );
+
+  }
+
+
+  exportBtn.addEventListener(
+    "click",
+    exportCSV
+  );
+
+
+  /* ============================================================
+     INICIALIZAÇÃO
+     ============================================================ */
+
+  if (
+    CLIENTES_CARREGADOS.length === 0
+  ) {
+
+    geocodeStatus.textContent =
+      "⚠️ Nenhum cliente carregado.";
+
+    geocodeDetail.textContent =
+      "O arquivo clientes.js não foi carregado ou não contém CLIENTES.";
+
+    progressBar.style.width =
+      "0%";
+
+  } else {
+
+    geocodeStatus.textContent =
+      "Pronto.";
+
+    geocodeDetail.textContent =
+      `${CLIENTES_CARREGADOS.length} clientes carregados.`;
+
+  }
+
+
+  loadData();
+
+
+  /*
+    Corrige tamanho do mapa depois
+    que a página termina de carregar.
+  */
+
+  setTimeout(
+    () => {
+
+      map.invalidateSize();
+
+    },
+    400
+  );
+
+
+  window.addEventListener(
+    "resize",
+    () => {
 
       setTimeout(
-        refreshMapSize,
-        300
+        () => {
+
+          map.invalidateSize();
+
+        },
+        100
       );
 
     }
+  );
 
 
-    initialize();
+  /* ============================================================
+     SERVICE WORKER
+     ============================================================ */
 
+  if (
+    "serviceWorker" in navigator
+  ) {
 
-    /* =========================================================
-       SERVICE WORKER
-    ========================================================= */
+    navigator.serviceWorker
+      .register(
+        "./sw.js"
+      )
+      .catch(
+        () => {}
+      );
 
-    if (
-      "serviceWorker" in navigator
-    ) {
+  }
 
-      navigator.serviceWorker
-        .register(
-          "./sw.js"
-        )
-        .then(registration => {
-
-          registration.update();
-
-        })
-        .catch(() => {
-
-          /*
-           * Não impede o aplicativo
-           * de funcionar caso o SW não exista.
-           */
-
-        });
-
-    }
-
-  </script>
+</script>
 
 </body>
-</html>
+  </html>
