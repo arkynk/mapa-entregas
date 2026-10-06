@@ -1,647 +1,437 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="utf-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1,viewport-fit=cover"
->
-
-<meta name="theme-color" content="#111827">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <title>Mapa de Entregas</title>
 
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  crossorigin=""
->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
+*{box-sizing:border-box}
 
-:root{
-  --bg:#eef2f5;
-  --card:#fff;
-  --dark:#111827;
-  --dark2:#1f2937;
-  --text:#111827;
-  --muted:#64748b;
-  --blue:#2563eb;
-  --green:#16a34a;
-  --red:#dc2626;
-  --orange:#ea580c;
-  --line:#dbe2ea;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
+html,body{
   margin:0;
-  padding:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
+  background:#eef2f5;
+  color:#172033;
+  font-family:Arial,sans-serif
 }
 
 body{
-  padding-bottom:24px;
+  padding-bottom:20px
 }
 
 header{
-  background:#000;
+  background:#111827;
   color:#fff;
-  padding:18px;
+  padding:16px 16px 12px;
   position:sticky;
   top:0;
-  z-index:1000;
+  z-index:1000
 }
 
 header h1{
-  margin:0 0 5px;
-  font-size:24px;
+  margin:0;
+  font-size:25px
 }
 
 header p{
-  margin:0;
+  margin:5px 0 12px;
   color:#cbd5e1;
-  font-size:13px;
+  font-size:14px
 }
 
-.wrap{
-  max-width:760px;
-  margin:auto;
-  padding:12px;
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px
 }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin:4px 0 10px;
-}
-
-.stat{
-  background:var(--dark2);
-  color:#fff;
-  border-radius:14px;
-  padding:11px 5px;
-  text-align:center;
-}
-
-.stat b{
-  display:block;
-  font-size:20px;
-}
-
-.stat span{
-  font-size:12px;
-  color:#cbd5e1;
+.count{
+  background:#2864df;
+  border-radius:22px;
+  padding:12px 15px;
+  font-size:25px;
+  font-weight:900;
+  white-space:nowrap
 }
 
 .actions{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin-bottom:9px;
+  gap:8px;
+  margin-top:10px
 }
 
-button{
+.actions button{
   border:0;
-  border-radius:14px;
-  padding:14px 12px;
+  border-radius:13px;
+  padding:14px 8px;
   font-weight:800;
   font-size:15px;
-  cursor:pointer;
+  color:#fff
 }
 
-button:disabled{
-  opacity:.55;
-  cursor:wait;
-}
+.blue{background:#2864df}
+.green{background:#079f72}
+.orange{background:#f28a00}
+.gray{background:#5b6879}
 
-.primary{
-  background:var(--dark);
-  color:#fff;
-}
-
-.light{
-  background:#fff;
-  color:#111827;
-  border:1px solid var(--line);
-}
-
-.blue{
-  background:var(--blue);
-  color:#fff;
-}
-
-.green{
-  background:var(--green);
-  color:#fff;
-}
-
-.red{
-  background:var(--red);
-  color:#fff;
-}
-
-.orange{
-  background:var(--orange);
-  color:#fff;
-}
-
-.small{
-  font-size:12px;
-  padding:9px 10px;
-  border-radius:10px;
-}
-
-#map{
-  height:52vh;
-  min-height:390px;
-  border-radius:18px;
-  border:1px solid #cbd5e1;
-  overflow:hidden;
-  background:#dfe7d9;
+.wrap{
+  padding:10px
 }
 
 .notice{
   background:#fff;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  margin:10px 0;
-  color:#475569;
+  border:1px solid #d7dee7;
+  border-radius:13px;
+  padding:10px;
+  margin:9px 0;
   font-size:13px;
-  line-height:1.4;
+  color:#475569
 }
 
 .progress{
-  height:8px;
-  background:#dbe4ed;
-  border-radius:99px;
+  height:6px;
+  background:#e5e7eb;
+  border-radius:9px;
   overflow:hidden;
-  margin:9px 0;
+  margin-top:8px
 }
 
-.progress > div{
+.progress div{
   height:100%;
   width:0;
-  background:var(--blue);
-  transition:width:.2s;
+  background:#2864df
 }
 
-.nearby{
-  margin-top:10px;
+#map{
+  height:58vh;
+  min-height:420px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid #cbd5e1;
+  background:#ddd
 }
 
-.nearby h2{
+.leaflet-control-zoom{
+  margin-top:10px!important
+}
+
+.leaflet-popup-content{
+  font-size:14px
+}
+
+.user-dot{
+  width:22px;
+  height:22px;
+  background:#1769ff;
+  border:4px solid #fff;
+  border-radius:50%;
+  box-shadow:0 0 0 7px #1769ff33
+}
+
+.pin{
+  width:34px;
+  height:34px;
+  border-radius:50% 50% 50% 0;
+  background:#f59e0b;
+  border:3px solid #fff;
+  transform:rotate(-45deg);
+  box-shadow:0 2px 7px #0005;
+  display:flex;
+  align-items:center;
+  justify-content:center
+}
+
+.pin span{
+  transform:rotate(45deg);
+  color:#fff;
+  font-weight:900
+}
+
+.list-title{
   font-size:18px;
-  margin:10px 2px;
+  font-weight:900;
+  margin:14px 3px 7px
 }
 
 .card{
   background:#fff;
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:13px;
-  margin:8px 0;
-  box-shadow:0 2px 8px rgba(15,23,42,.05);
+  border:1px solid #d7dee7;
+  border-radius:15px;
+  padding:12px;
+  margin:8px 0
 }
 
-.card-top{
+.row{
   display:flex;
   justify-content:space-between;
-  gap:10px;
-  align-items:flex-start;
+  gap:8px
 }
 
-.card-title{
-  font-weight:800;
+.title{
+  font-weight:900
 }
 
-.address{
+.dist{
+  font-weight:900;
+  color:#2864df;
+  white-space:nowrap
+}
+
+.addr{
   font-size:14px;
-  margin:6px 0;
   color:#334155;
   line-height:1.35;
+  margin:6px 0
 }
 
-.city{
-  color:#64748b;
-  font-size:12px;
-  margin-top:3px;
-}
-
-.distance{
-  font-weight:800;
-  color:var(--blue);
-  white-space:nowrap;
-}
-
-.method{
-  color:#64748b;
-  font-size:11px;
-  margin-top:5px;
+.card button{
+  border:0;
+  border-radius:9px;
+  padding:9px;
+  font-weight:800
 }
 
 .card-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:7px;
-  margin-top:9px;
+  gap:7px
 }
 
-.empty{
-  padding:22px;
-  text-align:center;
-  color:var(--muted);
-  background:#fff;
-  border-radius:16px;
-  border:1px dashed #cbd5e1;
+.go{
+  background:#2864df;
+  color:#fff
 }
 
-.modal-bg{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  z-index:3000;
-  align-items:flex-end;
+.nav{
+  background:#eef2f5;
+  color:#172033
 }
 
 .modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0008;
+  z-index:3000;
+  align-items:flex-end
+}
+
+.sheet{
   background:#fff;
   width:100%;
-  max-width:760px;
-  margin:auto auto 0;
-  border-radius:22px 22px 0 0;
-  padding:18px;
-  max-height:88vh;
-  overflow:auto;
+  border-radius:20px 20px 0 0;
+  padding:16px
 }
 
-.modal h2{
-  margin:0 0 6px;
-  font-size:21px;
+.sheet h2{
+  margin:0 0 6px
 }
 
-.modal .addr{
+.sheet p{
   color:#475569;
-  line-height:1.45;
-  margin-bottom:12px;
+  line-height:1.4
 }
 
-.status-grid{
+.status{
   display:grid;
   grid-template-columns:1fr;
-  gap:8px;
+  gap:8px
+}
+
+.status button{
+  border:0;
+  border-radius:12px;
+  padding:13px;
+  font-weight:900;
+  color:#fff
+}
+
+.carta{
+  background:#16a34a
+}
+
+.nao{
+  background:#dc2626
+}
+
+.risco{
+  background:#ea580c
 }
 
 .close{
-  background:#e5e7eb;
-  color:#111827;
+  background:#e5e7eb!important;
+  color:#111827!important
 }
-
-.debug{
-  background:#f8fafc;
-  border:1px solid #e2e8f0;
-  border-radius:10px;
-  padding:10px;
-  margin:10px 0;
-  font-size:12px;
-  line-height:1.45;
-  color:#475569;
-}
-
-.marker-pin{
-  width:34px;
-  height:34px;
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:3px solid #fff;
-  box-shadow:0 2px 7px rgba(0,0,0,.3);
-}
-
-.marker-pin span{
-  transform:rotate(45deg);
-  color:#fff;
-  font-weight:900;
-  font-size:15px;
-}
-
-.user-dot{
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:#1677ff;
-  border:4px solid #fff;
-  box-shadow:0 0 0 7px rgba(37,99,235,.18);
-}
-
-@media(min-width:700px){
-
-  .modal{
-    border-radius:22px;
-    margin:auto;
-  }
-
-  .modal-bg{
-    align-items:center;
-    padding:20px;
-  }
-
-  .status-grid{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-}
-
 </style>
-
 </head>
 
 <body>
 
 <header>
+  <div class="top">
+    <div>
+      <h1>📦 Mapa de Entregas</h1>
+      <p>Localização inteligente dos clientes</p>
+    </div>
 
-  <h1>🚚 Mapa de Entregas</h1>
+    <div class="count" id="count">0/0</div>
+  </div>
 
-  <p>
-    Localização inteligente por cidade
-  </p>
-
+  <div class="actions">
+    <button class="blue" id="locBtn">📍 Localizar</button>
+    <button class="green" id="gpsBtn">📌 GPS</button>
+    <button class="orange" id="geocodeBtn">🔄 Localizar pontos</button>
+    <button class="gray" id="exportBtn">📤 Exportar</button>
+  </div>
 </header>
 
 <div class="wrap">
 
-  <div class="stats">
-
-    <div class="stat">
-      <b id="total">0</b>
-      <span>Total</span>
-    </div>
-
-    <div class="stat">
-      <b id="pending">0</b>
-      <span>Pendentes</span>
-    </div>
-
-    <div class="stat">
-      <b id="done">0</b>
-      <span>Concluídas</span>
-    </div>
-
-  </div>
-
-
-  <div class="actions">
-
-    <button
-      class="primary"
-      id="locBtn"
-    >
-      📍 Minha localização
-    </button>
-
-    <button
-      class="light"
-      id="nearBtn"
-    >
-      📌 Mais próximas
-    </button>
-
-    <button
-      class="blue"
-      id="geocodeBtn"
-    >
-      🗺️ Localizar novamente
-    </button>
-
-    <button
-      class="light"
-      id="exportBtn"
-    >
-      📥 Exportar CSV
-    </button>
-
-  </div>
-
-
   <div class="notice">
-
-    <b>Localização inteligente</b>
-
-    <div style="margin-top:5px">
-
-      O sistema utiliza a <b>cidade da própria entrega</b>
-      para fazer as buscas. Depois tenta automaticamente
-      diferentes formatos do endereço.
-
-    </div>
+    <b>Visitas pendentes:</b>
+    <span id="statusText">carregando...</span>
 
     <div class="progress">
-      <div id="progressBar"></div>
+      <div id="bar"></div>
     </div>
-
-    <div id="geocodeStatus">
-      Nenhuma nova localização realizada.
-    </div>
-
   </div>
-
 
   <div id="map"></div>
 
-
-  <div class="notice">
-
-    <b>Como usar:</b>
-
-    toque em um ponto para ver o endereço.
-
-    Depois use <b>“Ir para o endereço”</b>.
-
-    Ao finalizar, registre
-
-    <b>Carta</b>,
-
-    <b>Não localizado</b>
-
-    ou
-
-    <b>Zona de risco</b>.
-
+  <div class="list-title">
+    📍 Visitas que ainda faltam
   </div>
 
-
-  <section class="nearby">
-
-    <h2>
-      📍 Entregas pendentes — mais próximas primeiro
-    </h2>
-
-    <div id="nearbyList"></div>
-
-  </section>
+  <div id="list"></div>
 
 </div>
 
+<div class="modal" id="modal">
 
-<div
-  class="modal-bg"
-  id="modalBg"
->
+  <div class="sheet">
 
-  <div class="modal">
-
-    <h2 id="modalTitle">
+    <h2 id="mtitle">
       Entrega
     </h2>
 
-    <div
-      class="addr"
-      id="modalAddress"
-    ></div>
+    <p id="maddr"></p>
 
-    <div id="modalDistance"></div>
+    <p id="mdist"></p>
 
-    <div
-      class="debug"
-      id="modalDebug"
-    ></div>
-
-    <div class="status-grid">
+    <div class="status">
 
       <button
-        class="green"
-        id="cartaBtn"
-      >
+        class="carta"
+        onclick="setStatus('CARTA')">
         📄 CARTA
       </button>
 
       <button
-        class="red"
-        id="naoBtn"
-      >
+        class="nao"
+        onclick="setStatus('NAO_LOCALIZADO')">
         ❌ NÃO LOCALIZADO
       </button>
 
       <button
-        class="orange"
-        id="riscoBtn"
-      >
+        class="risco"
+        onclick="setStatus('ZONA_DE_RISCO')">
         ⚠️ ZONA DE RISCO
       </button>
 
-    </div>
+      <button
+        class="close"
+        onclick="closeModal()">
+        Fechar
+      </button>
 
-    <button
-      class="close"
-      id="closeBtn"
-      style="width:100%;margin-top:9px"
-    >
-      Fechar
-    </button>
+    </div>
 
   </div>
 
 </div>
 
-
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  crossorigin=""
-></script>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-/* ============================================================
-   CONFIGURAÇÃO
-============================================================ */
+const STORAGE_KEY = 'mapa_entregas_lista1_v1';
 
-const DEFAULT_CENTER = [
-  -29.1678,
-  -51.1794
+const CACHE_KEY = 'mapa_entregas_geocache_lista1_v1';
+
+const CENTER = [-29.1678,-51.1794];
+
+const INITIAL_ADDRESSES = [
+
+"MARIO LUNARDI, 130, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"R. Alexandre Peretti, 154, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"ANTONIO SUSIN, 191, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"JOAO RIZZO, 1077, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"ANTONIO SUSIN, 322, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"R. Almerinda Ramos Santos, 208, CHARQUEADAS, CAXIAS DO SUL, RS, Brasil",
+"EUCLIDES MEDEIROS, 271, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"DOUTORA BEATRIZ BEDIN, 255, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"DOUTORA BEATRIZ BEDIN, 255, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"R. Joanna Toscana Mezzomo Lora, 902, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"ADELINO ANGELO CEGONI, 325, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"SEVERINA BONETTO, 150, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"R Alexandre Luciano, 956, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"R Ernesto Bernardi, 1443, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"R Alexandre Luciano, 956, DESVIO RIZZO, CAXIAS DO SUL, RS, Brasil",
+"ANGELO ZULIAN SOBRINO, 1410, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"RUA GALEZZO PAGANELLI, 280, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"DIONYSIO ADAMI, 430, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"GALEZZO PAGANELLI, 280, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"R. Hygino Tartarotti, 421, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"LUIZ LAVRATTI, 1150, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"IRMA GENI, 870, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"R. Dionysio Adami, 430, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"DIONYSIO ADAMI, 241, ESPLANADA, CAXIAS DO SUL, RS, Brasil",
+"R Sarmento Leite, 3488, Exposição, Caxias do Sul, RS, Brasil",
+"ANTONIO GATTERMANN, 2204, KAYSER, CAXIAS DO SUL, RS, Brasil",
+"SAO FRANCISCO DE PAULA, 725, KAYSER, CAXIAS DO SUL, RS, Brasil",
+"BOM JESUS, 1289, KAYSER, CAXIAS DO SUL, RS, Brasil",
+"R Ernesto Casara, 123, KAYSER, Caxias do Sul, RS, Brasil",
+"FRANCISCO FAGUNDES DA SILVA, 30, KAYSER, CAXIAS DO SUL, RS, Brasil",
+"Rua Gaetano Finco, 2125, KAYSER, Caxias do Sul, RS, Brasil",
+"Tv S Marcos, 345, KAYSER, CAXIAS DO SUL, RS, Brasil",
+"R N Sra Aparecida, 610, Medianeira, CAXIAS DO SUL, RS, Brasil",
+"Rua Dionysio Adami, 430, Nossa Senhora das Graças, CAXIAS DO SUL, RS, Brasil",
+"Rua Eduardo Castilhos dos Reis, 42, Nossa Senhora das Graças, CAXIAS DO SUL, RS, Brasil",
+"ANDRADINA FORTUNATO DA SILVA, 1150, NOSSA SRA DAS GRACAS, CAXIAS DO SUL, RS, Brasil",
+"R. das Ametistas, 96, Nossa Sra. Das Gracas, CAXIAS DO SUL, RS, Brasil",
+"R. Dionysio Adami, 741, Nossa Sra. das Graças, Caxias do Sul, RS, Brasil",
+"R. Bonfíglio Tamagno, 1091, Nossa Sra. das Graças, CAXIAS DO SUL, RS, Brasil",
+"LUIZ ANTUNES, 267, PANAZZOLO, CAXIAS DO SUL, RS, Brasil",
+"LUIZ ANTUNES 00906501, 906, PANAZZOLO, CAXIAS DO SUL, RS, Brasil",
+"LUIZ BURATTO, 47, RIO BRANCO, CAXIAS DO SUL, RS, Brasil",
+"WALTER CARLOS AFFONSO, 265, SALGADO FILHO, CAXIAS DO SUL, RS, Brasil",
+"VITORIO MADALOSSO, 255, SALGADO FILHO, CAXIAS DO SUL, RS, Brasil",
+"FLAVIO CHAVES, 605, SALGADO FILHO, CAXIAS DO SUL, RS, Brasil",
+"Rua Jacintho Zanol, 280, Santa Corona, CAXIAS DO SUL, RS, Brasil",
+"NATAL BONADEO, 127, SAO LEOPOLDO, CAXIAS DO SUL, RS, Brasil",
+"ERNA SIRTOLI UEZ, 1664, SAO LEOPOLDO, CAXIAS DO SUL, RS, Brasil",
+"MARLENE ELZA PANAROTTO, 303, SAO VICTOR COHAB, CAXIAS DO SUL, RS, Brasil"
+
 ];
 
-const STORAGE_KEY =
-  "mapa_entregas_lista1_v1";
+const INITIAL = INITIAL_ADDRESSES.map(
+  (address,i)=>({
+    id:i+1,
+    label:'Entrega '+(i+1),
+    address,
+    status:'PENDENTE',
+    lat:null,
+    lon:null,
+    updatedAt:null
+  })
+);
 
-const CACHE_KEY =
-  "mapa_entregas_geocache_lista1_v2";
-
-const GEO_HISTORY_KEY =
-  "mapa_entregas_geohistory_v1";
-
-
-/*
-  IMPORTANTE:
-
-  Não colocamos uma cidade fixa aqui.
-
-  A cidade será retirada do próprio registro.
-
-  Exemplos:
-
-  Caxias do Sul
-  Farroupilha
-  Garibaldi
-  Bento Gonçalves
-  Carlos Barbosa
-  etc.
-*/
-
-
-/* ============================================================
-   MAPA
-============================================================ */
-
-const map =
-  L.map("map",{
-    zoomControl:true
-  }).setView(
-    DEFAULT_CENTER,
-    13
-  );
-
-
-L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    attribution:
-      "&copy; OpenStreetMap contributors"
-  }
-).addTo(map);
-
-
-/* ============================================================
-   ESTADO
-============================================================ */
-
-let deliveries =
-  loadData();
-
-let geocache =
-  JSON.parse(
-    localStorage.getItem(CACHE_KEY) || "{}"
-  );
-
-let geoHistory =
-  JSON.parse(
-    localStorage.getItem(GEO_HISTORY_KEY) || "{}"
-  );
+let deliveries = loadData();
 
 let userPos = null;
 
@@ -653,351 +443,114 @@ let markers = new Map();
 
 let selectedId = null;
 
-let watchId = null;
+let geocache = JSON.parse(
+  localStorage.getItem(CACHE_KEY)||'{}'
+);
+
+Object.keys(geocache).forEach(k=>{
+
+  const p={
+    lat:Number(geocache[k]?.lat),
+    lon:Number(geocache[k]?.lon)
+  };
+
+  if(validCoords(p)){
+    geocache[k]=p;
+  }else{
+    delete geocache[k];
+  }
+
+});
+
+localStorage.setItem(
+  CACHE_KEY,
+  JSON.stringify(geocache)
+);
+
+deliveries.forEach(validCoords);
+
+const map = L.map('map').setView(
+  CENTER,
+  13
+);
+
+L.tileLayer(
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom:19,
+    attribution:'&copy; OpenStreetMap contributors'
+  }
+).addTo(map);
 
 
-/* ============================================================
-   NORMALIZAÇÃO
-============================================================ */
+/* ============================
+   VALIDAÇÃO DAS COORDENADAS
+   ============================ */
 
-function normalize(value){
+function validCoords(d){
 
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .toLowerCase()
-    .replace(/\s+/g," ")
-    .trim();
-
-}
-
-
-/* ============================================================
-   ESCAPE HTML
-============================================================ */
-
-function esc(value){
-
-  return String(value ?? "")
-    .replace(/[&<>"']/g,m=>({
-
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-
-    }[m]));
-
-}
-
-
-/* ============================================================
-   COORDENADAS
-============================================================ */
-
-function normalizeCoordinates(obj){
-
-  let lat =
-    Number(obj.lat);
-
-  let lon =
-    Number(obj.lon);
+  let lat=Number(d.lat);
+  let lon=Number(d.lon);
 
   if(
     !Number.isFinite(lat) ||
     !Number.isFinite(lon)
   ){
-
-    obj.lat = null;
-    obj.lon = null;
-
+    d.lat=null;
+    d.lon=null;
     return false;
-
   }
-
-
-  /*
-    Corrige automaticamente caso
-    latitude/longitude tenham vindo invertidas.
-  */
 
   if(
-    Math.abs(lat) > 90 &&
-    Math.abs(lon) <= 90
+    Math.abs(lat)>90 &&
+    Math.abs(lon)<=90
   ){
-
-    [
-      lat,
-      lon
-    ] = [
-      lon,
-      lat
-    ];
-
+    [lat,lon]=[lon,lat];
   }
-
-
-  /*
-    Não aceita coordenadas obviamente inválidas.
-    A faixa abaixo cobre o RS inteiro,
-    não apenas Caxias.
-  */
 
   if(
-    lat < -34.5 ||
-    lat > -26 ||
-    lon < -58 ||
-    lon > -48
+    lat<-30 ||
+    lat>-28 ||
+    lon<-52 ||
+    lon>-50.5
   ){
-
-    obj.lat = null;
-    obj.lon = null;
-
+    d.lat=null;
+    d.lon=null;
     return false;
-
   }
 
-
-  obj.lat = lat;
-  obj.lon = lon;
+  d.lat=lat;
+  d.lon=lon;
 
   return true;
-
 }
 
 
-/* ============================================================
-   EXTRAÇÃO DA CIDADE
-============================================================ */
-
-function extractCityFromAddress(address){
-
-  if(!address)
-    return "";
-
-  const parts =
-    String(address)
-      .split(",")
-      .map(x=>x.trim())
-      .filter(Boolean);
-
-
-  /*
-    Formato mais comum:
-
-    RUA, NUMERO, BAIRRO, CIDADE, RS, Brasil
-
-    Cidade = penúltimo bloco antes de RS/Brasil.
-  */
-
-  const cleaned =
-    parts.filter(
-      p =>
-        normalize(p) !== "rs" &&
-        normalize(p) !== "rio grande do sul" &&
-        normalize(p) !== "brasil"
-    );
-
-
-  if(cleaned.length >= 3){
-
-    return cleaned[cleaned.length - 1];
-
-  }
-
-
-  return "";
-
-}
-
-
-/* ============================================================
-   OBTÉM A CIDADE DO REGISTRO
-============================================================ */
-
-function getDeliveryCity(d){
-
-  /*
-    Primeiro tenta campos separados.
-
-    Isso permite que, no futuro,
-    uma importação da planilha tenha:
-
-    cidade
-    city
-    municipio
-  */
-
-  const explicit =
-    d.city ||
-    d.cidade ||
-    d.municipio ||
-    d.município ||
-    d.Cidade ||
-    d.CIDADE;
-
-
-  if(explicit){
-
-    return String(explicit)
-      .trim();
-
-  }
-
-
-  /*
-    Se o registro antigo não possuir
-    a coluna separada, extrai da string
-    do endereço.
-
-    Isso mantém compatibilidade com
-    os dados que já estão no celular.
-  */
-
-  return extractCityFromAddress(
-    d.address ||
-    d.endereco ||
-    d["Endereço completo"] ||
-    ""
-  );
-
-}
-
-
-/* ============================================================
-   NORMALIZA UM REGISTRO
-============================================================ */
-
-function normalizeDelivery(d,index){
-
-  if(!d.id)
-    d.id = index + 1;
-
-  if(!d.label)
-    d.label = "Entrega " + d.id;
-
-  if(!d.address){
-
-    d.address =
-      d.endereco ||
-      d["Endereço completo"] ||
-      "";
-
-  }
-
-
-  d.city =
-    getDeliveryCity(d);
-
-
-  if(!d.status)
-    d.status = "PENDENTE";
-
-
-  if(
-    d.lat !== null &&
-    d.lat !== undefined
-  ){
-
-    normalizeCoordinates(d);
-
-  }
-
-
-  if(!Number.isFinite(Number(d.lat)))
-    d.lat = null;
-
-  if(!Number.isFinite(Number(d.lon)))
-    d.lon = null;
-
-
-  if(!("locMethod" in d))
-    d.locMethod = null;
-
-  if(!("locQuery" in d))
-    d.locQuery = null;
-
-  if(!("locDisplay" in d))
-    d.locDisplay = null;
-
-  if(!("locScore" in d))
-    d.locScore = null;
-
-
-  return d;
-
-}
-
-
-/* ============================================================
-   CARREGA DADOS
-============================================================ */
+/* ============================
+   DADOS
+   ============================ */
 
 function loadData(){
 
   try{
 
-    const saved =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_KEY
-        )
-      );
-
-
-    if(
-      Array.isArray(saved) &&
-      saved.length
-    ){
-
-      saved.forEach(
-        normalizeDelivery
-      );
-
-      /*
-        Atualiza registros antigos
-        acrescentando a cidade.
-      */
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(saved)
-      );
-
-      return saved;
-
-    }
-
-  }catch(e){
-
-    console.warn(
-      "Erro lendo dados:",
-      e
+    const x=JSON.parse(
+      localStorage.getItem(STORAGE_KEY)
     );
 
-  }
+    if(
+      Array.isArray(x) &&
+      x.length
+    ){
+      return x;
+    }
 
+  }catch(e){}
 
-  /*
-    Caso não exista lista salva,
-    não inventamos endereços.
-
-    O sistema continuará vazio até
-    receber a lista/importação usada
-    pelo projeto.
-  */
-
-  return [];
-
+  return structuredClone(INITIAL);
 }
 
-
-/* ============================================================
-   SALVA
-============================================================ */
-
-function saveData(){
+function save(){
 
   localStorage.setItem(
     STORAGE_KEY,
@@ -1006,1645 +559,274 @@ function saveData(){
 
 }
 
+function norm(s){
 
-/* ============================================================
-   DISTÂNCIA
-============================================================ */
-
-function distanceKm(
-  lat1,
-  lon1,
-  lat2,
-  lon2
-){
-
-  if(
-    ![
-      lat1,
-      lon1,
-      lat2,
-      lon2
-    ].every(Number.isFinite)
-  ){
-
-    return null;
-
-  }
-
-
-  const R = 6371;
-
-  const rad =
-    Math.PI / 180;
-
-  const dLat =
-    (lat2-lat1)*rad;
-
-  const dLon =
-    (lon2-lon1)*rad;
-
-
-  const a =
-    Math.sin(dLat/2)**2 +
-    Math.cos(lat1*rad) *
-    Math.cos(lat2*rad) *
-    Math.sin(dLon/2)**2;
-
-
-  const safe =
-    Math.min(
-      1,
-      Math.max(0,a)
-    );
-
-
-  return (
-    R *
-    2 *
-    Math.atan2(
-      Math.sqrt(safe),
-      Math.sqrt(1-safe)
-    )
-  );
-
-}
-
-
-function distanceText(km){
-
-  if(km === null)
-    return "";
-
-  if(km < 1){
-
-    return (
-      Math.round(km*1000) +
-      " m"
-    );
-
-  }
-
-
-  return (
-    km
-      .toFixed(1)
-      .replace(".",",") +
-    " km"
-  );
-
-}
-
-
-/* ============================================================
-   NORMALIZA NOME DE RUA
-============================================================ */
-
-function normalizeStreetName(name){
-
-  let s =
-    String(name || "")
-      .trim();
-
-
-  /*
-    Remove códigos que costumam
-    contaminar o nome da rua.
-
-    Exemplo:
-
-    LUIZ ANTUNES 00906501
-
-    vira:
-
-    LUIZ ANTUNES
-  */
-
-  s =
-    s.replace(
-      /\b\d{5,}\b/g,
-      ""
-    );
-
-
-  s =
-    s.replace(
-      /\s+/g,
-      " "
-    )
+  return String(s)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/\s+/g,' ')
     .trim();
 
-
-  /*
-    Normaliza abreviações.
-  */
-
-  s =
-    s.replace(
-      /^R\.?\s+/i,
-      "Rua "
-    );
-
-
-  s =
-    s.replace(
-      /^RUA\s+/i,
-      "Rua "
-    );
-
-
-  s =
-    s.replace(
-      /^AV\.?\s+/i,
-      "Avenida "
-    );
-
-
-  s =
-    s.replace(
-      /^AVENIDA\s+/i,
-      "Avenida "
-    );
-
-
-  s =
-    s.replace(
-      /^TV\.?\s+/i,
-      "Travessa "
-    );
-
-
-  s =
-    s.replace(
-      /^TRAV\.?\s+/i,
-      "Travessa "
-    );
-
-
-  s =
-    s.replace(
-      /^EST\.?\s+MUN\.?\s+/i,
-      "Estrada Municipal "
-    );
-
-
-  s =
-    s.replace(
-      /^EST\.?\s+/i,
-      "Estrada "
-    );
-
-
-  return s;
-
 }
 
-
-/* ============================================================
-   EXTRAI COMPONENTES DO ENDEREÇO
-============================================================ */
-
-function parseAddress(d){
-
-  const raw =
-    String(
-      d.address ||
-      d.endereco ||
-      d["Endereço completo"] ||
-      ""
-    ).trim();
-
-
-  const city =
-    getDeliveryCity(d);
-
-
-  /*
-    Se a planilha tiver campos separados,
-    eles têm prioridade.
-  */
-
-  let street =
-    d.street ||
-    d.rua ||
-    d.Endereço ||
-    "";
-
-
-  let number =
-    d.number ||
-    d.numero ||
-    d.Número ||
-    "";
-
-
-  let neighborhood =
-    d.neighborhood ||
-    d.bairro ||
-    d.Bairro ||
-    "";
-
-
-  /*
-    Se não houver campos separados,
-    tenta desmontar o endereço completo.
-  */
-
-  if(
-    !street ||
-    !number ||
-    !neighborhood
-  ){
-
-    const parts =
-      raw
-        .split(",")
-        .map(x=>x.trim())
-        .filter(Boolean);
-
-
-    if(parts.length >= 2){
-
-      if(!street)
-        street = parts[0];
-
-
-      if(!number){
-
-        /*
-          O número normalmente está
-          no segundo bloco.
-        */
-
-        number =
-          parts[1]
-            .replace(
-              /[^\dA-Za-z\-]/g,
-              ""
-            );
-
-      }
-
-
-      if(!neighborhood){
-
-        const cityIndex =
-          parts.findIndex(
-            p =>
-              normalize(p) ===
-              normalize(city)
-          );
-
-
-        if(cityIndex > 2){
-
-          neighborhood =
-            parts[cityIndex-1];
-
-        }
-
-      }
-
-    }
-
-  }
-
-
-  street =
-    normalizeStreetName(
-      street
-    );
-
-
-  return {
-
-    raw,
-    street,
-    number:
-      String(number || "").trim(),
-    neighborhood:
-      String(
-        neighborhood || ""
-      ).trim(),
-    city:
-      String(
-        city || ""
-      ).trim()
-
-  };
-
-}
-
-
-/* ============================================================
-   CRIA TENTATIVAS DE BUSCA
-============================================================ */
-
-function buildQueries(d){
-
-  const p =
-    parseAddress(d);
-
-
-  const queries = [];
-
-  function add(
-    label,
-    query
-  ){
-
-    if(!query)
-      return;
-
-    const exists =
-      queries.some(
-        x =>
-          normalize(x.query) ===
-          normalize(query)
-      );
-
-
-    if(!exists){
-
-      queries.push({
-        label,
-        query
-      });
-
-    }
-
-  }
-
-
-  const city =
-    p.city;
-
-
-  const street =
-    p.street;
-
-
-  const number =
-    p.number;
-
-
-  const neighborhood =
-    p.neighborhood;
-
-
-  /*
-    1 — endereço original,
-    mas garantindo cidade.
-  */
-
-  add(
-    "Original + cidade",
-    `${p.raw}, ${city}, RS, Brasil`
-  );
-
-
-  /*
-    2 — rua normalizada + número
-        + bairro + cidade
-  */
-
-  if(
-    street &&
-    number &&
-    neighborhood
-  ){
-
-    add(
-      "Rua normalizada + bairro",
-      `${street}, ${number}, ${neighborhood}, ${city}, RS, Brasil`
-    );
-
-  }
-
-
-  /*
-    3 — remove bairro.
-  */
-
-  if(
-    street &&
-    number
-  ){
-
-    add(
-      "Rua + número + cidade",
-      `${street}, ${number}, ${city}, RS, Brasil`
-    );
-
-  }
-
-
-  /*
-    4 — nome original da rua
-        sem abreviação.
-  */
-
-  if(
-    d.address &&
-    number &&
-    city
-  ){
-
-    const originalStreet =
-      String(d.address)
-        .split(",")[0]
-        .trim();
-
-
-    add(
-      "Rua original + número + cidade",
-      `${originalStreet}, ${number}, ${city}, RS, Brasil`
-    );
-
-  }
-
-
-  /*
-    5 — somente rua + cidade.
-
-    É o fallback mais amplo.
-  */
-
-  if(
-    street &&
-    city
-  ){
-
-    add(
-      "Rua + cidade",
-      `${street}, ${city}, RS, Brasil`
-    );
-
-  }
-
-
-  /*
-    6 — sem acentos.
-  */
-
-  if(
-    street &&
-    number &&
-    city
-  ){
-
-    add(
-      "Sem acentos + cidade",
-      `${normalize(street)}, ${number}, ${normalize(city)}, RS, Brasil`
-    );
-
-  }
-
-
-  return queries;
-
-}
-
-
-/* ============================================================
-   VALIDA CIDADE DO RESULTADO
-============================================================ */
-
-function resultMatchesCity(
-  item,
-  expectedCity
-){
-
-  if(!expectedCity)
-    return true;
-
-
-  const wanted =
-    normalize(expectedCity);
-
-
-  const addr =
-    item.address || {};
-
-
-  const possible = [
-
-    addr.city,
-    addr.town,
-    addr.village,
-    addr.municipality,
-    addr.city_district,
-    addr.county
-
-  ]
-    .filter(Boolean)
-    .map(normalize);
-
-
-  /*
-    Primeiro verificamos os campos
-    estruturados do Nominatim.
-  */
-
-  if(
-    possible.some(
-      value =>
-        value === wanted ||
-        value.includes(wanted) ||
-        wanted.includes(value)
-    )
-  ){
-
-    return true;
-
-  }
-
-
-  /*
-    Segundo nível:
-    usa display_name como fallback.
-
-    Isso ajuda em cidades pequenas
-    onde o retorno pode variar.
-  */
-
-  const display =
-    normalize(
-      item.display_name || ""
-    );
-
-
-  /*
-    Exigimos a cidade inteira
-    dentro do resultado.
-  */
-
-  return display.includes(wanted);
-
-}
-
-
-/* ============================================================
-   VALIDA ESTADO
-============================================================ */
-
-function resultIsInRioGrandeDoSul(item){
-
-  const addr =
-    item.address || {};
-
-
-  const state =
-    normalize(
-      addr.state || ""
-    );
-
-
-  const iso =
-    normalize(
-      addr["ISO3166-2-lvl4"] || ""
-    );
-
-
-  if(
-    state.includes(
-      "rio grande do sul"
-    )
-  ){
-
-    return true;
-
-  }
-
-
-  if(
-    iso === "br-rs"
-  ){
-
-    return true;
-
-  }
-
-
-  /*
-    Alguns resultados não retornam
-    corretamente o campo estadual.
-    Nesse caso verificamos display_name.
-  */
-
-  const display =
-    normalize(
-      item.display_name || ""
-    );
-
-
-  return (
-    display.includes(
-      "rio grande do sul"
-    ) ||
-    display.includes(
-      " rs,"
-    )
+function esc(s){
+
+  return String(s).replace(
+    /[&<>"']/g,
+    m=>({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+    }[m])
   );
 
 }
 
 
-/* ============================================================
-   CALCULA QUALIDADE DO RESULTADO
-============================================================ */
+/* ============================
+   DISTÂNCIA
+   ============================ */
 
-function scoreResult(
-  item,
-  d
-){
-
-  const p =
-    parseAddress(d);
-
-
-  let score = 0;
-
-
-  const addr =
-    item.address || {};
-
-
-  const returnedCity =
-    normalize(
-      addr.city ||
-      addr.town ||
-      addr.village ||
-      addr.municipality ||
-      ""
-    );
-
-
-  const wantedCity =
-    normalize(p.city);
-
+function distanceKm(a,b,c,d){
 
   if(
-    returnedCity &&
-    wantedCity &&
-    returnedCity === wantedCity
+    ![a,b,c,d].every(Number.isFinite)
   ){
-
-    score += 50;
-
-  }else if(
-    returnedCity &&
-    wantedCity &&
-    (
-      returnedCity.includes(wantedCity) ||
-      wantedCity.includes(returnedCity)
-    )
-  ){
-
-    score += 35;
-
-  }
-
-
-  const returnedRoad =
-    normalize(
-      addr.road ||
-      addr.pedestrian ||
-      addr.footway ||
-      ""
-    );
-
-
-  const wantedRoad =
-    normalize(p.street)
-      .replace(
-        /^(rua|avenida|travessa|estrada|rodovia)\s+/,
-        ""
-      );
-
-
-  if(
-    returnedRoad &&
-    wantedRoad &&
-    (
-      returnedRoad.includes(wantedRoad) ||
-      wantedRoad.includes(returnedRoad)
-    )
-  ){
-
-    score += 35;
-
-  }
-
-
-  const returnedHouse =
-    normalize(
-      addr.house_number ||
-      ""
-    );
-
-
-  if(
-    p.number &&
-    returnedHouse &&
-    returnedHouse ===
-    normalize(p.number)
-  ){
-
-    score += 15;
-
-  }
-
-
-  if(
-    addr.suburb &&
-    p.neighborhood &&
-    normalize(addr.suburb) ===
-    normalize(p.neighborhood)
-  ){
-
-    score += 10;
-
-  }
-
-
-  return score;
-
-}
-
-
-/* ============================================================
-   CHAVE DO CACHE
-============================================================ */
-
-function cacheKey(
-  d,
-  query
-){
-
-  return normalize(
-    `${getDeliveryCity(d)}|${query}`
-  );
-
-}
-
-
-/* ============================================================
-   SALVA CACHE
-============================================================ */
-
-function saveGeoCache(){
-
-  localStorage.setItem(
-    CACHE_KEY,
-    JSON.stringify(
-      geocache
-    )
-  );
-
-}
-
-
-/* ============================================================
-   HISTÓRICO DA LOCALIZAÇÃO
-============================================================ */
-
-function saveGeoHistory(
-  d,
-  data
-){
-
-  geoHistory[String(d.id)] = {
-
-    address:
-      d.address,
-
-    city:
-      getDeliveryCity(d),
-
-    query:
-      data.query,
-
-    method:
-      data.method,
-
-    display:
-      data.display,
-
-    score:
-      data.score,
-
-    lat:
-      data.lat,
-
-    lon:
-      data.lon,
-
-    updatedAt:
-      new Date().toISOString()
-
-  };
-
-
-  localStorage.setItem(
-    GEO_HISTORY_KEY,
-    JSON.stringify(
-      geoHistory
-    )
-  );
-
-}
-
-
-/* ============================================================
-   CONSULTA NOMINATIM
-============================================================ */
-
-async function searchNominatim(
-  query,
-  d
-){
-
-  const url =
-    "https://nominatim.openstreetmap.org/search" +
-    "?format=jsonv2" +
-    "&limit=5" +
-    "&countrycodes=br" +
-    "&accept-language=pt-BR" +
-    "&addressdetails=1" +
-    "&q=" +
-    encodeURIComponent(query);
-
-
-  const response =
-    await fetch(
-      url,
-      {
-        headers:{
-          "Accept":
-            "application/json"
-        }
-      }
-    );
-
-
-  if(!response.ok){
-
-    throw new Error(
-      "HTTP " +
-      response.status
-    );
-
-  }
-
-
-  const data =
-    await response.json();
-
-
-  if(!Array.isArray(data))
     return null;
-
-
-  const expectedCity =
-    getDeliveryCity(d);
-
-
-  /*
-    Filtra primeiro por cidade
-    e estado.
-  */
-
-  const valid =
-    data
-      .filter(
-        item =>
-          resultIsInRioGrandeDoSul(item) &&
-          resultMatchesCity(
-            item,
-            expectedCity
-          )
-      )
-      .map(
-        item => ({
-
-          item,
-
-          score:
-            scoreResult(
-              item,
-              d
-            )
-
-        })
-      )
-      .sort(
-        (a,b)=>
-          b.score -
-          a.score
-      );
-
-
-  if(!valid.length)
-    return null;
-
-
-  const best =
-    valid[0];
-
-
-  const lat =
-    parseFloat(
-      best.item.lat
-    );
-
-  const lon =
-    parseFloat(
-      best.item.lon
-    );
-
-
-  if(
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon)
-  ){
-
-    return null;
-
   }
 
-
-  const coords = {
-    lat,
-    lon
-  };
-
-
   if(
-    !normalizeCoordinates(
-      coords
+    Math.abs(a)>90 ||
+    Math.abs(c)>90 ||
+    Math.abs(b)>180 ||
+    Math.abs(d)>180
+  ){
+    return null;
+  }
+
+  const r=6371;
+
+  const x=
+    Math.sin((c-a)*Math.PI/360)**2+
+    Math.cos(a*Math.PI/180)*
+    Math.cos(c*Math.PI/180)*
+    Math.sin((d-b)*Math.PI/360)**2;
+
+  return r*2*Math.atan2(
+    Math.sqrt(
+      Math.min(1,Math.max(0,x))
+    ),
+    Math.sqrt(
+      1-Math.min(1,Math.max(0,x))
     )
-  ){
-
-    return null;
-
-  }
-
-
-  return {
-
-    lat:
-      coords.lat,
-
-    lon:
-      coords.lon,
-
-    score:
-      best.score,
-
-    display:
-      best.item.display_name ||
-      "",
-
-    address:
-      best.item.address ||
-      {}
-
-  };
-
-}
-
-
-/* ============================================================
-   GEOCODIFICA UMA ENTREGA
-============================================================ */
-
-async function geocodeOne(d){
-
-  const queries =
-    buildQueries(d);
-
-
-  /*
-    Primeiro verifica se existe
-    histórico/cache para alguma
-    das consultas.
-  */
-
-  for(
-    const attempt of queries
-  ){
-
-    const key =
-      cacheKey(
-        d,
-        attempt.query
-      );
-
-
-    const cached =
-      geocache[key];
-
-
-    if(cached){
-
-      const coords = {
-        lat:
-          cached.lat,
-        lon:
-          cached.lon
-      };
-
-
-      if(
-        normalizeCoordinates(
-          coords
-        )
-      ){
-
-        d.lat =
-          coords.lat;
-
-        d.lon =
-          coords.lon;
-
-        d.locMethod =
-          cached.method ||
-          attempt.label;
-
-        d.locQuery =
-          attempt.query;
-
-        d.locDisplay =
-          cached.display ||
-          "";
-
-        d.locScore =
-          cached.score ||
-          0;
-
-
-        return {
-
-          success:true,
-
-          method:
-            d.locMethod,
-
-          query:
-            d.locQuery,
-
-          score:
-            d.locScore
-
-        };
-
-      }
-
-    }
-
-  }
-
-
-  /*
-    Agora executamos as consultas
-    uma por uma.
-  */
-
-  for(
-    let i=0;
-    i<queries.length;
-    i++
-  ){
-
-    const attempt =
-      queries[i];
-
-
-    try{
-
-      const result =
-        await searchNominatim(
-          attempt.query,
-          d
-        );
-
-
-      if(result){
-
-        d.lat =
-          result.lat;
-
-        d.lon =
-          result.lon;
-
-        d.locMethod =
-          attempt.label;
-
-        d.locQuery =
-          attempt.query;
-
-        d.locDisplay =
-          result.display;
-
-        d.locScore =
-          result.score;
-
-
-        const key =
-          cacheKey(
-            d,
-            attempt.query
-          );
-
-
-        geocache[key] = {
-
-          lat:
-            result.lat,
-
-          lon:
-            result.lon,
-
-          method:
-            attempt.label,
-
-          display:
-            result.display,
-
-          score:
-            result.score
-
-        };
-
-
-        saveGeoCache();
-
-
-        saveGeoHistory(
-          d,
-          {
-
-            query:
-              attempt.query,
-
-            method:
-              attempt.label,
-
-            display:
-              result.display,
-
-            score:
-              result.score,
-
-            lat:
-              result.lat,
-
-            lon:
-              result.lon
-
-          }
-        );
-
-
-        return {
-
-          success:true,
-
-          method:
-            attempt.label,
-
-          query:
-            attempt.query,
-
-          score:
-            result.score
-
-        };
-
-      }
-
-    }catch(error){
-
-      console.warn(
-        "Erro na tentativa:",
-        attempt.query,
-        error
-      );
-
-    }
-
-
-    /*
-      Respeita o limite do Nominatim.
-    */
-
-    await sleep(
-      1100
-    );
-
-  }
-
-
-  /*
-    Não encontrou.
-  */
-
-  d.lat = null;
-  d.lon = null;
-
-  d.locMethod =
-    "Não localizado";
-
-  d.locQuery = null;
-  d.locDisplay = null;
-  d.locScore = null;
-
-
-  return {
-
-    success:false,
-
-    method:
-      "Não localizado"
-
-  };
-
-}
-
-
-/* ============================================================
-   SLEEP
-============================================================ */
-
-function sleep(ms){
-
-  return new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        ms
-      )
   );
 
 }
 
+function distText(k){
 
-/* ============================================================
-   MARCADORES
-============================================================ */
+  if(k==null)return '';
 
-function createIcon(){
-
-  return L.divIcon({
-
-    className:"",
-
-    html:
-      '<div class="marker-pin" ' +
-      'style="background:#f59e0b">' +
-      '<span>📍</span>' +
-      '</div>',
-
-    iconSize:[
-      34,
-      34
-    ],
-
-    iconAnchor:[
-      10,
-      32
-    ],
-
-    popupAnchor:[
-      7,
-      -30
-    ]
-
-  });
+  return k<1
+    ?Math.round(k*1000)+' m'
+    :k.toFixed(1).replace('.',',')+' km';
 
 }
 
+
+/* ============================
+   MAPA
+   ============================ */
 
 function clearMarkers(){
 
   markers.forEach(
-    marker =>
-      map.removeLayer(
-        marker
-      )
+    m=>map.removeLayer(m)
   );
 
   markers.clear();
 
 }
 
+function icon(){
+
+  return L.divIcon({
+    className:'',
+    html:'<div class="pin"><span>📍</span></div>',
+    iconSize:[34,34],
+    iconAnchor:[10,32]
+  });
+
+}
 
 function renderMarkers(){
 
   clearMarkers();
 
-
   deliveries
     .filter(
-      d =>
-        d.status ===
-        "PENDENTE" &&
+      d=>
+        d.status==='PENDENTE' &&
         Number.isFinite(d.lat) &&
         Number.isFinite(d.lon)
     )
-    .forEach(
-      d => {
+    .forEach(d=>{
 
-        const marker =
-          L.marker(
-            [
-              d.lat,
-              d.lon
-            ],
-            {
-              icon:
-                createIcon()
-            }
-          )
-          .addTo(map);
+      const m=L.marker(
+        [d.lat,d.lon],
+        {icon:icon()}
+      ).addTo(map);
 
+      m.bindPopup(
+        '<b>'+
+        esc(d.label)+
+        '</b><br>'+
+        esc(d.address)+
+        '<br>'+
+        '<button onclick="openDelivery('+d.id+')" '+
+        'style="margin-top:7px;padding:8px;border:0;border-radius:8px;background:#172033;color:white;font-weight:bold">'+
+        'Abrir entrega</button>'
+      );
 
-        const method =
-          d.locMethod
-            ? `<br><small>🔎 ${esc(d.locMethod)}</small>`
-            : "";
+      m.on(
+        'click',
+        ()=>openDelivery(d.id)
+      );
 
+      markers.set(d.id,m);
 
-        marker.bindPopup(`
-
-          <b>${esc(d.label)}</b>
-
-          <br>
-
-          ${esc(d.address)}
-
-          <br>
-
-          <small>
-            📍 ${esc(getDeliveryCity(d))}
-          </small>
-
-          ${method}
-
-          <br>
-
-          <button
-            onclick="openDelivery(${d.id})"
-            style="
-              margin-top:8px;
-              padding:8px 10px;
-              border:0;
-              border-radius:9px;
-              background:#111827;
-              color:white;
-              font-weight:700
-            "
-          >
-            Abrir entrega
-          </button>
-
-        `);
-
-
-        marker.on(
-          "click",
-          () =>
-            openDelivery(
-              d.id
-            )
-        );
-
-
-        markers.set(
-          d.id,
-          marker
-        );
-
-      }
-    );
+    });
 
 }
 
 
-/* ============================================================
-   LISTA DE MAIS PRÓXIMAS
-============================================================ */
+/* ============================
+   LISTA
+   ============================ */
 
-function nearby(){
+function renderList(){
 
-  const list =
-    document.getElementById(
-      "nearbyList"
-    );
+  const el=document.getElementById('list');
 
-
-  let arr =
-    deliveries.filter(
-      d =>
-        d.status ===
-        "PENDENTE"
-    );
-
+  let arr=deliveries.filter(
+    d=>d.status==='PENDENTE'
+  );
 
   if(userPos){
 
-    arr =
-      arr
-        .map(
-          d => ({
-
-            ...d,
-
-            dist:
-              Number.isFinite(d.lat) &&
-              Number.isFinite(d.lon)
-
-                ? distanceKm(
-                    userPos.lat,
-                    userPos.lon,
-                    d.lat,
-                    d.lon
-                  )
-
-                : null
-
-          })
-        )
-        .sort(
-          (a,b)=>{
-
-            if(a.dist == null)
-              return 1;
-
-            if(b.dist == null)
-              return -1;
-
-            return (
-              a.dist -
-              b.dist
-            );
-
-          }
-        );
+    arr=arr
+      .map(d=>({
+        ...d,
+        dist:
+          Number.isFinite(d.lat)&&
+          Number.isFinite(d.lon)
+            ?distanceKm(
+              userPos.lat,
+              userPos.lon,
+              d.lat,
+              d.lon
+            )
+            :null
+      }))
+      .sort(
+        (a,b)=>
+          a.dist==null
+            ?1
+            :b.dist==null
+              ?-1
+              :a.dist-b.dist
+      );
 
   }
 
+  const coords=arr.filter(
+    d=>
+      Number.isFinite(d.lat)&&
+      Number.isFinite(d.lon)
+  ).length;
 
-  if(!arr.length){
+  document.getElementById('count').textContent=
+    arr.length+'/'+deliveries.length;
 
-    list.innerHTML =
-      '<div class="empty">' +
-      'Nenhuma entrega pendente.' +
-      '</div>';
+  document.getElementById('statusText').textContent=
+    arr.length+
+    ' pendentes. '+
+    (
+      coords<arr.length
+        ?(arr.length-coords)+' ainda sem ponto no mapa.'
+        :'Todos os pontos localizados.'
+    );
 
-    return;
+  el.innerHTML=
+    arr.map(d=>
 
-  }
+      '<div class="card">'+
 
+        '<div class="row">'+
 
-  const located =
-    arr.filter(
-      d =>
-        Number.isFinite(d.lat) &&
-        Number.isFinite(d.lon)
-    ).length;
+          '<div class="title">'+
+            esc(d.label)+
+          '</div>'+
 
+          '<div class="dist">'+
+            (
+              d.dist!=null
+                ?distText(d.dist)
+                :'📍 A localizar'
+            )+
+          '</div>'+
 
-  list.innerHTML = `
+        '</div>'+
 
-    <div class="notice">
+        '<div class="addr">'+
+          esc(d.address)+
+        '</div>'+
 
-      Mostrando
+        '<div class="card-actions">'+
 
-      <b>${arr.length}</b>
+          '<button class="go" onclick="openDelivery('+d.id+')">'+
+            'Ver no mapa'+
+          '</button>'+
 
-      entrega(s) pendente(s).
+          '<button class="nav" onclick="navigateTo('+d.id+')">'+
+            '🧭 Ir'+
+          '</button>'+
 
-      ${
-        userPos
-        ?
-        "Ordenadas pela distância em linha reta."
-        :
-        "Ative sua localização para ordenar pela distância."
-      }
+        '</div>'+
 
-      ${
-        located < arr.length
-        ?
-        `<br><b>${arr.length-located}</b> ainda sem coordenadas.`
-        :
-        ""
-      }
+      '</div>'
 
-    </div>
+    ).join('') ||
 
-  ` +
+    '<div class="notice">Nenhuma visita pendente.</div>';
 
-  arr.map(
-    d => `
+}
 
-      <div class="card">
+function render(){
 
-        <div class="card-top">
+  renderMarkers();
 
-          <div class="card-title">
-            ${esc(d.label)}
-          </div>
-
-          ${
-            d.dist != null
-            ?
-            `<div class="distance">
-              ${distanceText(d.dist)}
-            </div>`
-            :
-            `<div
-              class="distance"
-              style="color:#f59e0b"
-            >
-              📍 A localizar
-            </div>`
-          }
-
-        </div>
-
-
-        <div class="address">
-          ${esc(d.address)}
-        </div>
-
-
-        <div class="city">
-
-          🏙️ Cidade:
-          <b>
-            ${esc(getDeliveryCity(d))}
-          </b>
-
-        </div>
-
-
-        ${
-          d.locMethod
-          ?
-          `<div class="method">
-            🔎 ${esc(d.locMethod)}
-          </div>`
-          :
-          ""
-        }
-
-
-        <div class="card-actions">
-
-          <button
-            class="blue small"
-            onclick="openDelivery(${d.id})"
-          >
-            Ver no mapa
-          </button>
-
-          <button
-            class="light small"
-            onclick="navigateTo(${d.id})"
-          >
-            🧭 Ir
-          </button>
-
-        </div>
-
-      </div>
-
-    `
-  ).join("");
+  renderList();
 
 }
 
 
-/* ============================================================
+/* ============================
    GPS
-============================================================ */
+   ============================ */
 
-function applyUserPosition(
-  pos,
-  centerMap=false
-){
+function applyGPS(pos,center){
 
-  const lat =
-    Number(
-      pos.coords.latitude
-    );
+  const lat=Number(
+    pos.coords.latitude
+  );
 
-  const lon =
-    Number(
-      pos.coords.longitude
-    );
-
+  const lon=Number(
+    pos.coords.longitude
+  );
 
   if(
     !Number.isFinite(lat) ||
@@ -2652,447 +834,699 @@ function applyUserPosition(
     Math.abs(lat)>90 ||
     Math.abs(lon)>180
   ){
-
     return;
-
   }
 
-
-  userPos = {
-
+  userPos={
     lat,
     lon,
-
     accuracy:
-      Number(
-        pos.coords.accuracy
-      ) || 0
-
+      Number(pos.coords.accuracy)||0
   };
 
-
   if(userMarker)
-    map.removeLayer(
-      userMarker
-    );
-
+    map.removeLayer(userMarker);
 
   if(accuracyCircle)
-    map.removeLayer(
-      accuracyCircle
-    );
+    map.removeLayer(accuracyCircle);
 
+  const i=L.divIcon({
+    className:'',
+    html:'<div class="user-dot"></div>',
+    iconSize:[22,22],
+    iconAnchor:[11,11]
+  });
 
-  const icon =
-    L.divIcon({
-
-      className:"",
-
-      html:
-        '<div class="user-dot"></div>',
-
-      iconSize:[
-        20,
-        20
-      ],
-
-      iconAnchor:[
-        10,
-        10
-      ]
-
-    });
-
-
-  userMarker =
+  userMarker=
     L.marker(
-      [
-        lat,
-        lon
-      ],
+      [lat,lon],
       {
-        icon,
+        icon:i,
         zIndexOffset:1000
       }
     )
     .addTo(map)
     .bindPopup(
-      "📍 Você está aqui"
+      '📍 Você está aqui<br>'+
+      'Precisão aproximada: '+
+      Math.round(userPos.accuracy)+
+      ' metros'
     );
 
-
-  accuracyCircle =
+  accuracyCircle=
     L.circle(
-      [
-        lat,
-        lon
-      ],
+      [lat,lon],
       {
-        radius:
-          userPos.accuracy,
-
+        radius:userPos.accuracy,
         weight:1,
-
         fillOpacity:.08
       }
-    )
-    .addTo(map);
+    ).addTo(map);
 
-
-  if(centerMap){
-
+  if(center)
     map.setView(
-      [
-        lat,
-        lon
-      ],
+      [lat,lon],
       15
     );
 
-  }
-
-
-  nearby();
+  renderList();
 
 }
 
-
-function requestLocation(){
+function locate(){
 
   if(!navigator.geolocation){
 
     alert(
-      "Este navegador não disponibiliza GPS."
+      'GPS não disponível neste navegador.'
     );
 
     return;
-
   }
 
-
   navigator.geolocation.getCurrentPosition(
-
-    pos =>
-      applyUserPosition(
-        pos,
-        true
-      ),
-
-    err => {
-
+    p=>applyGPS(p,true),
+    e=>
       alert(
-        "Não foi possível obter sua localização. " +
-        "Permita o GPS no navegador. Código: " +
-        err.code
-      );
-
-    },
-
+        'Não foi possível obter sua localização. Código: '+
+        e.code
+      ),
     {
       enableHighAccuracy:true,
       timeout:15000,
-      maximumAge:10000
+      maximumAge:0
     }
-
   );
-
-
-  if(
-    watchId === null
-  ){
-
-    watchId =
-      navigator.geolocation.watchPosition(
-
-        pos =>
-          applyUserPosition(
-            pos,
-            false
-          ),
-
-        ()=>{},
-
-        {
-          enableHighAccuracy:true,
-          timeout:20000,
-          maximumAge:5000
-        }
-
-      );
-
-  }
 
 }
 
 
-/* ============================================================
-   ABRIR ENTREGA
-============================================================ */
+/* ============================
+   ENTREGA
+   ============================ */
 
 function openDelivery(id){
 
-  const d =
-    deliveries.find(
-      x =>
-        x.id === id
-    );
+  const d=deliveries.find(
+    x=>x.id===id
+  );
 
+  if(!d)return;
 
-  if(!d)
-    return;
-
-
-  selectedId =
-    id;
-
+  selectedId=id;
 
   document.getElementById(
-    "modalTitle"
-  ).textContent =
-    d.label;
-
+    'mtitle'
+  ).textContent=d.label;
 
   document.getElementById(
-    "modalAddress"
-  ).textContent =
-    d.address;
+    'maddr'
+  ).textContent=d.address;
 
+  document.getElementById(
+    'mdist'
+  ).textContent=
 
-  let distance = "";
-
-
-  if(
     userPos &&
     Number.isFinite(d.lat) &&
     Number.isFinite(d.lon)
-  ){
 
-    distance =
-      "📏 " +
-      distanceText(
+      ?
+
+      '📏 '+
+      distText(
         distanceKm(
           userPos.lat,
           userPos.lon,
           d.lat,
           d.lon
         )
-      ) +
-      " de você";
+      )+
+      ' de você'
 
-  }else if(
-    !Number.isFinite(d.lat)
-  ){
+      :
 
-    distance =
-      "📍 Coordenadas ainda não localizadas.";
-
-  }
-
+      (
+        !Number.isFinite(d.lat)
+          ?'📍 Coordenadas ainda não localizadas'
+          :''
+      );
 
   document.getElementById(
-    "modalDistance"
-  ).textContent =
-    distance;
-
-
-  document.getElementById(
-    "modalDebug"
-  ).innerHTML = `
-
-    <b>🏙️ Cidade usada na busca:</b>
-
-    ${esc(getDeliveryCity(d))}
-
-    ${
-      d.locMethod
-      ?
-      `<br><b>🔎 Método:</b>
-       ${esc(d.locMethod)}`
-      :
-      ""
-    }
-
-    ${
-      d.locQuery
-      ?
-      `<br><b>🔍 Consulta:</b>
-       ${esc(d.locQuery)}`
-      :
-      ""
-    }
-
-    ${
-      d.locScore
-      ?
-      `<br><b>⭐ Pontuação:</b>
-       ${d.locScore}`
-      :
-      ""
-    }
-
-  `;
-
-
-  document.getElementById(
-    "modalBg"
-  ).style.display =
-    "flex";
-
+    'modal'
+  ).style.display='flex';
 
   if(
-    Number.isFinite(d.lat) &&
+    Number.isFinite(d.lat)&&
     Number.isFinite(d.lon)
   ){
 
     map.setView(
-      [
-        d.lat,
-        d.lon
-      ],
+      [d.lat,d.lon],
       16
     );
 
+    const m=markers.get(id);
 
-    const marker =
-      markers.get(id);
-
-
-    if(marker)
-      marker.openPopup();
+    if(m)
+      m.openPopup();
 
   }
 
 }
 
-
 function closeModal(){
 
   document.getElementById(
-    "modalBg"
-  ).style.display =
-    "none";
+    'modal'
+  ).style.display='none';
 
-  selectedId =
-    null;
+  selectedId=null;
 
 }
 
-
-/* ============================================================
-   STATUS
-============================================================ */
-
 function setStatus(status){
 
-  if(!selectedId)
-    return;
+  if(!selectedId)return;
 
+  const d=deliveries.find(
+    x=>x.id===selectedId
+  );
 
-  const d =
-    deliveries.find(
-      x =>
-        x.id ===
-        selectedId
-    );
+  if(!d)return;
 
+  d.status=status;
 
-  if(!d)
-    return;
-
-
-  d.status =
-    status;
-
-
-  d.updatedAt =
+  d.updatedAt=
     new Date().toISOString();
 
-
-  saveData();
-
+  save();
 
   closeModal();
-
 
   render();
 
 }
 
-
-/* ============================================================
-   NAVEGAÇÃO
-============================================================ */
-
 function navigateTo(id){
 
-  const d =
-    deliveries.find(
-      x =>
-        x.id === id
-    );
+  const d=deliveries.find(
+    x=>x.id===id
+  );
 
+  if(!d)return;
 
-  if(!d)
-    return;
-
-
-  let destination;
-
-
-  if(
-    Number.isFinite(d.lat) &&
+  const dest=
+    Number.isFinite(d.lat)&&
     Number.isFinite(d.lon)
-  ){
 
-    destination =
-      `${d.lat},${d.lon}`;
+      ?
 
-  }else{
+      d.lat+','+d.lon
 
-    destination =
+      :
+
       encodeURIComponent(
         d.address
       );
 
-  }
-
-
-  const url =
-    "https://www.google.com/maps/dir/?api=1" +
-    "&destination=" +
-    destination;
-
-
   window.open(
-    url,
-    "_blank"
+    'https://www.google.com/maps/dir/?api=1&destination='+
+    dest,
+    '_blank'
   );
 
 }
 
 
-/* ============================================================
-   LOCALIZAR TODOS OS PENDENTES SEM COORDENADAS
-============================================================ */
+/* ==================================================
+   NOVA BUSCA INTELIGENTE
+   ================================================== */
+
+/*
+   Cria várias versões do endereço.
+
+   A busca original continua sendo a primeira.
+
+   Se ela falhar, somente então tentamos
+   versões mais flexíveis.
+*/
+
+function gerarVariacoesEndereco(endereco){
+
+  let base=String(endereco)
+    .replace(/,\s*Brasil\s*$/i,'')
+    .trim();
+
+  let variantes=[];
+
+  function add(v){
+
+    v=String(v)
+      .replace(/\s+/g,' ')
+      .replace(/,\s*,/g,',')
+      .trim();
+
+    if(!v)return;
+
+    const chave=norm(v);
+
+    if(
+      !variantes.some(
+        x=>norm(x)===chave
+      )
+    ){
+      variantes.push(v);
+    }
+
+  }
+
+
+  /*
+    1. Endereço original
+  */
+
+  add(base);
+
+
+  /*
+    2. Expande abreviações de rua
+  */
+
+  let v=base;
+
+  v=v
+    .replace(/^R\.\s*/i,'Rua ')
+    .replace(/^R\s+/i,'Rua ')
+    .replace(/^TV\.\s*/i,'Travessa ')
+    .replace(/^TV\s+/i,'Travessa ');
+
+  add(v);
+
+
+  /*
+    3. Corrige Nossa Senhora
+  */
+
+  v=v
+    .replace(/\bN\s+Sra\.?\b/gi,'Nossa Senhora')
+    .replace(/\bN\.?\s*Sra\.?\b/gi,'Nossa Senhora')
+    .replace(/\bNossa\s+Sra\.?\b/gi,'Nossa Senhora')
+    .replace(/\bNOSSA\s+SRA\s+DAS\s+GRACAS\b/gi,'Nossa Senhora das Gracas');
+
+  add(v);
+
+
+  /*
+    4. Expande abreviações de bairro
+  */
+
+  v=v
+    .replace(/\bSra\.?\b/gi,'Senhora')
+    .replace(/\bS\.\s*/gi,'São ');
+
+  add(v);
+
+
+  /*
+    5. Remove o bairro.
+
+    Isso ajuda quando o mapa reconhece a rua
+    e o número, mas não reconhece o bairro.
+  */
+
+  const partes=v.split(',');
+
+  if(partes.length>=2){
+
+    const ruaNumero=
+      partes
+        .slice(0,2)
+        .join(',')
+        .trim();
+
+    add(
+      ruaNumero+
+      ', Caxias do Sul, RS, Brasil'
+    );
+
+  }
+
+
+  /*
+    6. Somente rua + número + cidade.
+
+    Outra tentativa mais ampla.
+  */
+
+  const numeroMatch=
+    v.match(/,\s*(\d+)\s*,/);
+
+  if(numeroMatch){
+
+    const numero=numeroMatch[1];
+
+    const antesNumero=
+      v.substring(
+        0,
+        numeroMatch.index
+      ).trim();
+
+    const rua=
+      antesNumero
+        .replace(/,\s*$/,'')
+        .trim();
+
+    add(
+      rua+
+      ', '+
+      numero+
+      ', Caxias do Sul, RS, Brasil'
+    );
+
+  }
+
+
+  return variantes;
+
+}
+
+
+/*
+   Faz uma consulta ao Nominatim.
+*/
+
+async function consultarNominatim(query){
+
+  const url=
+    'https://nominatim.openstreetmap.org/search?'+
+    'format=jsonv2'+
+    '&limit=5'+
+    '&countrycodes=br'+
+    '&accept-language=pt-BR'+
+    '&addressdetails=1'+
+    '&viewbox=-51.35,-29.05,-51.05,-29.30'+
+    '&bounded=0'+
+    '&q='+
+    encodeURIComponent(query);
+
+  const r=await fetch(
+    url,
+    {
+      headers:{
+        Accept:'application/json'
+      }
+    }
+  );
+
+  if(!r.ok)
+    throw Error(
+      'HTTP '+r.status
+    );
+
+  return await r.json();
+
+}
+
+
+/*
+   Verifica se o resultado pertence realmente
+   à região de Caxias do Sul.
+
+   Isso evita que uma busca mais flexível
+   jogue o cliente para outra cidade.
+*/
+
+function candidatoAceitavel(x){
+
+  const p={
+    lat:parseFloat(x.lat),
+    lon:parseFloat(x.lon)
+  };
+
+  if(!validCoords(p))
+    return false;
+
+  const addr=x.address||{};
+
+  const texto=norm(
+    [
+      addr.city,
+      addr.town,
+      addr.municipality,
+      addr.county,
+      x.display_name
+    ]
+    .filter(Boolean)
+    .join(' ')
+  );
+
+  /*
+     Caxias do Sul precisa aparecer
+     na identificação do resultado.
+  */
+
+  if(
+    !texto.includes('caxias do sul')
+  ){
+    return false;
+  }
+
+  return true;
+
+}
+
+
+/*
+   Nova geocodificação.
+
+   IMPORTANTE:
+   A função só é chamada para clientes
+   que ainda não possuem coordenadas.
+*/
+
+async function geocodeOne(d){
+
+  const key=norm(d.address);
+
+
+  /*
+     1. Verifica o cache existente.
+  */
+
+  if(geocache[key]){
+
+    const p={
+      lat:Number(
+        geocache[key].lat
+      ),
+      lon:Number(
+        geocache[key].lon
+      )
+    };
+
+    if(validCoords(p)){
+
+      d.lat=p.lat;
+      d.lon=p.lon;
+
+      return true;
+
+    }
+
+    delete geocache[key];
+
+  }
+
+
+  /*
+     2. PRIMEIRA TENTATIVA
+        exatamente como antes.
+  */
+
+  const consultas=[];
+
+  consultas.push(
+    d.address+
+    ', Caxias do Sul, RS, Brasil'
+  );
+
+
+  /*
+     3. SEGUNDA ETAPA:
+        variações inteligentes.
+  */
+
+  const variacoes=
+    gerarVariacoesEndereco(
+      d.address
+    );
+
+  variacoes.forEach(v=>{
+
+    const completo=
+      v
+        .replace(
+          /,\s*Caxias do Sul,\s*RS,\s*Brasil/gi,
+          ''
+        )
+        .trim()+
+      ', Caxias do Sul, RS, Brasil';
+
+    consultas.push(completo);
+
+  });
+
+
+  /*
+     Remove consultas duplicadas.
+  */
+
+  const consultasUnicas=[];
+
+  consultas.forEach(q=>{
+
+    const chave=norm(q);
+
+    if(
+      !consultasUnicas.some(
+        x=>norm(x)===chave
+      )
+    ){
+
+      consultasUnicas.push(q);
+
+    }
+
+  });
+
+
+  /*
+     Executa as tentativas na ordem.
+
+     Se encontrar um resultado confiável,
+     para imediatamente.
+  */
+
+  for(
+    let tentativa=0;
+    tentativa<consultasUnicas.length;
+    tentativa++
+  ){
+
+    const q=consultasUnicas[tentativa];
+
+    try{
+
+      const data=
+        await consultarNominatim(q);
+
+      for(
+        const x of data
+      ){
+
+        if(
+          !candidatoAceitavel(x)
+        ){
+          continue;
+        }
+
+        const p={
+          lat:parseFloat(x.lat),
+          lon:parseFloat(x.lon)
+        };
+
+        if(!validCoords(p))
+          continue;
+
+
+        /*
+           Encontrou.
+
+           Salva no cliente.
+        */
+
+        d.lat=p.lat;
+        d.lon=p.lon;
+
+
+        /*
+           Salva no cache usando
+           o endereço original como chave.
+        */
+
+        geocache[key]={
+          lat:p.lat,
+          lon:p.lon
+        };
+
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify(geocache)
+        );
+
+        return true;
+
+      }
+
+    }catch(e){
+
+      /*
+         Se uma consulta falhar,
+         tenta a próxima.
+      */
+
+    }
+
+
+    /*
+       Pequena pausa entre tentativas
+       para não sobrecarregar o serviço.
+    */
+
+    await new Promise(
+      r=>setTimeout(r,700)
+    );
+
+  }
+
+
+  /*
+     Nenhuma tentativa conseguiu.
+  */
+
+  return false;
+
+}
+
+
+/* ==================================================
+   LOCALIZAR TODOS OS PONTOS PENDENTES
+   ================================================== */
 
 async function geocodeAll(){
 
-  const btn =
+  const btn=
     document.getElementById(
-      "geocodeBtn"
+      'geocodeBtn'
     );
 
-
-  btn.disabled =
-    true;
+  btn.disabled=true;
 
 
-  const pending =
+  /*
+     IMPORTANTE:
+
+     Só entra aqui quem ainda NÃO possui
+     coordenadas.
+
+     Quem já foi localizado fica intacto.
+  */
+
+  const pending=
     deliveries.filter(
-      d =>
-        d.status ===
-        "PENDENTE" &&
-
+      d=>
+        d.status==='PENDENTE' &&
         (
           !Number.isFinite(d.lat) ||
           !Number.isFinite(d.lon)
@@ -3100,38 +1534,23 @@ async function geocodeAll(){
     );
 
 
+  let ok=0;
+
+  let fail=0;
+
+
   if(!pending.length){
 
     document.getElementById(
-      "geocodeStatus"
-    ).textContent =
-      "Todos os clientes pendentes já possuem coordenadas.";
+      'statusText'
+    ).textContent=
+      'Todos os pontos já estão localizados.';
 
-    btn.disabled =
-      false;
+    btn.disabled=false;
 
     return;
 
   }
-
-
-  let ok = 0;
-
-  let fail = 0;
-
-  let recovered = 0;
-
-
-  const bar =
-    document.getElementById(
-      "progressBar"
-    );
-
-
-  const status =
-    document.getElementById(
-      "geocodeStatus"
-    );
 
 
   for(
@@ -3140,69 +1559,36 @@ async function geocodeAll(){
     i++
   ){
 
-    const d =
-      pending[i];
+    const d=pending[i];
 
 
-    const city =
-      getDeliveryCity(d);
+    document.getElementById(
+      'statusText'
+    ).textContent=
+      '🔎 Localizando '+
+      (i+1)+
+      ' de '+
+      pending.length+
+      ': '+
+      d.address;
 
 
-    status.innerHTML = `
-
-      <b>
-        Localizando ${i+1} de ${pending.length}
-      </b>
-
-      <br>
-
-      ${esc(d.address)}
-
-      <br>
-
-      🏙️ Cidade usada:
-      <b>${esc(city || "não informada")}</b>
-
-    `;
-
-
-    bar.style.width =
+    document.getElementById(
+      'bar'
+    ).style.width=
       (
-        (i / pending.length) *
-        100
-      ) +
-      "%";
-
-
-    const previousMethod =
-      d.locMethod;
+        i/pending.length*100
+      )+
+      '%';
 
 
     try{
 
-      const result =
-        await geocodeOne(d);
-
-
-      if(result.success){
+      if(
+        await geocodeOne(d)
+      ){
 
         ok++;
-
-
-        /*
-          Se conseguiu depois da
-          primeira estratégia,
-          contabiliza como recuperado.
-        */
-
-        if(
-          result.method !==
-          "Original + cidade"
-        ){
-
-          recovered++;
-
-        }
 
       }else{
 
@@ -3210,113 +1596,84 @@ async function geocodeAll(){
 
       }
 
-    }catch(error){
-
-      console.error(
-        "Erro:",
-        error
-      );
+    }catch(e){
 
       fail++;
 
     }
 
 
-    saveData();
+    save();
 
-    renderMarkers();
-
-    nearby();
+    render();
 
 
     /*
-      Pequena pausa adicional entre
-      clientes para evitar sobrecarga
-      do serviço.
+       Pausa entre clientes.
     */
 
-    await sleep(
-      300
+    await new Promise(
+      r=>setTimeout(r,1100)
     );
 
   }
 
 
-  bar.style.width =
-    "100%";
+  document.getElementById(
+    'bar'
+  ).style.width='100%';
 
 
-  status.innerHTML = `
-
-    <b>✅ Localização concluída</b>
-
-    <br>
-
-    ${ok} clientes localizados.
-
-    <br>
-
-    ${recovered} recuperados
-    através das novas estratégias.
-
-    <br>
-
-    ${fail} ainda não localizados.
-
-  `;
+  document.getElementById(
+    'statusText'
+  ).textContent=
+    'Concluído: '+
+    ok+
+    ' localizados, '+
+    fail+
+    ' não localizados.';
 
 
-  btn.disabled =
-    false;
-
+  btn.disabled=false;
 
   render();
 
 
-  const points =
-    deliveries.filter(
-      d =>
-        d.status ===
-        "PENDENTE" &&
+  /*
+     Ajusta o mapa para os pontos encontrados.
+  */
 
+  const pts=
+    deliveries.filter(
+      d=>
+        d.status==='PENDENTE' &&
         Number.isFinite(d.lat) &&
         Number.isFinite(d.lon)
     );
 
 
-  if(points.length){
+  if(pts.length){
 
-    const bounds =
+    const b=
       L.latLngBounds(
-        points.map(
-          d =>
-            [
-              d.lat,
-              d.lon
-            ]
+        pts.map(
+          d=>[d.lat,d.lon]
         )
       );
 
-
     if(userPos){
 
-      bounds.extend(
-        [
-          userPos.lat,
-          userPos.lon
-        ]
-      );
+      b.extend([
+        userPos.lat,
+        userPos.lon
+      ]);
 
     }
 
-
     map.fitBounds(
-      bounds,
+      b,
       {
-        padding:[
-          30,
-          30
-        ],
+        padding:[25,25],
         maxZoom:15
       }
     );
@@ -3326,306 +1683,116 @@ async function geocodeAll(){
 }
 
 
-/* ============================================================
-   ESTATÍSTICAS
-============================================================ */
-
-function updateStats(){
-
-  const total =
-    deliveries.length;
-
-
-  const done =
-    deliveries.filter(
-      d =>
-        d.status !==
-        "PENDENTE"
-    ).length;
-
-
-  document.getElementById(
-    "total"
-  ).textContent =
-    total;
-
-
-  document.getElementById(
-    "pending"
-  ).textContent =
-    total -
-    done;
-
-
-  document.getElementById(
-    "done"
-  ).textContent =
-    done;
-
-}
-
-
-/* ============================================================
-   RENDER
-============================================================ */
-
-function render(){
-
-  updateStats();
-
-  renderMarkers();
-
-  nearby();
-
-}
-
-
-/* ============================================================
+/* ============================
    EXPORTAÇÃO
-============================================================ */
+   ============================ */
 
 function exportCSV(){
 
-  const headers = [
-
-    "ID",
-    "Entrega",
-    "Endereco",
-    "Cidade",
-    "Status",
-    "Metodo_Localizacao",
-    "Consulta_Localizacao",
-    "Resultado_Localizacao",
-    "Pontuacao",
-    "Atualizado_em",
-    "Latitude",
-    "Longitude"
-
+  const rows=[
+    [
+      'ID',
+      'Entrega',
+      'Endereco',
+      'Status',
+      'Atualizado',
+      'Latitude',
+      'Longitude'
+    ]
   ];
 
+  deliveries.forEach(d=>
 
-  const lines = [
-    headers.join(";")
-  ];
+    rows.push([
+      d.id,
+      d.label,
+      d.address,
+      d.status,
+      d.updatedAt||'',
+      d.lat??'',
+      d.lon??''
+    ])
 
-
-  deliveries.forEach(
-    d => {
-
-      const values = [
-
-        d.id,
-
-        d.label,
-
-        d.address,
-
-        getDeliveryCity(d),
-
-        d.status,
-
-        d.locMethod || "",
-
-        d.locQuery || "",
-
-        d.locDisplay || "",
-
-        d.locScore ?? "",
-
-        d.updatedAt || "",
-
-        d.lat ?? "",
-
-        d.lon ?? ""
-
-      ];
-
-
-      lines.push(
-
-        values
-          .map(
-            value =>
-              `"${String(value)
-                .replace(
-                  /"/g,
-                  '""'
-                )}"`
-          )
-          .join(";")
-
-      );
-
-    }
   );
 
-
-  const blob =
-    new Blob(
-      [
-        "\ufeff" +
-        lines.join("\n")
-      ],
-      {
-        type:
-          "text/csv;charset=utf-8"
-      }
-    );
-
-
-  const a =
-    document.createElement(
-      "a"
-    );
+  const csv=
+    '\ufeff'+
+    rows
+      .map(
+        r=>
+          r
+            .map(
+              v=>
+                '"'+
+                String(v)
+                  .replace(/"/g,'""')+
+                '"'
+            )
+            .join(';')
+      )
+      .join('\n');
 
 
-  a.href =
+  const a=
+    document.createElement('a');
+
+  a.href=
     URL.createObjectURL(
-      blob
+      new Blob(
+        [csv],
+        {
+          type:
+            'text/csv;charset=utf-8'
+        }
+      )
     );
 
-
-  a.download =
-    "entregas_localizacao_historico.csv";
-
+  a.download=
+    'entregas_historico.csv';
 
   a.click();
 
-
   setTimeout(
-    () =>
-      URL.revokeObjectURL(
-        a.href
-      ),
+    ()=>URL.revokeObjectURL(a.href),
     1000
   );
 
 }
 
 
-/* ============================================================
-   EVENTOS
-============================================================ */
+/* ============================
+   BOTÕES
+   ============================ */
 
 document.getElementById(
-  "locBtn"
-).onclick =
-  requestLocation;
-
+  'locBtn'
+).onclick=locate;
 
 document.getElementById(
-  "nearBtn"
-).onclick =
-  () => {
-
-    nearby();
-
-    if(userPos){
-
-      map.setView(
-        [
-          userPos.lat,
-          userPos.lon
-        ],
-        15
-      );
-
-    }
-
-  };
-
+  'gpsBtn'
+).onclick=locate;
 
 document.getElementById(
-  "geocodeBtn"
-).onclick =
-  geocodeAll;
-
+  'geocodeBtn'
+).onclick=geocodeAll;
 
 document.getElementById(
-  "exportBtn"
-).onclick =
-  exportCSV;
+  'exportBtn'
+).onclick=exportCSV;
 
 
-document.getElementById(
-  "closeBtn"
-).onclick =
-  closeModal;
-
-
-document.getElementById(
-  "cartaBtn"
-).onclick =
-  () =>
-    setStatus(
-      "CARTA"
-    );
-
-
-document.getElementById(
-  "naoBtn"
-).onclick =
-  () =>
-    setStatus(
-      "NAO_LOCALIZADO"
-    );
-
-
-document.getElementById(
-  "riscoBtn"
-).onclick =
-  () =>
-    setStatus(
-      "ZONA_DE_RISCO"
-    );
-
-
-document.getElementById(
-  "modalBg"
-).addEventListener(
-  "click",
-  e => {
-
-    if(
-      e.target.id ===
-      "modalBg"
-    ){
-
-      closeModal();
-
-    }
-
-  }
-);
-
-
-/* ============================================================
-   FUNÇÕES GLOBAIS
-============================================================ */
-
-window.openDelivery =
-  openDelivery;
-
-window.navigateTo =
-  navigateTo;
-
-
-/* ============================================================
+/* ============================
    INICIALIZAÇÃO
-============================================================ */
+   ============================ */
 
 render();
 
-
-/*
-  Não solicitamos GPS automaticamente.
-
-  O usuário pode tocar no botão
-  quando quiser.
-*/
+setTimeout(
+  locate,
+  500
+);
 
 </script>
 
 </body>
-
-  </html>
+</html>
