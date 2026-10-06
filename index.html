@@ -1,23 +1,15 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<!DOCTYPE html><html lang="pt-BR">
+<head>  <meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 
-  <meta charset="UTF-8">
+«»
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
-
-  <title>Mapa de Entregas</title>
-
-  <link
+  <title>Mapa de Entregas</title>  <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     crossorigin=""
-  >
-
-  <style>
+  >  <style>
 
     * {
       box-sizing: border-box;
@@ -432,192 +424,121 @@
 
     }
 
-  </style>
+  </style></head><body><header>  <div class="header-top"><div class="title-area">
 
-</head>
+  <h1 class="title">
+    📦 Mapa de Entregas
+  </h1>
 
-<body>
-
-<header>
-
-  <div class="header-top">
-
-    <div class="title-area">
-
-      <h1 class="title">
-        📦 Mapa de Entregas
-      </h1>
-
-      <div class="subtitle">
-        Localização inteligente dos clientes
-      </div>
-
-    </div>
-
-    <div
-      class="counter"
-      id="counter">
-      0/0
-    </div>
-
+  <div class="subtitle">
+    Localização inteligente dos clientes
   </div>
 
-  <div class="toolbar">
-
-    <button
-      id="geocodeBtn"
-      class="btn-localizar">
-      🗺️ Localizar
-    </button>
-
-    <button
-      id="gpsBtn"
-      class="btn-gps">
-      📍 GPS
-    </button>
-
-    <button
-      id="retryBtn"
-      class="btn-falhas">
-      🔄 Falhas
-    </button>
-
-    <button
-      id="exportBtn"
-      class="btn-exportar">
-      📤 Exportar
-    </button>
-
-  </div>
-
-</header>
-
-
-<!-- =========================================================
-     MAPA
-========================================================= -->
+</div>
 
 <div
+  class="counter"
+  id="counter">
+  0/0
+</div>
+
+  </div>  <div class="toolbar"><button
+  id="geocodeBtn"
+  class="btn-localizar">
+  🗺️ Localizar
+</button>
+
+<button
+  id="gpsBtn"
+  class="btn-gps">
+  📍 GPS
+</button>
+
+<button
+  id="retryBtn"
+  class="btn-falhas">
+  🔄 Falhas
+</button>
+
+<button
+  id="exportBtn"
+  class="btn-exportar">
+  📤 Exportar
+</button>
+
+  </div></header><!-- =========================================================
+     MAPA
+========================================================= --><div
   class="map-wrapper"
-  id="mapWrapper">
+  id="mapWrapper"><button
+id="mapToggle"
+class="map-toggle">
+⛶ Expandir mapa
+</button>
+
+  <div id="map"></div></div><!-- =========================================================
+     PROGRESSO
+========================================================= --><section class="progress-section">  <div id="geocodeStatus">
+    Preparando...
+  </div>  <div id="geocodeDetail">
+    Carregando clientes...
+  </div>  <div class="progress-bg"><div id="progressBar"></div>
+
+  </div></section><!-- =========================================================
+     LISTA
+========================================================= --><section class="list-header">  <h2 id="listTitle">
+    📍 Entregas pendentes — 0 clientes
+  </h2></section><div id="nearbyList"></div><!-- =========================================================
+     MODAL DE STATUS
+========================================================= --><div
+  id="modal"
+  class="modal">  <div class="modal-box"><h3 id="modalTitle">
+  Entrega
+</h3>
+
+<div
+  id="modalAddress"
+  class="modal-address">
+</div>
+
+<div class="status-options">
 
   <button
-    id="mapToggle"
-    class="map-toggle">
-    ⛶ Expandir mapa
+    class="status-carta"
+    data-status="CARTA">
+    ✉️ Carta entregue
   </button>
 
-  <div id="map"></div>
+  <button
+    class="status-nao"
+    data-status="NAO_LOCALIZADO">
+    ❌ Não localizado
+  </button>
+
+  <button
+    class="status-risco"
+    data-status="ZONA_DE_RISCO">
+    ⚠️ Zona de risco
+  </button>
+
+  <button
+    class="status-pendente"
+    data-status="PENDENTE">
+    🔵 Voltar para pendente
+  </button>
 
 </div>
 
+<button
+  id="closeModal"
+  class="close-modal">
+  Fechar
+</button>
 
-<!-- =========================================================
-     PROGRESSO
-========================================================= -->
-
-<section class="progress-section">
-
-  <div id="geocodeStatus">
-    Preparando...
-  </div>
-
-  <div id="geocodeDetail">
-    Carregando clientes...
-  </div>
-
-  <div class="progress-bg">
-
-    <div id="progressBar"></div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     LISTA
-========================================================= -->
-
-<section class="list-header">
-
-  <h2 id="listTitle">
-    📍 Entregas pendentes — 0 clientes
-  </h2>
-
-</section>
-
-<div id="nearbyList"></div>
-
-
-<!-- =========================================================
-     MODAL DE STATUS
-========================================================= -->
-
-<div
-  id="modal"
-  class="modal">
-
-  <div class="modal-box">
-
-    <h3 id="modalTitle">
-      Entrega
-    </h3>
-
-    <div
-      id="modalAddress"
-      class="modal-address">
-    </div>
-
-    <div class="status-options">
-
-      <button
-        class="status-carta"
-        data-status="CARTA">
-        ✉️ Carta entregue
-      </button>
-
-      <button
-        class="status-nao"
-        data-status="NAO_LOCALIZADO">
-        ❌ Não localizado
-      </button>
-
-      <button
-        class="status-risco"
-        data-status="ZONA_DE_RISCO">
-        ⚠️ Zona de risco
-      </button>
-
-      <button
-        class="status-pendente"
-        data-status="PENDENTE">
-        🔵 Voltar para pendente
-      </button>
-
-    </div>
-
-    <button
-      id="closeModal"
-      class="close-modal">
-      Fechar
-    </button>
-
-  </div>
-
-</div>
-
-
-<script
+  </div></div><script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   crossorigin="">
-</script>
-
-
-<script src="./clientes.js?v=20261006"></script>
-
-
-<script>
+</script><script src="./clientes.js?v=20261006"></script><script>
 
   /* =========================================================
      CLIENTES
@@ -976,44 +897,15 @@
 
 
   /* =========================================================
-     DISTÂNCIA HAVERSINE
+     DISTÂNCIA HAVERSINE — CORRIGIDA
   ========================================================= */
 
-  function distanceKm(
+  function haversineRaw(
     lat1,
     lon1,
     lat2,
     lon2
   ) {
-
-    const aLat =
-      Number(lat1);
-
-    const aLon =
-      Number(lon1);
-
-    const bLat =
-      Number(lat2);
-
-    const bLon =
-      Number(lon2);
-
-
-    if (
-      !validCoordinates(
-        aLat,
-        aLon
-      ) ||
-      !validCoordinates(
-        bLat,
-        bLon
-      )
-    ) {
-
-      return Infinity;
-
-    }
-
 
     const R =
       6371;
@@ -1021,8 +913,8 @@
 
     const dLat =
       (
-        bLat -
-        aLat
+        Number(lat2) -
+        Number(lat1)
       ) *
       Math.PI /
       180;
@@ -1030,21 +922,21 @@
 
     const dLon =
       (
-        bLon -
-        aLon
+        Number(lon2) -
+        Number(lon1)
       ) *
       Math.PI /
       180;
 
 
     const lat1Rad =
-      aLat *
+      Number(lat1) *
       Math.PI /
       180;
 
 
     const lat2Rad =
-      bLat *
+      Number(lat2) *
       Math.PI /
       180;
 
@@ -1067,14 +959,221 @@
       ) ** 2;
 
 
+    const safeA =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          a
+        )
+      );
+
+
     return (
       R *
       2 *
       Math.atan2(
-        Math.sqrt(a),
-        Math.sqrt(1 - a)
+        Math.sqrt(
+          safeA
+        ),
+        Math.sqrt(
+          1 -
+          safeA
+        )
       )
     );
+
+  }
+
+
+  /*
+    Calcula a distância entre o GPS do usuário
+    e o cliente de maneira resistente a:
+
+    - latitude/longitude invertidas;
+    - longitude com sinal invertido;
+    - latitude com sinal invertido;
+    - coordenadas antigas salvas no cache.
+
+    O mapa continua usando as coordenadas originais
+    normalizadas. Esta função existe somente para
+    impedir distâncias absurdas na lista.
+  */
+
+  function distanceKm(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+  ) {
+
+    const user =
+      normalizeCoordinatePair(
+        lat1,
+        lon1
+      );
+
+
+    const destination =
+      normalizeCoordinatePair(
+        lat2,
+        lon2
+      );
+
+
+    if (
+      !user ||
+      !destination
+    ) {
+
+      return Infinity;
+
+    }
+
+
+    const candidates = [];
+
+
+    function addCandidate(
+      aLat,
+      aLon,
+      bLat,
+      bLon
+    ) {
+
+      if (
+        validCoordinates(
+          aLat,
+          aLon
+        ) &&
+        validCoordinates(
+          bLat,
+          bLon
+        )
+      ) {
+
+        candidates.push(
+          haversineRaw(
+            aLat,
+            aLon,
+            bLat,
+            bLon
+          )
+        );
+
+      }
+
+    }
+
+
+    /*
+      1. Coordenadas normais.
+    */
+
+    addCandidate(
+      user.lat,
+      user.lon,
+      destination.lat,
+      destination.lon
+    );
+
+
+    /*
+      2. Destino com longitude invertida.
+    */
+
+    addCandidate(
+      user.lat,
+      user.lon,
+      destination.lat,
+      -destination.lon
+    );
+
+
+    /*
+      3. Destino com latitude invertida.
+    */
+
+    addCandidate(
+      user.lat,
+      user.lon,
+      -destination.lat,
+      destination.lon
+    );
+
+
+    /*
+      4. Usuário com longitude invertida.
+    */
+
+    addCandidate(
+      user.lat,
+      -user.lon,
+      destination.lat,
+      destination.lon
+    );
+
+
+    /*
+      5. Usuário com latitude invertida.
+    */
+
+    addCandidate(
+      -user.lat,
+      user.lon,
+      destination.lat,
+      destination.lon
+    );
+
+
+    /*
+      6. Ambos com longitude invertida.
+    */
+
+    addCandidate(
+      user.lat,
+      -user.lon,
+      destination.lat,
+      -destination.lon
+    );
+
+
+    /*
+      7. Ambos com latitude invertida.
+    */
+
+    addCandidate(
+      -user.lat,
+      user.lon,
+      -destination.lat,
+      destination.lon
+    );
+
+
+    if (
+      candidates.length === 0
+    ) {
+
+      return Infinity;
+
+    }
+
+
+    /*
+      Para uma rota de entregas local em Caxias
+      do Sul, uma distância absurda é quase sempre
+      sinal de coordenada inconsistente.
+
+      Ordenamos e usamos a menor combinação.
+    */
+
+    candidates.sort(
+      (a, b) =>
+        a - b
+    );
+
+
+    return candidates[0];
 
   }
 
@@ -4076,7 +4175,5 @@
 
   }
 
-</script>
-
-</body>
-  </html>
+</script></body>
+</html>
