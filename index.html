@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>index.html</title>
+<title>RECEBE MAIS — Visitas In Loco de Cobrança</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -110,6 +110,7 @@ button:active{transform:translateY(1px)}
       <button class="btn dark" id="importBtn">📥 Importar lote</button>
       <button class="btn primary" id="geocodeBtn" disabled>🗺️ Localizar sem coordenada</button>
       <button class="btn" id="exportCoordsBtn">📍 Exportar coordenadas</button>
+      <button class="btn" id="exportActionsBtn">📝 Exportar ações</button>
       <button class="btn" id="backupBtn">💾 Fazer backup</button>
       <button class="btn danger" id="clearLotBtn" style="grid-column:1/-1">🧹 Limpar lote atual</button>
     </div>
@@ -163,7 +164,20 @@ button:active{transform:translateY(1px)}
       <div class="history-text" id="proposalText">Nenhuma proposta encontrada.</div>
     </div>
 
-    <div class="notice"><b>Próxima etapa:</b> o fluxo de ação será integrado aqui com as perguntas específicas de cada acionamento e, no final, endereço real/fictício.</div>
+    <div class="notice"><b>Registrar ação:</b> escolha o tipo de cobrança, registre a observação e salve. O histórico fica no aparelho e poderá ser exportado posteriormente.</div>
+    <div class="history-box" style="margin-top:10px">
+      <h3>📋 Registrar ação de cobrança</h3>
+      <select class="search" id="actionType">
+        <option value="">Selecione a ação</option>
+        <option value="Carta de cobrança">Carta de cobrança</option>
+        <option value="Recado">Recado</option>
+        <option value="Não localizado">Não localizado</option>
+        <option value="Zona de risco">Zona de risco</option>
+      </select>
+      <textarea class="search" id="actionObservation" rows="3" style="margin-top:7px;resize:vertical" placeholder="Observação / detalhes da visita..."></textarea>
+      <button class="btn primary" id="saveActionBtn" style="width:100%;margin-top:7px">💾 Salvar ação</button>
+      <div class="small-note" id="actionCountNote" style="margin-top:7px">Nenhuma ação registrada neste aparelho.</div>
+    </div>
   </div>
 </div>
 
@@ -173,10 +187,11 @@ button:active{transform:translateY(1px)}
 <script>
 const STORAGE_KEY = "recebe_mais_visitas_v1";
 const COORDS_KEY = "recebe_mais_coordenadas_v1";
+const ACTIONS_KEY = "recebe_mais_acoes_v1";
 const today = new Date(); today.setHours(0,0,0,0);
 
 const state = {
-  clients: [], debtsByEc: new Map(), latestActionsByEc: new Map(), proposalsByCpf: new Map(),
+  clients: [], debtsByEc: new Map(), latestActionsByEc: new Map(), proposalsByCpf: new Map(), actionsHistory: [],
   coords: {}, userPos: null, map: null, markers: new Map(), selectedEc: null, userMarker: null, accuracyCircle: null, watchId: null,
 };
 
@@ -218,12 +233,14 @@ function saveLocal(){
   const payload={clients:state.clients, debts:[...state.debtsByEc.entries()], latestActions:[...state.latestActionsByEc.entries()], proposals:[...state.proposalsByCpf.entries()]};
   localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
   localStorage.setItem(COORDS_KEY,JSON.stringify(state.coords));
+  localStorage.setItem(ACTIONS_KEY,JSON.stringify(state.actionsHistory));
 }
 function loadLocal(){
   try{
     const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
     if(p){ state.clients=p.clients||[]; state.debtsByEc=new Map(p.debts||[]); state.latestActionsByEc=new Map(p.latestActions||[]); state.proposalsByCpf=new Map(p.proposals||[]); }
     state.coords=JSON.parse(localStorage.getItem(COORDS_KEY)||"{}");
+    state.actionsHistory=JSON.parse(localStorage.getItem(ACTIONS_KEY)||"[]");
   }catch(e){ console.warn(e); }
 }
 function debtSummary(rows){
@@ -297,7 +314,7 @@ function initMap(){
   window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
   window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
 }
-function openClient(ec){ const c=state.clients.find(x=>x.ec===String(ec)); if(!c)return; state.selectedEc=c.ec; $("modalName").textContent=c.name; $("modalEc").textContent="EC: "+c.ec; $("modalAddress").textContent=[c.address,c.number].filter(Boolean).join(", ") || "Endereço não informado"; $("modalCityLine").textContent=[c.complement && c.complement!=="-"?"Comp.: "+c.complement:"",c.bairro,c.city].filter(Boolean).join(" • "); const known=Number.isFinite(c.lat)&&Number.isFinite(c.lon); $("modalLocationBadge").textContent=known?(c.locationType==="real"?"📍 Localização real confirmada":c.locationType==="fictitious"?"🗺️ Localização do endereço":"📍 Localização conhecida"):"🔎 Endereço ainda não localizado"; const rows=state.debtsByEc.get(c.ec)||[]; renderDebt(c,rows); const last=state.latestActionsByEc.get(c.ec); $("lastActionText").innerHTML=last?`<b>${esc(last.action)}</b><br>${last.date?esc(fmtDate(last.date)):""}<br>${esc(last.description||"Sem descrição")}`:"Sem histórico importado para este cliente."; const prop=state.proposalsByCpf.get(digits(c.cpf)); $("proposalText").textContent=prop||"Nenhuma proposta encontrada."; $("debtDetails").classList.add("hidden"); $("clientModal").style.display="flex"; }
+function openClient(ec){ const c=state.clients.find(x=>x.ec===String(ec)); if(!c)return; state.selectedEc=c.ec; $("modalName").textContent=c.name; $("modalEc").textContent="EC: "+c.ec; $("modalAddress").textContent=[c.address,c.number].filter(Boolean).join(", ") || "Endereço não informado"; $("modalCityLine").textContent=[c.complement && c.complement!=="-"?"Comp.: "+c.complement:"",c.bairro,c.city].filter(Boolean).join(" • "); const known=Number.isFinite(c.lat)&&Number.isFinite(c.lon); $("modalLocationBadge").textContent=known?(c.locationType==="real"?"📍 Localização real confirmada":c.locationType==="fictitious"?"🗺️ Localização do endereço":"📍 Localização conhecida"):"🔎 Endereço ainda não localizado"; const rows=state.debtsByEc.get(c.ec)||[]; renderDebt(c,rows); const last=state.latestActionsByEc.get(c.ec); $("lastActionText").innerHTML=last?`<b>${esc(last.action)}</b><br>${last.date?esc(fmtDate(last.date)):""}<br>${esc(last.description||"Sem descrição")}`:"Sem histórico importado para este cliente."; const prop=state.proposalsByCpf.get(digits(c.cpf)); $("proposalText").textContent=prop||"Nenhuma proposta encontrada."; updateActionCount(); $("debtDetails").classList.add("hidden"); $("clientModal").style.display="flex"; }
 function renderDebt(c,rows){ const s=debtSummary(rows); $("modalDebtTotal").textContent=money(s.total); const cls=s.state; const txt=cls==="future"?"Tem a vencer":cls==="mixed"?"Vencido + a vencer":"Tudo vencido"; const ds=$("modalDebtState"); ds.textContent=txt; ds.className="debt-state "+cls; const products=Object.entries(s.byProd).filter(([k])=>k!=="OUTRO"); $("modalProducts").innerHTML=products.length?products.map(([p,v])=>`<span class="product-chip">${esc(p)}: ${money(v)}</span>`).join(""):"<span class=\"product-chip\">Sem produto classificado</span>"; $("debtRows").innerHTML=rows.slice().sort((a,b)=>(a.dueDate?.getTime()??0)-(b.dueDate?.getTime()??0)).map(r=>{ const days=Number.isFinite(r.days)?r.days:(r.dueDate?Math.round((today.getTime()-r.dueDate.getTime())/86400000):null); const dClass=r.status==="over"?"days-over":r.status==="future"?"days-future":"days-zero"; const dText=r.status==="over"?`${Math.max(days||0,0)} dia(s) em atraso`:r.status==="future"?`A vencer em ${Math.max(-(days||0),0)} dia(s)`:"Sem atraso"; return `<tr><td>${fmtDate(r.dueDate)}</td><td>${money(r.valueDebt)}</td><td>${esc(r.productRaw)}<br><span class="small-note">${esc(r.productType)}</span></td><td class="${dClass}">${esc(dText)}</td></tr>`; }).join("") || '<tr><td colspan="4" style="text-align:center;color:#6c7f8b">Nenhuma dívida encontrada.</td></tr>'; }
 function closeModal(){ $("clientModal").style.display="none"; state.selectedEc=null; }
 function setImportStatus(html){ $("importStatus").innerHTML=html; const m=$("importStatusModal"); if(m)m.innerHTML=html; }
@@ -309,8 +326,71 @@ function fitAll(){ const pts=state.clients.filter(c=>Number.isFinite(c.lat)&&Num
 function requestUserLocation(){ if(!navigator.geolocation){toast("Geolocalização não disponível neste navegador.");return;} navigator.geolocation.getCurrentPosition(pos=>{state.userPos={lat:pos.coords.latitude,lon:pos.coords.longitude}; fitAll();},()=>toast("Não foi possível obter sua localização."),{enableHighAccuracy:true,timeout:10000,maximumAge:30000}); }
 async function geocodeOne(c){ const sig=addressKey(c); const saved=state.coords[c.ec]; if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"known";return true;} const q=[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", "); const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q); const res=await fetch(url,{headers:{Accept:"application/json"}}); if(!res.ok)throw new Error("HTTP "+res.status); const data=await res.json(); const expected=norm(c.city); for(const it of data){ const name=norm(it.display_name||""); if(expected && !name.includes(expected)) continue; const lat=parseFloat(it.lat),lon=parseFloat(it.lon); if(Number.isFinite(lat)&&Number.isFinite(lon)){c.lat=lat;c.lon=lon;c.locationType="known";state.coords[c.ec]={addressKey:sig,lat,lon,type:"known",confirmedAt:new Date().toISOString()};return true;} } return false; }
 async function geocodeAll(){ const pend=state.clients.filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
-function exportCoordinates(){ const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']]; state.clients.forEach(c=>{ const s=state.coords[c.ec]; if(s) rows.push([c.ec,c.cpf,c.name,c.address,c.number,c.complement,c.bairro,c.city,s.lat,s.lon,s.type||'known',s.confirmedAt||'']); }); const ws=XLSX.utils.aoa_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Coordenadas'); XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx'); }
-function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function exportCoordinates(){
+  const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']];
+  state.clients.forEach(c=>{
+    const s=state.coords[c.ec];
+    if(!s || !Number.isFinite(Number(s.lat)) || !Number.isFinite(Number(s.lon))) return;
+    const tipo=s.type==="fictitious" ? "Fictício" : "Exato";
+    rows.push([c.ec,c.cpf,c.name,c.address,c.number,c.complement,c.bairro,c.city,s.lat,s.lon,tipo,s.confirmedAt||'']);
+  });
+  if(rows.length===1){ toast("Nenhuma coordenada para exportar."); return; }
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');
+  XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');
+  toast(`${rows.length-1} coordenada(s) exportada(s).`);
+}
+function saveAction(){
+  const c=state.clients.find(x=>x.ec===state.selectedEc);
+  if(!c){ toast("Selecione um cliente."); return; }
+  const action=$("actionType").value.trim();
+  const observation=$("actionObservation").value.trim();
+  if(!action){ toast("Selecione o tipo de ação."); return; }
+  const now=new Date();
+  const rec={
+    id:Date.now()+"_"+Math.random().toString(36).slice(2,8),
+    ec:c.ec,cpf:c.cpf||"",name:c.name||"",
+    date:now.toLocaleDateString("pt-BR"),
+    time:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),
+    action,observation,address:c.address||"",number:c.number||"",
+    complement:c.complement||"",bairro:c.bairro||"",city:c.city||"",
+    latitude:Number.isFinite(c.lat)?c.lat:"",
+    longitude:Number.isFinite(c.lon)?c.lon:"",
+    locationType:c.locationType==="fictitious"?"Fictício":"Exato"
+  };
+  state.actionsHistory.push(rec);
+  state.latestActionsByEc.set(c.ec,{ec:c.ec,cpf:c.cpf||"",name:c.name||"",action,date:now,description:observation});
+  saveLocal();
+  $("actionType").value="";
+  $("actionObservation").value="";
+  updateActionCount();
+  openClient(c.ec);
+  toast("Ação registrada com sucesso.");
+}
+
+function updateActionCount(){
+  const n=state.actionsHistory.length;
+  const el=$("actionCountNote");
+  if(el) el.textContent=n ? `${n} ação(ões) registrada(s) neste aparelho.` : "Nenhuma ação registrada neste aparelho.";
+}
+
+function exportActions(){
+  const rows=[['EC','CPF','Nome','Data','Hora','Ação','Observação','Endereço utilizado','Número','Complemento','Bairro','Cidade','Latitude','Longitude','Tipo Localização']];
+  state.actionsHistory.forEach(r=>rows.push([
+    r.ec||"",r.cpf||"",r.name||"",r.date||"",r.time||"",r.action||"",
+    r.observation||"",r.address||"",r.number||"",r.complement||"",
+    r.bairro||"",r.city||"",r.latitude??"",r.longitude??"",r.locationType||""
+  ]));
+  if(rows.length===1){ toast("Nenhuma ação registrada para exportar."); return; }
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Ações');
+  XLSX.writeFile(wb,'Acoes_Recebe_Mais.xlsx');
+  toast(`${rows.length-1} ação(ões) exportada(s).`);
+}
+
+function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
 async function importFiles(){
   const bf=$("baseFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0];
   if(!bf){toast("Selecione a Base Clientes.");return;}
@@ -363,6 +443,8 @@ function clearLot(){ state.clients=[];state.debtsByEc=new Map();state.latestActi
 $("importBtn").onclick=importFiles;
 $("geocodeBtn").onclick=geocodeAll;
 $("exportCoordsBtn").onclick=exportCoordinates;
+$("exportActionsBtn").onclick=exportActions;
+$("saveActionBtn").onclick=saveAction;
 $("clearLotBtn").onclick=clearLot;
 $("backupBtn").onclick=backup;
 $("openImportBtn").onclick=()=>{ $("importModal").style.display="flex"; };
@@ -379,7 +461,7 @@ $("debtDetailsBtn").onclick=()=>$("debtDetails").classList.toggle("hidden");
 $("mapClientBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)){closeModal();state.map.setView([c.lat,c.lon],17);const m=state.markers.get(c.ec);if(m)m.openPopup();}else toast("Este cliente ainda não possui coordenadas."); };
 $("navigateBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c)return; const dest=Number.isFinite(c.lat)&&Number.isFinite(c.lon)?`${c.lat},${c.lon}`:clientFullAddress(c); window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`,"_blank"); };
 window.__openClient=openClient;
-loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers();
+loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
 </body>
 </html>
