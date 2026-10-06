@@ -293,6 +293,18 @@ function refreshClientCoordsFromStore(){
     }
   });
 }
+function parseCoordinateNumber(value){
+  if(typeof value === "number") return value;
+  let s=String(value??"").trim().replace(/\s/g,"");
+  if(!s) return NaN;
+  if(s.includes(",") && s.includes(".")){
+    if(s.lastIndexOf(",")>s.lastIndexOf(".")) s=s.replace(/\./g,"").replace(",", ".");
+    else s=s.replace(/,/g,"");
+  }else if(s.includes(",")){
+    s=s.replace(",", ".");
+  }
+  return Number(s);
+}
 function parseCoordinateWorkbook(wb){
   const sh=sheetByName(wb,"Coordenadas") || wb.Sheets[wb.SheetNames[0]];
   if(!sh) throw new Error("Aba de coordenadas não encontrada.");
@@ -312,7 +324,7 @@ function parseCoordinateWorkbook(wb){
   if(iEC<0||iLat<0||iLon<0) throw new Error("O arquivo de Coordenadas precisa ter EC, Latitude e Longitude.");
   const out=[];
   for(let r=1;r<rows.length;r++){
-    const row=rows[r], ec=String(getText(row,iEC)).trim(), lat=Number(getText(row,iLat)), lon=Number(getText(row,iLon));
+    const row=rows[r], ec=String(getText(row,iEC)).trim(), lat=parseCoordinateNumber(getText(row,iLat)), lon=parseCoordinateNumber(getText(row,iLon));
     if(!ec||!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
     const rawType=norm(getText(row,iType));
     const type=rawType.includes("FICT")?"fictitious":"exact";
@@ -389,7 +401,19 @@ function getFilteredClients(){ const q=norm($("searchInput").value), city=$("cit
 function renderList(){ const list=$("clientList"); let rows=getFilteredClients(); if(state.userPos){ rows=rows.map(c=>({...c,_dist:Number.isFinite(c.lat)&&Number.isFinite(c.lon)?distanceKm(state.userPos.lat,state.userPos.lon,c.lat,c.lon):null})).sort((a,b)=>a._dist==null?1:b._dist==null?-1:a._dist-b._dist); } if(!rows.length){list.innerHTML='<div class="empty">Nenhum cliente encontrado.</div>';return;} list.innerHTML=rows.map(c=>{ const stateLabel=c.debtState==="future"?"Tem a vencer":c.debtState==="mixed"?"Vencido + a vencer":"Tudo vencido"; const cls=c.debtState==="future"?"future":c.debtState==="mixed"?"mixed":"over"; const loc=Number.isFinite(c.lat)&&Number.isFinite(c.lon); const dist=c._dist!=null?`<div class="distance-line">📏 <span class="distance-value">${distanceText(c._dist)}</span> de você</div>`:""; return `<div class="client-card"><h3>${esc(c.name)}</h3><div class="ec">EC: ${esc(c.ec)}</div><div class="addr">${esc(clientFullAddress(c))}</div>${dist}<div class="meta"><div class="debt-pill">Total dívida: ${money(c.debtTotal||0)}</div><div class="state-pill ${cls}">${esc(stateLabel)}</div></div><div class="card-actions"><button class="btn" data-open="${esc(c.ec)}">Ver cliente</button><button class="btn primary" data-open="${esc(c.ec)}">${loc?"📍 Localização":"🔎 Localizar"}</button></div></div>`; }).join(""); list.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openClient(btn.dataset.open))); }
 function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
 function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
-function fitAll(){ const pts=state.clients.filter(c=>Number.isFinite(c.lat)&&Number.isFinite(c.lon)).map(c=>[c.lat,c.lon]); if(!pts.length)return; const b=L.latLngBounds(pts); if(state.userPos)b.extend([state.userPos.lat,state.userPos.lon]); state.map.fitBounds(b,{padding:[30,30],maxZoom:15}); }
+function fitAll(){
+  if(!state.map || typeof state.map.fitBounds !== "function") return;
+  const pts=state.clients
+    .filter(c=>Number.isFinite(Number(c.lat)) && Number.isFinite(Number(c.lon)))
+    .map(c=>[Number(c.lat),Number(c.lon)]);
+  if(!pts.length) return;
+  const bounds=L.latLngBounds(pts);
+  if(state.userPos && Number.isFinite(Number(state.userPos.lat)) && Number.isFinite(Number(state.userPos.lon))){
+    bounds.extend([Number(state.userPos.lat),Number(state.userPos.lon)]);
+  }
+  if(bounds.isValid()) state.map.fitBounds(bounds,{padding:[30,30],maxZoom:15});
+}
+
 function initMap(){
   state.map=L.map("map",{zoomControl:true,preferCanvas:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false})
     .setView([-29.1678,-51.1794],13);
