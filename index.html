@@ -408,6 +408,12 @@ function initMap(){
   window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
   window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
 }
+function setImportStatus(html){
+  const a=$("importStatus");
+  const b=$("importStatusModal");
+  if(a) a.innerHTML=html||"";
+  if(b) b.innerHTML=html||"";
+}
 function renderLocationRecords(c){ const st=getCoordStore(c.ec),el=$("locationRecords"); if(!st.records.length){el.innerHTML='<div class="small-note">Nenhuma localização salva além do endereço da base.</div>';return;} el.innerHTML=st.records.map(r=>{const tipo=r.type==="fictitious"?"Coordenada salva":"Exato",active=st.activeType===r.type,addr=[r.address,r.number].filter(Boolean).join(", "),line=[r.complement&&r.complement!=="-"?"Comp.: "+r.complement:"",r.bairro,r.city].filter(Boolean).join(" • ");return `<div class="location-record"><b>${tipo}${active?" • EM USO NO MAPA":""}</b><div class="small-note">${esc(addr||clientFullAddress(c)||"Endereço não informado")}</div><div class="small-note">${esc(line)}</div><div class="small-note">${Number(r.lat).toFixed(6)}, ${Number(r.lon).toFixed(6)} • ${r.confirmedAt?esc(new Date(r.confirmedAt).toLocaleString("pt-BR")):""}</div><button class="btn" style="margin-top:6px;min-height:38px" data-use-location="${esc(r.type)}">${active?"✓ Localização em uso":"Usar esta localização no mapa"}</button></div>`;}).join("");el.querySelectorAll("[data-use-location]").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.useLocation;setActiveCoord(c.ec,type);const r=getCoordRecord(c.ec,type);if(r){c.lat=r.lat;c.lon=r.lon;c.locationType=type;saveLocal();renderLocationRecords(c);renderMarkers();renderList();renderStats();toast(type==="fictitious"?"Coordenada salva selecionada para uso no mapa.":"Localização exata selecionada para uso.");}})); }
 function fillLocationEditor(c){ const r=getCoordRecord(c.ec,"fictitious"); const preview=$("currentCoordPreview"); if(r&&Number.isFinite(r.lat)&&Number.isFinite(r.lon)){preview.textContent=`Coordenada salva: ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}. Para substituir, obtenha sua localização novamente e toque no botão.`;} else preview.textContent="Nenhuma nova coordenada capturada."; }
 function saveManualLocation(){ toast("Use o botão 'Usar coordenada atual' para salvar o ponto onde você está."); }
