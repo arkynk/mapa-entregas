@@ -14,6 +14,7 @@
 >
 
 <style>
+
 * {
   box-sizing: border-box;
 }
@@ -22,6 +23,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
   height: 100%;
   font-family: Arial, Helvetica, sans-serif;
   background: #f3f4f6;
@@ -34,23 +36,24 @@ body {
   overflow: hidden;
 }
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 header {
   background: #111827;
   color: white;
-  padding: 12px 14px;
+  padding: 10px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,.25);
-  z-index: 1000;
+  z-index: 2000;
+  flex-shrink: 0;
 }
 
 .header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 h1 {
@@ -59,38 +62,38 @@ h1 {
 }
 
 .subtitle {
-  font-size: 12px;
-  opacity: .75;
-  margin-top: 3px;
+  font-size: 11px;
+  opacity: .7;
+  margin-top: 2px;
 }
 
 .header-count {
   background: #2563eb;
-  padding: 7px 10px;
+  padding: 7px 9px;
   border-radius: 10px;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
-/* =========================
+/* =========================================================
    BOTÕES
-========================= */
+========================================================= */
 
 .toolbar {
   display: flex;
-  gap: 7px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 9px;
   flex-wrap: wrap;
 }
 
 button {
   border: 0;
-  border-radius: 9px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 9px 10px;
   font-weight: bold;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 button:disabled {
@@ -123,282 +126,580 @@ button:disabled {
   color: white;
 }
 
-/* =========================
-   MAPA
-========================= */
+/* =========================================================
+   ÁREA DO MAPA
+========================================================= */
 
-#map {
-  flex: 1;
-  min-height: 280px;
-  z-index: 1;
+#mapContainer {
+  position: relative;
+  height: 35vh;
+  min-height: 220px;
+  max-height: 380px;
+  flex-shrink: 0;
+  background: #ddd;
+  z-index: 100;
+  transition:
+    height .25s ease,
+    min-height .25s ease,
+    max-height .25s ease;
 }
 
-/* =========================
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================================
+   BOTÃO EXPANDIR
+========================================================= */
+
+.map-expand-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1000;
+
+  background: white;
+  color: #111827;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 8px;
+
+  padding: 9px 11px;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.25);
+}
+
+.map-expand-button:active {
+  transform: scale(.96);
+}
+
+/* =========================================================
+   MAPA EXPANDIDO
+========================================================= */
+
+body.map-expanded #mapContainer {
+
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  max-height: none;
+  min-height: 0;
+
+  z-index: 10000;
+
+}
+
+body.map-expanded #map {
+  height: 100%;
+}
+
+body.map-expanded .map-expand-button {
+
+  top: 14px;
+  right: 14px;
+
+}
+
+/* =========================================================
    PAINEL INFERIOR
-========================= */
+========================================================= */
 
 .bottom-panel {
+
+  flex: 1;
+
+  min-height: 0;
+
   background: white;
-  border-top: 1px solid #d1d5db;
-  max-height: 46vh;
+
+  border-top:
+    1px solid #d1d5db;
+
   display: flex;
   flex-direction: column;
+
   z-index: 500;
+
+  overflow: hidden;
 }
 
 .progress-area {
-  padding: 10px 12px 7px;
-  border-bottom: 1px solid #e5e7eb;
+
+  padding:
+    7px 10px 5px;
+
+  border-bottom:
+    1px solid #e5e7eb;
+
+  flex-shrink: 0;
 }
 
 .progress-text {
-  font-size: 12px;
+
+  font-size: 11px;
+
   font-weight: bold;
-  margin-bottom: 6px;
-  line-height: 1.4;
+
+  margin-bottom: 5px;
+
+  line-height: 1.3;
 }
 
 .progress-container {
-  height: 8px;
+
+  height: 7px;
+
   background: #e5e7eb;
+
   border-radius: 10px;
+
   overflow: hidden;
 }
 
 #progressBar {
+
   height: 100%;
+
   width: 0%;
+
   background: #2563eb;
-  transition: width .2s;
+
+  transition:
+    width .2s;
 }
 
 #geocodeStatus {
-  min-height: 18px;
+
+  min-height: 16px;
 }
 
 .list-title {
-  padding: 9px 12px;
+
+  padding:
+    8px 10px;
+
   font-weight: bold;
-  font-size: 14px;
-  border-bottom: 1px solid #e5e7eb;
+
+  font-size: 13px;
+
+  border-bottom:
+    1px solid #e5e7eb;
+
+  flex-shrink: 0;
 }
 
 #deliveryList {
-  overflow: auto;
+
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
   -webkit-overflow-scrolling: touch;
 }
 
-/* =========================
+/* =========================================================
    ENTREGA
-========================= */
+========================================================= */
 
 .delivery {
-  padding: 10px 12px;
-  border-bottom: 1px solid #e5e7eb;
+
+  padding:
+    9px 10px;
+
+  border-bottom:
+    1px solid #e5e7eb;
 }
 
 .delivery-top {
+
   display: flex;
-  justify-content: space-between;
+
+  justify-content:
+    space-between;
+
   gap: 8px;
 }
 
 .delivery-title {
+
   font-weight: bold;
+
   font-size: 13px;
 }
 
 .distance {
+
   font-size: 11px;
+
   color: #2563eb;
+
   white-space: nowrap;
+
   font-weight: bold;
 }
 
 .delivery-address {
-  margin-top: 4px;
-  font-size: 12px;
+
+  margin-top: 3px;
+
+  font-size: 11px;
+
   color: #4b5563;
+
   line-height: 1.35;
 }
 
 .delivery-corrected {
-  margin-top: 4px;
-  font-size: 11px;
+
+  margin-top: 3px;
+
+  font-size: 10px;
+
   color: #059669;
+
   font-weight: bold;
 }
 
 .delivery-actions {
+
   display: flex;
-  gap: 6px;
-  margin-top: 7px;
+
+  gap: 5px;
+
+  margin-top: 6px;
 }
 
 .delivery-actions button {
-  padding: 7px 9px;
-  font-size: 11px;
+
+  padding:
+    6px 8px;
+
+  font-size: 10px;
 }
 
-/* =========================
+/* =========================================================
    STATUS
-========================= */
+========================================================= */
 
 .status {
+
   display: inline-block;
-  margin-top: 5px;
-  padding: 3px 6px;
-  border-radius: 6px;
-  font-size: 10px;
+
+  margin-top: 4px;
+
+  padding:
+    3px 5px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+
   font-weight: bold;
 }
 
 .status-pendente {
+
   background: #fef3c7;
+
   color: #92400e;
 }
 
 .status-carta {
+
   background: #dcfce7;
+
   color: #166534;
 }
 
 .status-nao-localizado {
+
   background: #fee2e2;
+
   color: #991b1b;
 }
 
 .status-risco {
+
   background: #fef3c7;
+
   color: #92400e;
 }
 
-/* =========================
+/* =========================================================
    MODAL
-========================= */
+========================================================= */
 
 .modal-backdrop {
+
   position: fixed;
+
   inset: 0;
-  background: rgba(0,0,0,.55);
+
+  background:
+    rgba(0,0,0,.55);
+
   display: none;
+
   align-items: flex-end;
+
   justify-content: center;
-  z-index: 5000;
+
+  z-index: 50000;
 }
 
 .modal {
+
   width: 100%;
+
   max-width: 600px;
+
   background: white;
-  border-radius: 18px 18px 0 0;
+
+  border-radius:
+    18px 18px 0 0;
+
   padding: 18px;
+
   max-height: 85vh;
+
   overflow: auto;
 }
 
 .modal h2 {
-  margin: 0 0 8px;
+
+  margin:
+    0 0 8px;
+
   font-size: 18px;
 }
 
 .modal-address {
+
   font-size: 13px;
+
   color: #4b5563;
+
   line-height: 1.4;
+
   margin-bottom: 12px;
 }
 
 .modal-buttons {
+
   display: grid;
-  grid-template-columns: 1fr 1fr;
+
+  grid-template-columns:
+    1fr 1fr;
+
   gap: 8px;
 }
 
 .modal-buttons button {
+
   min-height: 44px;
 }
 
 .close-modal {
+
   width: 100%;
+
   margin-top: 10px;
+
   background: #e5e7eb;
+
   color: #111827;
 }
 
-/* =========================
-   OUTROS
-========================= */
+/* =========================================================
+   MENSAGENS
+========================================================= */
 
 .failures {
-  margin-top: 8px;
-  font-size: 11px;
+
+  margin-top: 6px;
+
+  font-size: 10px;
+
   color: #991b1b;
-  max-height: 100px;
+
+  max-height: 80px;
+
   overflow: auto;
 }
 
 .locating {
+
   color: #2563eb;
 }
 
 .found {
+
   color: #059669;
 }
 
 .small-note {
-  font-size: 10px;
+
+  font-size: 9px;
+
   color: #6b7280;
-  padding: 5px 12px 8px;
+
+  padding:
+    4px 0 2px;
 }
 
+/* =========================================================
+   POPUP
+========================================================= */
+
 .leaflet-popup-content {
+
   font-size: 13px;
 }
 
 .popup-title {
+
   font-weight: bold;
+
   margin-bottom: 4px;
 }
 
 .popup-address {
+
   color: #4b5563;
+
   margin-bottom: 7px;
 }
 
 .popup-button {
+
   background: #2563eb;
+
   color: white;
-  padding: 7px 9px;
+
+  padding:
+    7px 9px;
+
   border-radius: 7px;
+
   display: inline-block;
+
   font-weight: bold;
+
   font-size: 11px;
 }
 
-/* =========================
+/* =========================================================
    DESKTOP
-========================= */
+========================================================= */
 
 @media (min-width: 800px) {
 
-  .bottom-panel {
-    max-height: 42vh;
+  #mapContainer {
+
+    height: 40vh;
+
+    max-height: 450px;
+
   }
 
   .modal-backdrop {
+
     align-items: center;
+
   }
 
   .modal {
+
     border-radius: 18px;
+
   }
 
 }
+
+/* =========================================================
+   MAPA EXPANDIDO - ESCONDE O RESTANTE
+========================================================= */
+
+body.map-expanded header,
+body.map-expanded .bottom-panel {
+
+  display: none;
+
+}
+
+/* =========================================================
+   MELHORIAS PARA CELULAR
+========================================================= */
+
+@media (max-width: 500px) {
+
+  header {
+
+    padding:
+      9px 10px;
+
+  }
+
+  h1 {
+
+    font-size: 17px;
+
+  }
+
+  .toolbar {
+
+    gap: 5px;
+
+  }
+
+  .toolbar button {
+
+    font-size: 11px;
+
+    padding:
+      8px 8px;
+
+  }
+
+  #mapContainer {
+
+    height: 34vh;
+
+    min-height: 210px;
+
+  }
+
+  .list-title {
+
+    font-size: 12px;
+
+  }
+
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
 
 <header>
 
@@ -406,7 +707,9 @@ button:disabled {
 
     <div>
 
-      <h1>📦 Mapa de Entregas</h1>
+      <h1>
+        📦 Mapa de Entregas
+      </h1>
 
       <div class="subtitle">
         Localização inteligente dos clientes
@@ -430,14 +733,14 @@ button:disabled {
       class="btn-primary"
       onclick="geocodeAll()"
     >
-      🗺️ Localizar entregas
+      🗺️ Localizar
     </button>
 
     <button
       class="btn-success"
       onclick="locateMe()"
     >
-      📍 Minha localização
+      📍 GPS
     </button>
 
     <button
@@ -451,14 +754,34 @@ button:disabled {
       class="btn-warning"
       onclick="retryFailed()"
     >
-      🔄 Tentar falhas
+      🔄 Falhas
     </button>
 
   </div>
 
 </header>
 
-<div id="map"></div>
+<!-- =====================================================
+     MAPA
+====================================================== -->
+
+<div id="mapContainer">
+
+  <div id="map"></div>
+
+  <button
+    id="mapExpandButton"
+    class="map-expand-button"
+    onclick="toggleMap()"
+  >
+    ⛶ Expandir mapa
+  </button>
+
+</div>
+
+<!-- =====================================================
+     PAINEL
+====================================================== -->
 
 <div class="bottom-panel">
 
@@ -473,7 +796,9 @@ button:disabled {
 
     <div class="progress-container">
 
-      <div id="progressBar"></div>
+      <div
+        id="progressBar"
+      ></div>
 
     </div>
 
@@ -492,16 +817,21 @@ button:disabled {
   </div>
 
   <div class="list-title">
-    📍 Entregas pendentes — mais próximas primeiro
+
+    📍 Entregas pendentes
+    — mais próximas primeiro
+
   </div>
 
-  <div id="deliveryList"></div>
+  <div
+    id="deliveryList"
+  ></div>
 
 </div>
 
-<!-- =========================
+<!-- =====================================================
      MODAL
-========================= -->
+====================================================== -->
 
 <div
   id="modalBackdrop"
@@ -514,7 +844,9 @@ button:disabled {
     onclick="event.stopPropagation()"
   >
 
-    <h2 id="modalTitle">
+    <h2
+      id="modalTitle"
+    >
       Entrega
     </h2>
 
@@ -591,10 +923,10 @@ button:disabled {
 ========================================================= */
 
 const STORAGE_KEY =
-  "mapa_entregas_clientes_v4";
+  "mapa_entregas_clientes_v5";
 
 const CACHE_KEY =
-  "mapa_entregas_geocache_clientes_v4";
+  "mapa_entregas_geocache_clientes_v5";
 
 const DEFAULT_CENTER =
   [-29.1678, -51.1794];
@@ -607,8 +939,6 @@ const REQUEST_DELAY =
 
 /* =========================================================
    CLIENTES
-   CORREÇÃO IMPORTANTE:
-   CLIENTES é um const global criado pelo clientes.js.
 ========================================================= */
 
 const sourceClients =
@@ -716,7 +1046,7 @@ const INITIAL_DATA =
   );
 
 /* =========================================================
-   CARREGAR STORAGE
+   STORAGE
 ========================================================= */
 
 let deliveries = [];
@@ -729,6 +1059,10 @@ let selectedDelivery =
 let userLocation =
   null;
 
+/* =========================================================
+   CARREGAR DADOS
+========================================================= */
+
 try {
 
   let saved =
@@ -739,10 +1073,19 @@ try {
     );
 
   /*
-    Se não existir V4, tenta V3.
-    Isso ajuda a preservar os dados
-    da versão anterior.
+    Compatibilidade com versões anteriores.
   */
+
+  if(!Array.isArray(saved)) {
+
+    saved =
+      JSON.parse(
+        localStorage.getItem(
+          "mapa_entregas_clientes_v4"
+        )
+      );
+
+  }
 
   if(!Array.isArray(saved)) {
 
@@ -790,12 +1133,14 @@ try {
           if(old) {
 
             return {
+
               ...item,
+
               ...old,
 
               /*
-                O endereço atual do clientes.js
-                sempre tem prioridade.
+                O endereço do clientes.js
+                permanece como fonte principal.
               */
 
               address:
@@ -897,6 +1242,50 @@ const markerLayer =
 let markersById = {};
 
 /* =========================================================
+   EXPANDIR / FECHAR MAPA
+========================================================= */
+
+function toggleMap() {
+
+  const expanded =
+    document.body.classList.toggle(
+      "map-expanded"
+    );
+
+  const button =
+    document.getElementById(
+      "mapExpandButton"
+    );
+
+  if(expanded) {
+
+    button.textContent =
+      "↙️ Fechar mapa";
+
+  } else {
+
+    button.textContent =
+      "⛶ Expandir mapa";
+
+  }
+
+  /*
+    O Leaflet precisa recalcular
+    o tamanho depois da animação.
+  */
+
+  setTimeout(
+    () => {
+
+      map.invalidateSize();
+
+    },
+    300
+  );
+
+}
+
+/* =========================================================
    UTILITÁRIOS
 ========================================================= */
 
@@ -945,7 +1334,7 @@ function saveData() {
   } catch(error) {
 
     console.error(
-      "Erro ao salvar:",
+      "Erro ao salvar dados:",
       error
     );
 
@@ -1079,7 +1468,7 @@ function parseAddress(d) {
 }
 
 /* =========================================================
-   MONTAR CONSULTAS
+   CONSULTAS
 ========================================================= */
 
 function buildQueries(d) {
@@ -1185,10 +1574,6 @@ function buildQueries(d) {
     });
 
   }
-
-  /*
-    Remove consultas duplicadas.
-  */
 
   const seen =
     new Set();
@@ -1355,7 +1740,7 @@ async function fetchGeocode(query) {
 }
 
 /* =========================================================
-   ESCOLHER RESULTADO
+   RESULTADO
 ========================================================= */
 
 function chooseBestResult(
@@ -1370,10 +1755,6 @@ function chooseBestResult(
     return null;
 
   }
-
-  /*
-    Primeiro procura Caxias do Sul.
-  */
 
   const caxias =
     results.filter(
@@ -1402,27 +1783,18 @@ function chooseBestResult(
   if(caxias.length)
     return caxias[0];
 
-  /*
-    Se não achou explicitamente,
-    ainda usa o primeiro resultado.
-  */
-
   return results[0];
 
 }
 
 /* =========================================================
-   LOCALIZAR UMA ENTREGA
+   GEOCODIFICAR UMA
 ========================================================= */
 
 async function geocodeOne(
   d,
   progressCallback
 ) {
-
-  /*
-    Primeiro verifica cache.
-  */
 
   const cached =
     findCachedCoordinate(d);
@@ -1535,10 +1907,6 @@ async function geocodeOne(
 
       }
 
-      /*
-        Coordenadas.
-      */
-
       d.lat =
         lat;
 
@@ -1550,10 +1918,6 @@ async function geocodeOne(
 
       d.geocodeTentativa =
         attempt.query;
-
-      /*
-        Bairro retornado pelo Nominatim.
-      */
 
       const address =
         result.address ||
@@ -1573,10 +1937,6 @@ async function geocodeOne(
           bairro;
 
       }
-
-      /*
-        Cache por rua + número.
-      */
 
       const parsed =
         parseAddress(d);
@@ -1610,10 +1970,6 @@ async function geocodeOne(
         };
 
       }
-
-      /*
-        Cache por endereço completo.
-      */
 
       geocache[
         normalize(
@@ -1663,11 +2019,6 @@ async function geocodeOne(
 
     }
 
-    /*
-      Pequena pausa antes
-      da próxima tentativa.
-    */
-
     await sleep(300);
 
   }
@@ -1685,7 +2036,7 @@ async function geocodeOne(
 }
 
 /* =========================================================
-   LOCALIZAR TODOS
+   GEOCODIFICAR TODAS
 ========================================================= */
 
 async function geocodeAll() {
@@ -1855,10 +2206,6 @@ async function geocodeAll() {
 
       updateHeader();
 
-      /*
-        Respeita intervalo entre consultas.
-      */
-
       await sleep(
         REQUEST_DELAY
       );
@@ -1905,11 +2252,6 @@ async function geocodeAll() {
 
     renderAll();
 
-    /*
-      GARANTE QUE O BOTÃO
-      NUNCA FIQUE TRAVADO.
-    */
-
     unlockGeocodeButton();
 
   }
@@ -1934,12 +2276,12 @@ function unlockGeocodeButton() {
     false;
 
   button.textContent =
-    "🗺️ Localizar entregas";
+    "🗺️ Localizar";
 
 }
 
 /* =========================================================
-   TENTAR NOVAMENTE
+   TENTAR FALHAS
 ========================================================= */
 
 async function retryFailed() {
@@ -2057,7 +2399,7 @@ function renderMarkers() {
             <div style="
               color:#059669;
               font-size:11px;
-              margin-top:4px
+              margin-top:4px;
             ">
               📍 Bairro encontrado:
               ${escapeHtml(
@@ -2188,11 +2530,10 @@ function renderList() {
     );
 
   const pending =
-    deliveries
-      .filter(
-        d =>
-          d.status === "PENDENTE"
-      );
+    deliveries.filter(
+      d =>
+        d.status === "PENDENTE"
+    );
 
   if(!userLocation) {
 
@@ -2254,7 +2595,7 @@ function renderList() {
 }
 
 /* =========================================================
-   ITEM DA LISTA
+   ENTREGA DA LISTA
 ========================================================= */
 
 function renderDelivery(d) {
@@ -2284,10 +2625,12 @@ function renderDelivery(d) {
     )
       ? `
         <div class="delivery-corrected">
+
           📍 Bairro encontrado:
           ${escapeHtml(
             d.bairroCorrigido
           )}
+
         </div>
         `
       : "";
@@ -2464,10 +2807,6 @@ function openDelivery(id) {
   ).style.display =
     "flex";
 
-  /*
-    Centraliza o mapa no cliente.
-  */
-
   if(
     validCoordinate(d)
   ) {
@@ -2584,7 +2923,7 @@ function navigateTo(id) {
 }
 
 /* =========================================================
-   LOCALIZAÇÃO DO USUÁRIO
+   GPS
 ========================================================= */
 
 function locateMe() {
@@ -2830,7 +3169,7 @@ function updateHeader() {
 }
 
 /* =========================================================
-   RENDER GERAL
+   RENDER
 ========================================================= */
 
 function renderAll() {
@@ -2844,7 +3183,7 @@ function renderAll() {
 }
 
 /* =========================================================
-   SEGURANÇA
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(value) {
@@ -2941,4 +3280,4 @@ if(
 </script>
 
 </body>
-    </html>
+  </html>
