@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -13,7 +14,6 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIINfQ3V6r1mQ0nL7m0eN9M2rY8rYxK8Zs="
     crossorigin=""
   >
 
@@ -27,30 +27,33 @@
     body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      min-height: 100%;
       background: #eef1f5;
       color: #172033;
       font-family: Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
     }
 
     body {
       min-height: 100vh;
     }
 
-    /* =========================
-       CABEÇALHO
-    ========================= */
+    /* =========================================================
+       CABEÇALHO COMPACTO
+    ========================================================= */
 
     header {
       background: #101827;
       color: white;
-      padding: 12px 14px 10px;
+      padding: 8px 10px 8px;
     }
 
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
     .title-area {
@@ -59,47 +62,47 @@
 
     .title {
       margin: 0;
-      font-size: 25px;
+      font-size: 21px;
       line-height: 1.05;
       font-weight: 800;
     }
 
     .subtitle {
-      margin: 4px 0 0;
-      font-size: 13px;
+      margin: 3px 0 0;
+      font-size: 11px;
       color: #c8d0dd;
     }
 
     .counter {
       flex-shrink: 0;
-      min-width: 74px;
-      height: 58px;
-      border-radius: 17px;
+      min-width: 62px;
+      height: 50px;
+      border-radius: 15px;
       background: #2864e8;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 21px;
+      font-size: 18px;
       font-weight: 800;
     }
 
-    /* =========================
+    /* =========================================================
        BOTÕES
-    ========================= */
+    ========================================================= */
 
     .toolbar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 7px;
-      margin-top: 10px;
+      gap: 5px;
+      margin-top: 7px;
     }
 
     .toolbar button {
       border: 0;
-      border-radius: 13px;
-      min-height: 48px;
-      padding: 7px 5px;
-      font-size: 14px;
+      border-radius: 10px;
+      min-height: 40px;
+      padding: 5px 3px;
+      font-size: 12px;
       font-weight: 800;
       color: white;
       cursor: pointer;
@@ -125,69 +128,71 @@
       opacity: 0.55;
     }
 
-    /* =========================
-       ÁREA DO MAPA
-    ========================= */
+    /* =========================================================
+       MAPA
+    ========================================================= */
 
     .map-wrapper {
       position: relative;
+      width: 100%;
       background: #dce1e8;
+      overflow: hidden;
     }
 
     #map {
       width: 100%;
-      height: 330px;
-      transition: height 0.25s ease;
+      height: 250px;
+      min-height: 250px;
+      background: #dce1e8;
     }
 
     .map-wrapper.expanded #map {
-      height: calc(100vh - 40px);
+      height: calc(100vh - 35px);
+      min-height: calc(100vh - 35px);
     }
 
     .map-toggle {
       position: absolute;
       z-index: 1000;
-      top: 12px;
-      right: 12px;
-
+      top: 9px;
+      right: 9px;
       border: 0;
-      border-radius: 14px;
+      border-radius: 13px;
       background: white;
       color: #172033;
-
-      padding: 12px 15px;
-      font-size: 15px;
+      padding: 10px 12px;
+      font-size: 13px;
       font-weight: 800;
-
       box-shadow: 0 3px 12px rgba(0,0,0,0.22);
     }
 
-    /* =========================
+    /* =========================================================
        PROGRESSO
-    ========================= */
+    ========================================================= */
 
     .progress-section {
       background: white;
-      padding: 12px 14px;
+      padding: 9px 12px;
       border-bottom: 1px solid #d7dce4;
     }
 
     #geocodeStatus {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 800;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
 
     #geocodeDetail {
-      font-size: 13px;
+      font-size: 12px;
       color: #697386;
-      min-height: 18px;
-      margin-bottom: 7px;
+      min-height: 16px;
+      margin-bottom: 5px;
+      overflow-wrap: anywhere;
     }
 
     .progress-bg {
       width: 100%;
-      height: 9px;
+      height: 7px;
       border-radius: 20px;
       background: #e3e7ee;
       overflow: hidden;
@@ -200,31 +205,31 @@
       transition: width 0.2s ease;
     }
 
-    /* =========================
+    /* =========================================================
        LISTA
-    ========================= */
+    ========================================================= */
 
     .list-header {
       background: white;
-      padding: 14px;
+      padding: 10px 12px;
       border-bottom: 1px solid #d7dce4;
     }
 
     .list-header h2 {
       margin: 0;
-      font-size: 20px;
+      font-size: 18px;
     }
 
     #nearbyList {
-      padding: 10px;
+      padding: 8px;
     }
 
     .delivery-card {
       background: white;
-      border-radius: 15px;
-      margin-bottom: 10px;
-      padding: 13px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-radius: 13px;
+      margin-bottom: 8px;
+      padding: 11px;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.08);
       border-left: 5px solid #2864e8;
     }
 
@@ -232,11 +237,11 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
     .delivery-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
     }
 
@@ -245,33 +250,34 @@
       font-weight: 800;
       white-space: nowrap;
       text-align: right;
+      font-size: 15px;
     }
 
     .address {
-      margin-top: 8px;
+      margin-top: 7px;
       color: #4d5869;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
     .corrected-address {
-      margin-top: 6px;
+      margin-top: 5px;
       color: #07865e;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
     }
 
     .card-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 11px;
+      gap: 7px;
+      margin-top: 9px;
     }
 
     .card-buttons button {
       border: 0;
-      border-radius: 11px;
-      padding: 11px 8px;
+      border-radius: 10px;
+      padding: 10px 7px;
       font-size: 14px;
       font-weight: 800;
       color: white;
@@ -287,15 +293,15 @@
 
     .empty {
       background: white;
-      border-radius: 14px;
+      border-radius: 13px;
       padding: 18px;
       text-align: center;
       color: #687384;
     }
 
-    /* =========================
+    /* =========================================================
        MODAL
-    ========================= */
+    ========================================================= */
 
     .modal {
       display: none;
@@ -315,35 +321,35 @@
       width: 100%;
       max-width: 600px;
       background: white;
-      border-radius: 20px 20px 0 0;
-      padding: 18px;
+      border-radius: 18px 18px 0 0;
+      padding: 16px;
       max-height: 90vh;
       overflow-y: auto;
     }
 
     .modal-box h3 {
-      margin: 0 0 6px;
-      font-size: 21px;
+      margin: 0 0 5px;
+      font-size: 20px;
     }
 
     .modal-address {
       color: #687384;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.4;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .status-options {
       display: grid;
-      gap: 8px;
+      gap: 7px;
     }
 
     .status-options button {
       border: 0;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 11px;
+      padding: 13px;
       color: white;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
     }
 
@@ -364,62 +370,64 @@
     }
 
     .close-modal {
-      margin-top: 10px;
+      margin-top: 9px;
       width: 100%;
       border: 0;
-      border-radius: 12px;
-      padding: 13px;
+      border-radius: 11px;
+      padding: 12px;
       background: #e5e8ed;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
     }
 
-    /* =========================
+    /* =========================================================
        MOBILE
-    ========================= */
+    ========================================================= */
 
     @media (max-width: 520px) {
 
       header {
-        padding: 10px 12px 9px;
+        padding: 7px 9px 7px;
       }
 
       .title {
-        font-size: 22px;
+        font-size: 20px;
       }
 
       .subtitle {
-        font-size: 12px;
+        font-size: 10px;
       }
 
       .counter {
-        min-width: 67px;
-        height: 52px;
-        font-size: 19px;
+        min-width: 60px;
+        height: 47px;
+        font-size: 17px;
       }
 
       .toolbar {
-        gap: 6px;
-        margin-top: 8px;
+        gap: 4px;
+        margin-top: 6px;
       }
 
       .toolbar button {
-        min-height: 45px;
-        font-size: 13px;
-        border-radius: 11px;
+        min-height: 38px;
+        font-size: 11px;
+        border-radius: 9px;
       }
 
       #map {
-        height: 310px;
+        height: 250px;
+        min-height: 250px;
       }
 
       .map-wrapper.expanded #map {
         height: calc(100vh - 30px);
+        min-height: calc(100vh - 30px);
       }
 
       .map-toggle {
-        padding: 10px 12px;
-        font-size: 14px;
+        padding: 9px 11px;
+        font-size: 13px;
       }
 
     }
@@ -485,6 +493,10 @@
 </header>
 
 
+<!-- =========================================================
+     MAPA
+========================================================= -->
+
 <div
   class="map-wrapper"
   id="mapWrapper">
@@ -500,6 +512,10 @@
 </div>
 
 
+<!-- =========================================================
+     PROGRESSO
+========================================================= -->
+
 <section class="progress-section">
 
   <div id="geocodeStatus">
@@ -512,14 +528,16 @@
 
   <div class="progress-bg">
 
-    <div
-      id="progressBar">
-    </div>
+    <div id="progressBar"></div>
 
   </div>
 
 </section>
 
+
+<!-- =========================================================
+     LISTA
+========================================================= -->
 
 <section class="list-header">
 
@@ -529,13 +547,12 @@
 
 </section>
 
-
 <div id="nearbyList"></div>
 
 
-<!-- =========================
+<!-- =========================================================
      MODAL DE STATUS
-========================= -->
+========================================================= -->
 
 <div
   id="modal"
@@ -593,7 +610,6 @@
 
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
   crossorigin="">
 </script>
 
@@ -603,9 +619,9 @@
 
 <script>
 
-  /* ============================================================
+  /* =========================================================
      CLIENTES
-  ============================================================ */
+  ========================================================= */
 
   const CLIENTES_CARREGADOS =
     typeof CLIENTES !== "undefined" &&
@@ -614,9 +630,9 @@
       : [];
 
 
-  /* ============================================================
+  /* =========================================================
      CONFIGURAÇÕES
-  ============================================================ */
+  ========================================================= */
 
   const STORAGE_KEY =
     "mapa_entregas_clientes_v5";
@@ -636,9 +652,9 @@
   ];
 
 
-  /* ============================================================
+  /* =========================================================
      VARIÁVEIS
-  ============================================================ */
+  ========================================================= */
 
   let deliveries = [];
 
@@ -661,9 +677,9 @@
   let gpsRequestInProgress = false;
 
 
-  /* ============================================================
+  /* =========================================================
      ELEMENTOS
-  ============================================================ */
+  ========================================================= */
 
   const counter =
     document.getElementById("counter");
@@ -714,13 +730,14 @@
     document.getElementById("mapToggle");
 
 
-  /* ============================================================
+  /* =========================================================
      MAPA
-  ============================================================ */
+  ========================================================= */
 
   const map =
     L.map("map", {
-      zoomControl: true
+      zoomControl: true,
+      preferCanvas: true
     }).setView(
       DEFAULT_CENTER,
       12
@@ -732,7 +749,9 @@
     {
       maxZoom: 19,
       attribution:
-        "&copy; OpenStreetMap contributors"
+        "&copy; OpenStreetMap contributors",
+      updateWhenZooming: false,
+      updateWhenIdle: true
     }
   ).addTo(map);
 
@@ -741,9 +760,9 @@
     L.layerGroup().addTo(map);
 
 
-  /* ============================================================
+  /* =========================================================
      FUNÇÕES BÁSICAS
-  ============================================================ */
+  ========================================================= */
 
   function wait(ms) {
 
@@ -754,6 +773,28 @@
           ms
         )
     );
+
+  }
+
+
+  function readJson(key) {
+
+    try {
+
+      const value =
+        localStorage.getItem(key);
+
+      if (!value) {
+        return null;
+      }
+
+      return JSON.parse(value);
+
+    } catch (error) {
+
+      return null;
+
+    }
 
   }
 
@@ -807,10 +848,9 @@
   }
 
 
-  /*
-    Verifica se uma coordenada
-    individual é matematicamente válida.
-  */
+  /* =========================================================
+     COORDENADAS
+  ========================================================= */
 
   function validCoordinates(
     lat,
@@ -822,7 +862,6 @@
 
     const longitude =
       Number(lon);
-
 
     return (
       Number.isFinite(latitude) &&
@@ -837,20 +876,10 @@
 
 
   /*
-    ============================================================
-    CORREÇÃO DE LATITUDE/LONGITUDE INVERTIDAS
+    Corrige coordenadas invertidas.
 
-    Um erro muito comum em arquivos de clientes é:
-
-      lat = -51.x
-      lon = -29.x
-
-    quando o correto seria:
-
-      lat = -29.x
-      lon = -51.x
-
-    Para a região do RS isso é facilmente identificado.
+    Também protege especificamente a região
+    de Caxias do Sul contra sinais invertidos.
   */
 
   function normalizeCoordinatePair(
@@ -858,11 +887,72 @@
     lon
   ) {
 
-    const latitude =
+    let latitude =
       Number(lat);
 
-    const longitude =
+    let longitude =
       Number(lon);
+
+
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
+
+      return null;
+
+    }
+
+
+    /*
+      Caso latitude/longitude tenham sido
+      completamente invertidas.
+    */
+
+    if (
+      Math.abs(latitude) > 40 &&
+      Math.abs(longitude) < 40
+    ) {
+
+      const temp =
+        latitude;
+
+      latitude =
+        longitude;
+
+      longitude =
+        temp;
+
+    }
+
+
+    /*
+      Caxias do Sul está aproximadamente em:
+
+      Latitude  -29
+      Longitude -51
+
+      Se vier +29 / -51, o sinal da latitude
+      está invertido.
+
+      Se vier -29 / +51, o sinal da longitude
+      está invertido.
+    */
+
+    if (
+      Math.abs(latitude) >= 25 &&
+      Math.abs(latitude) <= 35 &&
+      Math.abs(longitude) >= 45 &&
+      Math.abs(longitude) <= 60
+    ) {
+
+      latitude =
+        -Math.abs(latitude);
+
+      longitude =
+        -Math.abs(longitude);
+
+    }
 
 
     if (
@@ -877,57 +967,17 @@
     }
 
 
-    /*
-      Coordenadas invertidas típicas
-      do Rio Grande do Sul/Brasil.
-    */
-
-    const looksSwapped =
-      Math.abs(latitude) > 40 &&
-      Math.abs(longitude) < 40;
-
-
-    if (looksSwapped) {
-
-      const swappedLat =
-        longitude;
-
-      const swappedLon =
-        latitude;
-
-
-      if (
-        validCoordinates(
-          swappedLat,
-          swappedLon
-        )
-      ) {
-
-        return {
-          lat: swappedLat,
-          lon: swappedLon,
-          corrected: true
-        };
-
-      }
-
-    }
-
-
     return {
       lat: latitude,
-      lon: longitude,
-      corrected: false
+      lon: longitude
     };
 
   }
 
 
-  /*
-    ============================================================
-    DISTÂNCIA HAVERSINE
-  ============================================================
-  */
+  /* =========================================================
+     DISTÂNCIA HAVERSINE
+  ========================================================= */
 
   function distanceKm(
     lat1,
@@ -965,7 +1015,8 @@
     }
 
 
-    const R = 6371;
+    const R =
+      6371;
 
 
     const dLat =
@@ -1002,12 +1053,15 @@
       Math.sin(
         dLat / 2
       ) ** 2 +
+
       Math.cos(
         lat1Rad
       ) *
+
       Math.cos(
         lat2Rad
       ) *
+
       Math.sin(
         dLon / 2
       ) ** 2;
@@ -1018,18 +1072,16 @@
       2 *
       Math.atan2(
         Math.sqrt(a),
-        Math.sqrt(
-          1 - a
-        )
+        Math.sqrt(1 - a)
       )
     );
 
   }
 
 
-  /* ============================================================
+  /* =========================================================
      ENDEREÇO
-  ============================================================ */
+  ========================================================= */
 
   function getAddress(
     cliente
@@ -1056,182 +1108,138 @@
     const parts = [];
 
 
-    if (
-      cliente.rua
-    ) {
+    if (cliente.rua) {
+      parts.push(cliente.rua);
+    }
 
-      parts.push(
-        cliente.rua
-      );
+    if (cliente.numero) {
+      parts.push(cliente.numero);
+    }
 
+    if (cliente.bairro) {
+      parts.push(cliente.bairro);
+    }
+
+    if (cliente.cidade) {
+      parts.push(cliente.cidade);
+    }
+
+    if (cliente.uf) {
+      parts.push(cliente.uf);
     }
 
 
-    if (
-      cliente.numero
-    ) {
-
-      parts.push(
-        cliente.numero
-      );
-
-    }
-
-
-    if (
-      cliente.bairro
-    ) {
-
-      parts.push(
-        cliente.bairro
-      );
-
-    }
-
-
-    if (
-      cliente.cidade
-    ) {
-
-      parts.push(
-        cliente.cidade
-      );
-
-    }
-
-
-    if (
-      cliente.uf
-    ) {
-
-      parts.push(
-        cliente.uf
-      );
-
-    }
-
-
-    return parts.join(
-      ", "
-    );
+    return parts.join(", ");
 
   }
 
 
   function getAddressParts(
-    cliente
+    delivery
   ) {
 
-    const address =
-      getAddress(
-        cliente
-      );
-
-
-    const raw =
-      address
-        .split(",")
-        .map(
-          x => x.trim()
-        )
-        .filter(
-          Boolean
-        );
-
-
-    let rua =
-      cliente.rua ||
-      raw[0] ||
-      "";
-
-
-    let numero =
-      cliente.numero ||
-      "";
-
-
-    let bairro =
-      cliente.bairro ||
-      "";
+    const cliente =
+      CLIENTES_CARREGADOS.find(
+        c =>
+          String(c.id) ===
+          String(delivery.id)
+      ) || {};
 
 
     if (
-      !numero &&
-      raw[1]
+      cliente.rua ||
+      cliente.numero ||
+      cliente.bairro
     ) {
 
-      const match =
-        raw[1].match(
-          /\d+[A-Za-z]?/
-        );
+      return {
 
+        rua:
+          cliente.rua ||
+          "",
 
-      if (match) {
+        numero:
+          String(
+            cliente.numero ||
+            ""
+          ),
 
-        numero =
-          match[0];
+        bairro:
+          cliente.bairro ||
+          ""
 
-      }
+      };
 
     }
 
 
+    const address =
+      delivery.address ||
+      "";
+
+
+    const parts =
+      address
+        .split(",")
+        .map(
+          item =>
+            item.trim()
+        )
+        .filter(Boolean);
+
+
+    let rua =
+      parts[0] ||
+      "";
+
+
+    let numero =
+      parts[1] ||
+      "";
+
+
+    let bairro =
+      parts[2] ||
+      "";
+
+
+    /*
+      Remove informações extras
+      depois do bairro.
+    */
+
     if (
-      !bairro &&
-      raw[2]
+      !numero &&
+      rua
     ) {
 
-      bairro =
-        raw[2];
+      const match =
+        rua.match(
+          /\b(\d{1,6})\b/
+        );
+
+      if (match) {
+
+        numero =
+          match[1];
+
+      }
 
     }
 
 
     return {
       rua,
-      numero:
-        String(numero),
+      numero,
       bairro
     };
 
   }
 
 
-  /* ============================================================
+  /* =========================================================
      STORAGE
-  ============================================================ */
-
-  function readJson(
-    key
-  ) {
-
-    try {
-
-      const raw =
-        localStorage.getItem(
-          key
-        );
-
-
-      if (!raw) {
-
-        return null;
-
-      }
-
-
-      return JSON.parse(
-        raw
-      );
-
-    } catch (e) {
-
-      return null;
-
-    }
-
-  }
-
+  ========================================================= */
 
   function saveData() {
 
@@ -1244,11 +1252,11 @@
         )
       );
 
-    } catch (e) {
+    } catch (error) {
 
       console.warn(
-        "Não foi possível salvar:",
-        e
+        "Não foi possível salvar os dados.",
+        error
       );
 
     }
@@ -1267,21 +1275,17 @@
         )
       );
 
-    } catch (e) {
+    } catch (error) {
 
       console.warn(
-        "Não foi possível salvar cache:",
-        e
+        "Não foi possível salvar o cache.",
+        error
       );
 
     }
 
   }
 
-
-  /* ============================================================
-     CARREGAR CLIENTES
-  ============================================================ */
 
   function loadData() {
 
@@ -1291,33 +1295,24 @@
       );
 
 
-    /*
-      Migração das versões antigas.
-    */
-
     if (
       !Array.isArray(saved)
     ) {
 
       for (
-        const oldKey of
-        OLD_STORAGE_KEYS
+        const key
+        of OLD_STORAGE_KEYS
       ) {
 
-        const oldData =
-          readJson(
-            oldKey
-          );
-
+        const old =
+          readJson(key);
 
         if (
-          Array.isArray(
-            oldData
-          )
+          Array.isArray(old)
         ) {
 
           saved =
-            oldData;
+            old;
 
           break;
 
@@ -1328,35 +1323,35 @@
     }
 
 
-    const savedById = {};
-
-
     if (
-      Array.isArray(
-        saved
-      )
+      !Array.isArray(saved)
     ) {
 
-      saved.forEach(
-        item => {
-
-          if (
-            item &&
-            item.id !== undefined
-          ) {
-
-            savedById[
-              String(
-                item.id
-              )
-            ] = item;
-
-          }
-
-        }
-      );
+      saved = [];
 
     }
+
+
+    const savedById =
+      new Map();
+
+
+    saved.forEach(
+      item => {
+
+        savedById.set(
+          String(item.id),
+          item
+        );
+
+      }
+    );
+
+
+    geocache =
+      readJson(
+        CACHE_KEY
+      ) || {};
 
 
     deliveries =
@@ -1366,11 +1361,10 @@
           const id =
             cliente.id;
 
-
           const old =
-            savedById[
+            savedById.get(
               String(id)
-            ] || {};
+            ) || {};
 
 
           const address =
@@ -1379,22 +1373,12 @@
             );
 
 
-          /*
-            Primeiro tentamos
-            coordenadas do clientes.js.
-          */
-
           let coordinates =
             normalizeCoordinatePair(
               cliente.lat,
               cliente.lon
             );
 
-
-          /*
-            Se não houver coordenadas
-            válidas, usamos as antigas.
-          */
 
           if (
             !coordinates
@@ -1409,7 +1393,38 @@
           }
 
 
-          const item = {
+          /*
+            Cache do endereço.
+          */
+
+          if (
+            !coordinates
+          ) {
+
+            const cached =
+              geocache[
+                normalizeText(
+                  address
+                )
+              ];
+
+
+            if (
+              cached
+            ) {
+
+              coordinates =
+                normalizeCoordinatePair(
+                  cached.lat,
+                  cached.lon
+                );
+
+            }
+
+          }
+
+
+          return {
 
             ...old,
 
@@ -1472,104 +1487,8 @@
 
           };
 
-
-          /*
-            Se detectamos coordenadas
-            invertidas, marcamos a origem.
-          */
-
-          if (
-            coordinates &&
-            coordinates.corrected
-          ) {
-
-            item.geocodeSource =
-              "coordenadas corrigidas";
-
-          }
-
-
-          return item;
-
         }
       );
-
-
-    geocache =
-      readJson(
-        CACHE_KEY
-      ) || {};
-
-
-    /*
-      Recupera coordenadas do cache.
-    */
-
-    deliveries.forEach(
-      d => {
-
-        if (
-          !validCoordinates(
-            d.lat,
-            d.lon
-          )
-        ) {
-
-          const key =
-            normalizeText(
-              d.address
-            );
-
-
-          const cached =
-            geocache[key];
-
-
-          if (
-            cached
-          ) {
-
-            const normalized =
-              normalizeCoordinatePair(
-                cached.lat,
-                cached.lon
-              );
-
-
-            if (
-              normalized
-            ) {
-
-              d.lat =
-                normalized.lat;
-
-              d.lon =
-                normalized.lon;
-
-              d.correctedNeighborhood =
-                cached.correctedNeighborhood ||
-                "";
-
-              d.geocodeDisplayName =
-                cached.displayName ||
-                "";
-
-              d.geocodeSource =
-                normalized.corrected
-                  ? "cache corrigido"
-                  : (
-                      cached.source ||
-                      "cache"
-                    );
-
-            }
-
-          }
-
-        }
-
-      }
-    );
 
 
     saveData();
@@ -1579,20 +1498,9 @@
   }
 
 
-  /* ============================================================
-     RENDERIZAÇÃO
-  ============================================================ */
-
-  function renderAll() {
-
-    renderSummary();
-
-    renderMarkers();
-
-    renderNearby();
-
-  }
-
+  /* =========================================================
+     RESUMO
+  ========================================================= */
 
   function renderSummary() {
 
@@ -1621,10 +1529,10 @@
     ) {
 
       geocodeStatus.textContent =
-        "Nenhum cliente carregado.";
+        "⚠️ Nenhum cliente carregado.";
 
       geocodeDetail.textContent =
-        "Verifique se o clientes.js está publicado corretamente.";
+        "Verifique o arquivo clientes.js.";
 
       progressBar.style.width =
         "0%";
@@ -1652,9 +1560,9 @@
   }
 
 
-  /* ============================================================
+  /* =========================================================
      MARCADORES
-  ============================================================ */
+  ========================================================= */
 
   function markerColor(
     status
@@ -1664,9 +1572,7 @@
       status ===
       "CARTA"
     ) {
-
       return "#079c6c";
-
     }
 
 
@@ -1674,9 +1580,7 @@
       status ===
       "NAO_LOCALIZADO"
     ) {
-
       return "#f08a00";
-
     }
 
 
@@ -1684,9 +1588,7 @@
       status ===
       "ZONA_DE_RISCO"
     ) {
-
       return "#d9363e";
-
     }
 
 
@@ -1705,11 +1607,15 @@
     deliveries.forEach(
       d => {
 
-        if (
-          !validCoordinates(
+        const coordinates =
+          normalizeCoordinatePair(
             d.lat,
             d.lon
-          )
+          );
+
+
+        if (
+          !coordinates
         ) {
 
           return;
@@ -1720,8 +1626,8 @@
         const marker =
           L.circleMarker(
             [
-              Number(d.lat),
-              Number(d.lon)
+              coordinates.lat,
+              coordinates.lon
             ],
             {
               radius: 9,
@@ -1740,7 +1646,7 @@
           d.correctedNeighborhood
             ? `
               <br>
-              <b>Bairro encontrado:</b>
+              <b>📍 Bairro:</b>
               ${escapeHtml(
                 d.correctedNeighborhood
               )}
@@ -1749,25 +1655,23 @@
 
 
         marker.bindPopup(`
-          <div style="min-width:220px">
-            <b>Entrega ${escapeHtml(d.id)}</b><br>
-            ${escapeHtml(d.address)}
-            ${corrected}
-            <br><br>
-
-            <button
-              onclick="openStatus(${JSON.stringify(d.id)})"
-              style="
-                border:0;
-                border-radius:8px;
-                padding:9px 12px;
-                background:#2864e8;
-                color:white;
-                font-weight:700;
-              ">
-              Status
-            </button>
-          </div>
+          <b>Entrega ${escapeHtml(d.id)}</b>
+          <br>
+          ${escapeHtml(d.address)}
+          ${corrected}
+          <br><br>
+          <button
+            onclick="navigateToById(${JSON.stringify(d.id)})"
+            style="
+              border:0;
+              border-radius:8px;
+              padding:9px 12px;
+              background:#2864e8;
+              color:white;
+              font-weight:700;
+            ">
+            🧭 Navegar
+          </button>
         `);
 
 
@@ -1786,9 +1690,9 @@
   }
 
 
-  /* ============================================================
-     LISTA
-  ============================================================ */
+  /* =========================================================
+     LISTA — TODOS OS CLIENTES
+  ========================================================= */
 
   function renderNearby() {
 
@@ -1820,9 +1724,13 @@
 
 
     /*
-      SEM GPS:
-      não inventamos uma distância.
+      IMPORTANTE:
+
+      Não usamos slice().
+      Portanto TODOS os clientes
+      serão exibidos.
     */
+
 
     if (
       !userPosition
@@ -1839,34 +1747,40 @@
         }
       );
 
-
       return;
 
     }
 
 
-    /*
-      COM GPS:
-      calcula distância real.
-    */
-
     const sorted =
       pending
         .map(
-          d => ({
+          d => {
 
-            delivery:
-              d,
+            const coordinates =
+              normalizeCoordinatePair(
+                d.lat,
+                d.lon
+              );
 
-            distance:
-              distanceKm(
-                userPosition.lat,
-                userPosition.lon,
-                Number(d.lat),
-                Number(d.lon)
-              )
 
-          })
+            const distance =
+              coordinates
+                ? distanceKm(
+                    userPosition.lat,
+                    userPosition.lon,
+                    coordinates.lat,
+                    coordinates.lon
+                  )
+                : Infinity;
+
+
+            return {
+              delivery: d,
+              distance
+            };
+
+          }
         )
         .sort(
           (a, b) =>
@@ -1914,8 +1828,9 @@
       distanceText =
         "📍 GPS";
 
+    }
 
-    } else if (
+    else if (
       !Number.isFinite(
         distance
       )
@@ -1924,8 +1839,9 @@
       distanceText =
         "Sem localização";
 
+    }
 
-    } else if (
+    else if (
       distance < 1
     ) {
 
@@ -1934,8 +1850,9 @@
           distance * 1000
         )} m`;
 
+    }
 
-    } else {
+    else {
 
       distanceText =
         `${distance.toFixed(
@@ -1980,13 +1897,11 @@
 
       <div class="card-buttons">
 
-        <button
-          class="navigate-btn">
+        <button class="navigate-btn">
           🧭 Navegar
         </button>
 
-        <button
-          class="status-btn">
+        <button class="status-btn">
           📋 Status
         </button>
 
@@ -2032,9 +1947,9 @@
   }
 
 
-  /* ============================================================
+  /* =========================================================
      NAVEGAÇÃO
-  ============================================================ */
+  ========================================================= */
 
   function navigateTo(
     d
@@ -2075,9 +1990,38 @@
   }
 
 
-  /* ============================================================
-     GPS
-  ============================================================ */
+  function navigateToById(
+    id
+  ) {
+
+    const delivery =
+      deliveries.find(
+        d =>
+          String(d.id) ===
+          String(id)
+      );
+
+
+    if (
+      delivery
+    ) {
+
+      navigateTo(
+        delivery
+      );
+
+    }
+
+  }
+
+
+  window.navigateToById =
+    navigateToById;
+
+
+  /* =========================================================
+     GPS — CORRIGIDO
+  ========================================================= */
 
   function showUserPosition(
     latitude,
@@ -2112,7 +2056,9 @@
         coordinates.lon,
 
       accuracy:
-        Number(accuracy) || 0
+        Number(
+          accuracy
+        ) || 0
 
     };
 
@@ -2144,7 +2090,7 @@
 
 
     /*
-      Círculo de precisão.
+      Círculo da precisão.
     */
 
     if (
@@ -2180,7 +2126,7 @@
 
 
     /*
-      Marcador principal.
+      Marcador do usuário.
     */
 
     userMarker =
@@ -2200,23 +2146,21 @@
       .addTo(map);
 
 
-    userMarker.bindPopup(
-      `
-        <b>📍 Você está aqui</b><br>
-        Precisão aproximada:
-        ${Math.round(
-          userPosition.accuracy
-        )} metros
-      `
-    );
+    userMarker.bindPopup(`
+      <b>📍 Você está aqui</b>
+      <br>
+      Precisão aproximada:
+      ${Math.round(
+        userPosition.accuracy
+      )} metros
+    `);
 
 
     userMarker.openPopup();
 
 
     /*
-      Centraliza o mapa exatamente
-      na localização do celular.
+      Centraliza o mapa.
     */
 
     map.setView(
@@ -2239,6 +2183,14 @@
 
 
     renderNearby();
+
+
+    /*
+      Corrige o tamanho do mapa
+      depois de centralizar.
+    */
+
+    fixMapSize();
 
   }
 
@@ -2266,16 +2218,6 @@
       geocodeDetail.textContent =
         "Seu navegador não disponibilizou a localização.";
 
-      if (
-        !automatic
-      ) {
-
-        alert(
-          "Seu navegador não oferece localização GPS."
-        );
-
-      }
-
       return;
 
     }
@@ -2287,7 +2229,6 @@
 
     gpsBtn.disabled =
       true;
-
 
     gpsBtn.textContent =
       "📍 Obtendo...";
@@ -2323,7 +2264,6 @@
           userPosition =
             null;
 
-
           geocodeStatus.textContent =
             "⚠️ GPS retornou uma localização inválida.";
 
@@ -2336,10 +2276,8 @@
         gpsRequestInProgress =
           false;
 
-
         gpsBtn.disabled =
           false;
-
 
         gpsBtn.textContent =
           "📍 GPS";
@@ -2352,10 +2290,8 @@
         gpsRequestInProgress =
           false;
 
-
         gpsBtn.disabled =
           false;
-
 
         gpsBtn.textContent =
           "📍 GPS";
@@ -2378,9 +2314,11 @@
         ) {
 
           message =
-            "Permissão de localização negada. Ative a localização do navegador para usar o GPS.";
+            "Permissão de localização negada.";
 
-        } else if (
+        }
+
+        else if (
           error.code ===
           2
         ) {
@@ -2388,13 +2326,15 @@
           message =
             "O celular não conseguiu determinar sua localização.";
 
-        } else if (
+        }
+
+        else if (
           error.code ===
           3
         ) {
 
           message =
-            "O GPS demorou demais para responder. Tente novamente.";
+            "O GPS demorou demais para responder.";
 
         }
 
@@ -2427,16 +2367,13 @@
 
         maximumAge:
           0
+
       }
 
     );
 
   }
 
-
-  /*
-    Botão GPS.
-  */
 
   gpsBtn.addEventListener(
     "click",
@@ -2450,9 +2387,9 @@
   );
 
 
-  /* ============================================================
-     EXPANDIR MAPA
-  ============================================================ */
+  /* =========================================================
+     MAPA EXPANDIR / FECHAR
+  ========================================================= */
 
   mapToggle.addEventListener(
     "click",
@@ -2473,7 +2410,9 @@
         mapToggle.textContent =
           "↙ Fechar mapa";
 
-      } else {
+      }
+
+      else {
 
         mapWrapper.classList.remove(
           "expanded"
@@ -2485,12 +2424,88 @@
       }
 
 
-      setTimeout(
+      fixMapSize();
+
+    }
+  );
+
+
+  /* =========================================================
+     CORREÇÃO DOS ESPAÇOS CINZENTOS DO LEAFLET
+  ========================================================= */
+
+  function fixMapSize() {
+
+    const delays = [
+      50,
+      200,
+      500,
+      900
+    ];
+
+
+    delays.forEach(
+      delay => {
+
+        setTimeout(
+          () => {
+
+            try {
+
+              map.invalidateSize({
+                pan: false,
+                animate: false
+              });
+
+            } catch (error) {}
+
+          },
+          delay
+        );
+
+      }
+    );
+
+  }
+
+
+  /*
+    Observa mudanças reais no tamanho do mapa.
+  */
+
+  if (
+    "ResizeObserver" in window
+  ) {
+
+    const resizeObserver =
+      new ResizeObserver(
         () => {
 
-          map.invalidateSize();
+          fixMapSize();
 
-        },
+        }
+      );
+
+
+    resizeObserver.observe(
+      mapWrapper
+    );
+
+  }
+
+
+  window.addEventListener(
+    "resize",
+    fixMapSize
+  );
+
+
+  window.addEventListener(
+    "orientationchange",
+    () => {
+
+      setTimeout(
+        fixMapSize,
         300
       );
 
@@ -2498,9 +2513,9 @@
   );
 
 
-  /* ============================================================
+  /* =========================================================
      NOMINATIM
-  ============================================================ */
+  ========================================================= */
 
   async function waitNominatimGap() {
 
@@ -2597,7 +2612,6 @@
           4000
         );
 
-
         throw new Error(
           "Limite do serviço de localização atingido."
         );
@@ -2619,7 +2633,9 @@
 
       return await response.json();
 
-    } finally {
+    }
+
+    finally {
 
       clearTimeout(
         timeout
@@ -2630,9 +2646,9 @@
   }
 
 
-  /* ============================================================
-     COMPARAÇÃO DE RESULTADOS
-  ============================================================ */
+  /* =========================================================
+     COMPARAÇÃO DE ENDEREÇOS
+  ========================================================= */
 
   function tokenOverlap(
     a,
@@ -2678,9 +2694,7 @@
       token => {
 
         if (
-          B.has(
-            token
-          )
+          B.has(token)
         ) {
 
           matches++;
@@ -2855,10 +2869,6 @@
             );
 
 
-          let score =
-            0;
-
-
           const roadScore =
             tokenOverlap(
               parts.rua,
@@ -2881,22 +2891,20 @@
             );
 
 
-          if (
-            roadScore > 0
-          ) {
+          let score =
+            100;
 
-            score +=
-              roadScore *
-              40;
 
-          }
+          score +=
+            roadScore *
+            40;
 
 
           if (
             inputNumber &&
             resultNumber &&
             inputNumber ===
-              resultNumber
+            resultNumber
           ) {
 
             score +=
@@ -2905,15 +2913,9 @@
           }
 
 
-          if (
-            neighborhoodScore > 0
-          ) {
-
-            score +=
-              neighborhoodScore *
-              45;
-
-          }
+          score +=
+            neighborhoodScore *
+            45;
 
 
           if (
@@ -2936,10 +2938,6 @@
               10;
 
           }
-
-
-          score +=
-            100;
 
 
           return {
@@ -2970,9 +2968,9 @@
   }
 
 
-  /* ============================================================
+  /* =========================================================
      GEOCODIFICAÇÃO
-  ============================================================ */
+  ========================================================= */
 
   async function geocodeOne(
     delivery,
@@ -2986,28 +2984,22 @@
 
 
     /*
-      1. CACHE
+      CACHE
     */
 
-    if (
+    const cached =
       geocache[
         cacheKey
-      ] &&
+      ];
+
+
+    if (
+      cached &&
       validCoordinates(
-        geocache[
-          cacheKey
-        ].lat,
-        geocache[
-          cacheKey
-        ].lon
+        cached.lat,
+        cached.lon
       )
     ) {
-
-      const cached =
-        geocache[
-          cacheKey
-        ];
-
 
       const normalized =
         normalizeCoordinatePair(
@@ -3035,13 +3027,8 @@
           "";
 
         delivery.geocodeSource =
-          normalized.corrected
-            ? "cache corrigido"
-            : (
-                cached.source ||
-                "cache"
-              );
-
+          cached.source ||
+          "cache";
 
         return true;
 
@@ -3061,6 +3048,7 @@
 
     /*
       TENTATIVA 1
+      Rua + número
     */
 
     if (
@@ -3083,6 +3071,7 @@
 
     /*
       TENTATIVA 2
+      Rua + número + bairro
     */
 
     if (
@@ -3106,6 +3095,7 @@
 
     /*
       TENTATIVA 3
+      Endereço original
     */
 
     queries.push({
@@ -3179,14 +3169,19 @@
           }
 
 
+          /*
+            Quando o bairro bate,
+            damos prioridade a ele.
+          */
+
           if (
             attempt.label ===
-              "Rua + número + bairro"
+            "Rua + número + bairro"
           ) {
 
             if (
               best.neighborhoodScore >=
-              0.4
+              0.30
             ) {
 
               return applyGeocode(
@@ -3197,10 +3192,19 @@
 
             }
 
-          } else if (
+          }
+
+
+          /*
+            Se não existe bairro,
+            podemos aceitar a primeira
+            localização boa.
+          */
+
+          else if (
             !parts.bairro &&
             attempt.label ===
-              "Rua + número"
+            "Rua + número"
           ) {
 
             return applyGeocode(
@@ -3213,7 +3217,9 @@
 
         }
 
-      } catch (
+      }
+
+      catch (
         error
       ) {
 
@@ -3227,6 +3233,11 @@
 
     }
 
+
+    /*
+      Se alguma tentativa encontrou
+      alguma coisa válida, usamos ela.
+    */
 
     if (
       firstResult
@@ -3335,13 +3346,11 @@
   }
 
 
-  /* ============================================================
+  /* =========================================================
      LOCALIZAR TODOS
-  ============================================================ */
+  ========================================================= */
 
-  async function geocodeAll(
-    retryOnly = false
-  ) {
+  async function geocodeAll() {
 
     if (
       CLIENTES_CARREGADOS.length ===
@@ -3349,7 +3358,7 @@
     ) {
 
       alert(
-        "Nenhum cliente foi carregado.\n\nVerifique se o arquivo clientes.js está no mesmo repositório."
+        "Nenhum cliente foi carregado."
       );
 
       return;
@@ -3448,7 +3457,9 @@
 
           success++;
 
-        } else {
+        }
+
+        else {
 
           failed++;
 
@@ -3474,7 +3485,7 @@
 
 
         await wait(
-          200
+          150
         );
 
       }
@@ -3486,10 +3497,12 @@
 
       geocodeDetail.textContent =
         failed > 0
-          ? "Os que falharam podem ser tentados novamente pelo botão 🔄 Falhas."
+          ? "Os que falharam podem ser tentados novamente."
           : "Todos os clientes foram localizados.";
 
-    } finally {
+    }
+
+    finally {
 
       geocodeBtn.disabled =
         false;
@@ -3505,17 +3518,11 @@
   }
 
 
-  /* ============================================================
-     BOTÕES
-  ============================================================ */
-
   geocodeBtn.addEventListener(
     "click",
     () => {
 
-      geocodeAll(
-        false
-      );
+      geocodeAll();
 
     }
   );
@@ -3525,17 +3532,15 @@
     "click",
     () => {
 
-      geocodeAll(
-        true
-      );
+      geocodeAll();
 
     }
   );
 
 
-  /* ============================================================
+  /* =========================================================
      STATUS
-  ============================================================ */
+  ========================================================= */
 
   function openStatus(
     id
@@ -3662,12 +3667,17 @@
               button.dataset.status;
 
 
+            const now =
+              new Date()
+                .toISOString();
+
+
             delivery.status =
               newStatus;
 
 
             delivery.updatedAt =
-              new Date().toISOString();
+              now;
 
 
             if (
@@ -3682,13 +3692,25 @@
             }
 
 
+            /*
+              REGISTRO DA AÇÃO
+
+              Guarda:
+              - status
+              - data/hora
+              - endereço original
+              - latitude
+              - longitude
+              - posição do GPS no momento
+            */
+
             delivery.actions.push({
 
               status:
                 newStatus,
 
               timestamp:
-                new Date().toISOString(),
+                now,
 
               address:
                 delivery.address,
@@ -3711,6 +3733,21 @@
                   ? Number(
                       delivery.lon
                     )
+                  : null,
+
+              gpsLat:
+                userPosition
+                  ? userPosition.lat
+                  : null,
+
+              gpsLon:
+                userPosition
+                  ? userPosition.lon
+                  : null,
+
+              gpsAccuracy:
+                userPosition
+                  ? userPosition.accuracy
                   : null
 
             });
@@ -3736,9 +3773,9 @@
     );
 
 
-  /* ============================================================
-     EXPORTAR
-  ============================================================ */
+  /* =========================================================
+     EXPORTAR CSV
+  ========================================================= */
 
   function csvEscape(
     value
@@ -3753,13 +3790,14 @@
       );
 
 
-    return '"' +
-      text
-        .replace(
-          /"/g,
-          '""'
-        ) +
-      '"';
+    return (
+      '"' +
+      text.replace(
+        /"/g,
+        '""'
+      ) +
+      '"'
+    );
 
   }
 
@@ -3784,7 +3822,9 @@
 
       "Endereco_localizado",
 
-      "Fonte_localizacao"
+      "Fonte_localizacao",
+
+      "Acoes"
 
     ];
 
@@ -3823,7 +3863,12 @@
             "",
 
           d.geocodeSource ||
-            ""
+            "",
+
+          JSON.stringify(
+            d.actions ||
+            []
+          )
 
         ]
       );
@@ -3893,6 +3938,7 @@
 
     a.click();
 
+
     a.remove();
 
 
@@ -3909,9 +3955,26 @@
   );
 
 
-  /* ============================================================
+  /* =========================================================
+     RENDERIZAÇÃO GERAL
+  ========================================================= */
+
+  function renderAll() {
+
+    renderSummary();
+
+    renderMarkers();
+
+    renderNearby();
+
+    fixMapSize();
+
+  }
+
+
+  /* =========================================================
      INICIALIZAÇÃO
-  ============================================================ */
+  ========================================================= */
 
   if (
     CLIENTES_CARREGADOS.length ===
@@ -3922,15 +3985,17 @@
       "⚠️ Nenhum cliente carregado.";
 
     geocodeDetail.textContent =
-      "O arquivo clientes.js não foi carregado ou não contém CLIENTES.";
+      "O arquivo clientes.js não foi carregado.";
 
     progressBar.style.width =
       "0%";
 
-  } else {
+  }
+
+  else {
 
     geocodeStatus.textContent =
-      "📍 Obtendo sua localização...";
+      "Pronto.";
 
     geocodeDetail.textContent =
       `${CLIENTES_CARREGADOS.length} clientes carregados.`;
@@ -3942,46 +4007,29 @@
 
 
   /*
-    Corrige tamanho do mapa.
+    Várias correções de tamanho
+    porque o navegador do celular
+    pode calcular o tamanho da tela
+    depois do Leaflet.
   */
 
+  fixMapSize();
+
+
   setTimeout(
-    () => {
-
-      map.invalidateSize();
-
-    },
+    fixMapSize,
     400
   );
 
 
-  window.addEventListener(
-    "resize",
-    () => {
-
-      setTimeout(
-        () => {
-
-          map.invalidateSize();
-
-        },
-        100
-      );
-
-    }
+  setTimeout(
+    fixMapSize,
+    1000
   );
 
 
   /*
-    ============================================================
-    GPS AUTOMÁTICO
-
-    Tenta pegar a posição do celular assim
-    que o aplicativo termina de carregar.
-
-    Se o navegador pedir permissão,
-    permita a localização.
-    ============================================================
+    GPS automático.
   */
 
   setTimeout(
@@ -3996,9 +4044,9 @@
   );
 
 
-  /* ============================================================
+  /* =========================================================
      SERVICE WORKER
-  ============================================================ */
+  ========================================================= */
 
   if (
     "serviceWorker" in navigator
@@ -4007,6 +4055,20 @@
     navigator.serviceWorker
       .register(
         "./sw.js"
+      )
+      .then(
+        registration => {
+
+          if (
+            registration &&
+            registration.update
+          ) {
+
+            registration.update();
+
+          }
+
+        }
       )
       .catch(
         () => {}
