@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS</title>
+<title>RECEBE MAIS • V17</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -35,7 +35,7 @@ button:active{transform:translateY(1px)}
 
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}.stat{background:var(--navy);color:#fff;border-radius:13px;padding:9px 6px;text-align:center;min-height:62px;display:flex;flex-direction:column;justify-content:center}.stat b{display:block;font-size:18px;line-height:1.15;word-break:break-word}.stat span{display:block;font-size:10px;color:#d9edf5;margin-top:3px}
 
-.map-wrap{display:flex;flex-direction:column;gap:9px;align-items:stretch}.map-card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow);order:1}#map{height:45vh;min-height:300px;max-height:460px;background:#dde9dd}.side{width:100%;min-width:0;order:2}
+.map-wrap{display:flex;flex-direction:column;gap:9px;align-items:stretch}.map-card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow);order:1}#map{height:45vh;min-height:300px;max-height:460px;background:#dde9dd;position:relative;z-index:1}.side{width:100%;min-width:0;order:2}
 
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.list-head h2{margin:0;font-size:16px}.search{width:100%;min-height:44px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:14px}.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0}.client-list{max-height:none;overflow:visible;padding-right:0}
 .client-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:7px 0;box-shadow:0 2px 7px rgba(7,59,97,.05)}.client-card h3{margin:0 0 2px;font-size:16px;line-height:1.2}.ec{font-size:11px;color:var(--muted);font-weight:800}.addr{font-size:13px;color:#364f5e;line-height:1.38;margin:7px 0}.meta{display:flex;justify-content:space-between;gap:8px;align-items:center}.debt-pill{font-weight:900;color:var(--navy);font-size:13px}.state-pill{font-size:10px;font-weight:900;padding:5px 7px;border-radius:999px;white-space:nowrap}.state-pill.over{background:var(--redbg);color:var(--red)}.state-pill.future{background:var(--okbg);color:var(--green2)}.state-pill.mixed{background:var(--amberbg);color:#9c6500}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.card-actions .btn{padding:10px 7px;font-size:12px;min-height:43px}
@@ -78,7 +78,7 @@ button:active{transform:translateY(1px)}
 
 
   <section class="map-wrap">
-    <div class="map-card"><div id="map"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
+    <div class="map-card"><div id="map"><div id="mapLoading" style="position:absolute;z-index:500;left:12px;top:12px;background:rgba(255,255,255,.94);padding:8px 10px;border-radius:9px;font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.15)">🗺️ Carregando mapa...</div></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
     <div class="side">
       <section class="panel">
         <div class="list-head"><h2>Clientes do lote</h2></div>
@@ -422,7 +422,7 @@ function renderStats(){ const total=state.clients.length; const incomplete=state
 function getFilteredClients(){ const q=norm($("searchInput").value), city=$("cityFilter").value, df=$("debtFilter").value; return state.clients.filter(c=>{ const text=norm(c.name+" "+c.ec); if(q&&!text.includes(q)) return false; if(city&&c.city!==city)return false; if(df&&c.debtState!==df)return false; return true; }).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR")); }
 function renderList(){ const list=$("clientList"); let rows=getFilteredClients(); if(state.userPos){ rows=rows.map(c=>({...c,_dist:Number.isFinite(c.lat)&&Number.isFinite(c.lon)?distanceKm(state.userPos.lat,state.userPos.lon,c.lat,c.lon):null})).sort((a,b)=>a._dist==null?1:b._dist==null?-1:a._dist-b._dist); } if(!rows.length){list.innerHTML='<div class="empty">Nenhum cliente encontrado.</div>';return;} list.innerHTML=rows.map(c=>{ const stateLabel=c.debtState==="future"?"Tem a vencer":c.debtState==="mixed"?"Vencido + a vencer":"Tudo vencido"; const cls=c.debtState==="future"?"future":c.debtState==="mixed"?"mixed":"over"; const loc=Number.isFinite(c.lat)&&Number.isFinite(c.lon); const dist=c._dist!=null?`<div class="distance-line">📏 <span class="distance-value">${distanceText(c._dist)}</span> de você</div>`:""; return `<div class="client-card"><h3>${esc(c.name)}</h3><div class="ec">EC: ${esc(c.ec)}</div><div class="addr">${esc(clientFullAddress(c))}</div>${dist}<div class="meta"><div class="debt-pill">Total dívida: ${money(c.debtTotal||0)}</div><div class="state-pill ${cls}">${esc(stateLabel)}</div></div><div class="card-actions"><button class="btn" data-open="${esc(c.ec)}">Ver cliente</button><button class="btn primary" data-open="${esc(c.ec)}">${loc?"📍 Localização":"🔎 Localizar"}</button></div></div>`; }).join(""); list.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openClient(btn.dataset.open))); }
 function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
-function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
+function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ const lat=Number(c.lat),lon=Number(c.lon); if(!Number.isFinite(lat)||!Number.isFinite(lon)) return; const m=L.marker([lat,lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
 function fitAll(){
   if(!state.map) return;
   const pts=state.clients
@@ -457,27 +457,40 @@ function refreshMap(){
 function initMap(){
   const el=$('map');
   if(!el){console.error('Elemento #map não encontrado.');return;}
+  const loading=$('mapLoading');
   if(typeof L==='undefined'){
-    el.innerHTML='<div style="padding:20px;text-align:center;font-weight:800;color:#8a1c1c">Não foi possível carregar o mapa. Verifique a internet e recarregue a página.</div>';
+    if(loading) loading.textContent='❌ Biblioteca do mapa não carregou. Verifique a internet e recarregue.';
     return;
   }
   try{
-    state.map=L.map(el,{zoomControl:true,preferCanvas:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false})
+    state.map=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false})
       .setView([-29.1678,-51.1794],13);
-    const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:19,minZoom:3,updateWhenIdle:false,keepBuffer:3,crossOrigin:true,
+    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19,minZoom:3,updateWhenIdle:true,keepBuffer:4,
       attribution:'© OpenStreetMap contributors'
-    }).addTo(state.map);
+    });
+    let loaded=false;
+    tiles.on('load',function(){
+      loaded=true;
+      if(loading) loading.style.display='none';
+      refreshMap();
+    });
     tiles.on('tileerror',function(e){
       console.warn('Falha ao carregar bloco do mapa:',e);
+      if(!loaded && loading) loading.textContent='⚠️ Carregando mapa... se continuar em branco, verifique a internet.';
     });
-    state.map.whenReady(()=>refreshMap());
+    tiles.addTo(state.map);
+    state.map.whenReady(()=>{
+      refreshMap();
+      setTimeout(()=>{refreshMap();renderMarkers();},500);
+      setTimeout(()=>{if(loading && loaded) loading.style.display='none';},2500);
+    });
     window.addEventListener('resize',refreshMap);
     window.addEventListener('orientationchange',()=>setTimeout(refreshMap,300));
     refreshMap();
   }catch(e){
     console.error(e);
-    el.innerHTML='<div style="padding:20px;text-align:center;font-weight:800;color:#8a1c1c">Erro ao iniciar o mapa. Recarregue a página.</div>';
+    if(loading) loading.textContent='❌ Erro ao iniciar o mapa. Recarregue a página.';
   }
 }
 function setImportStatus(html){
