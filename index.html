@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V40</title>
+<title>RECEBE MAIS • V41</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -50,7 +50,7 @@ button:active{transform:translateY(1px)}
 .notice{background:#f4f9fb;border:1px solid #d7e8ef;border-radius:12px;padding:9px 10px;font-size:11px;color:#405866;line-height:1.45;margin-top:9px}.notice b{color:var(--navy)}.location-history{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px;background:#fff}.location-history h3{font-size:13px;margin:0 0 7px;color:var(--navy)}.location-record{border:1px solid var(--line);border-radius:11px;padding:9px;margin-top:7px;background:#fbfdfe}.location-record b{font-size:11px;color:var(--navy)}.location-record .small-note{margin-top:3px}.location-editor{border-top:1px solid var(--line);margin-top:9px;padding-top:9px}.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.location-grid .full{grid-column:1/-1}.action-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.action-option{min-height:82px;background:#fff;border:1px solid var(--line);color:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px}.action-option span{font-size:11px}.action-option.selected{border:2px solid var(--green);background:#eefbf5;color:var(--green2)}
 .diag-check{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);border-radius:12px;padding:10px;margin:7px 0;background:#fbfdfe}.diag-icon{font-size:18px;line-height:1}.diag-check b{display:block;font-size:12px;color:var(--navy)}.diag-check span{display:block;font-size:10px;color:var(--muted);line-height:1.4;margin-top:2px}.diag-ok{border-color:#bfe8d2;background:#f3fcf7}.diag-fail{border-color:#f0b8bf;background:#fff5f6}.diag-warn{border-color:#ead6aa;background:#fffbf2}.toast{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));transform:none;background:#163041;color:#fff;padding:11px 13px;border-radius:12px;z-index:9000;display:none;font-size:12px;box-shadow:0 8px 22px rgba(0,0,0,.18);text-align:center}
 
-.import-modal-bg{position:fixed;inset:0;background:rgba(3,22,35,.72);z-index:8000;display:none;align-items:flex-end;justify-content:center;padding:0}.import-modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 12px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25)}.import-modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.import-modal-header h2{margin:0;color:var(--navy);font-size:17px}.close-modal{background:#eef3f6;color:var(--navy);padding:9px 12px;min-height:42px}.file-box input{min-height:44px}.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.map-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;background:#fff;border-top:1px solid var(--line)}.map-toolbar .btn{min-height:42px}.distance-line{font-size:11px;color:var(--muted);margin-top:5px}.distance-value{font-weight:900;color:var(--navy)}
+.import-modal-bg{position:fixed;inset:0;background:rgba(3,22,35,.72);z-index:8000;display:none;align-items:flex-end;justify-content:center;padding:0}.import-modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 12px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25)}.import-modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.import-modal-header h2{margin:0;color:var(--navy);font-size:17px}.close-modal{background:#eef3f6;color:var(--navy);padding:9px 12px;min-height:42px}.file-box input{min-height:44px}.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.map-toolbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px;background:#fff;border-top:1px solid var(--line)}.map-toolbar .btn{min-height:42px}.distance-line{font-size:11px;color:var(--muted);margin-top:5px}.distance-value{font-weight:900;color:var(--navy)}
 .import-progress{height:10px;background:#e5edf1;border-radius:999px;overflow:hidden;margin:8px 0 4px}.import-progress>div{height:100%;width:0;background:var(--green);transition:width .2s}.import-progress-label{font-size:11px;color:var(--muted);line-height:1.35;min-height:16px}.hidden{display:none!important}
 
 @media(min-width:700px){
@@ -92,7 +92,7 @@ button:active{transform:translateY(1px)}
 @media(min-width:700px){.company-logo{height:92px}.subpage-logo-title img{height:68px}.home-actions,.subpage-actions{grid-template-columns:1fr 1fr}.functions-grid{grid-template-columns:repeat(2,1fr)}}
 
 
-/* ================= V40 — TELAS E FLUXOS ================= */
+/* ================= V41 — TELAS E FLUXOS ================= */
 #diagModal, #importModal{align-items:stretch;justify-content:stretch;padding:0;background:var(--bg)}
 #diagModal .import-modal, #importModal .import-modal{width:100%;max-width:1100px;max-height:none;height:100vh;border-radius:0;padding:0 10px calc(20px + env(safe-area-inset-bottom));box-shadow:none;background:var(--bg)}
 #diagModal .import-modal-header, #importModal .import-modal-header{position:sticky;top:0;z-index:20;margin:0 -10px 10px;padding:10px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff}
@@ -106,10 +106,21 @@ button:active{transform:translateY(1px)}
 .section-caption{font-size:11px;font-weight:900;color:var(--navy);margin-top:12px}
 @media(min-width:700px){.page-flow{grid-template-columns:1fr 1fr}}
 
-/* V40 polish: logo sempre à esquerda e ações sempre à direita */
+/* V41 polish: logo sempre à esquerda e ações sempre à direita */
 .home-header-inner,.subpage-header-inner{grid-template-columns:minmax(0,1fr) minmax(150px,260px)}
 .home-actions,.subpage-actions{align-items:stretch}
 .company-logo{filter:none}
+
+/* V41 — layout mobile estável: identidade à esquerda, ações à direita */
+@media(max-width:699px){
+  .home-header-inner,.subpage-header-inner{grid-template-columns:118px minmax(0,1fr);gap:8px;align-items:center}
+  .company-logo{width:112px;height:72px;max-width:112px}
+  .subpage-logo-title{min-width:0;overflow:hidden}
+  .subpage-logo-title img{width:108px;height:58px;max-width:108px}
+  .subpage-logo-title>div{display:none}
+  .home-actions,.subpage-actions{min-width:0;width:100%;gap:6px}
+  .home-action,.page-action{min-height:42px;font-size:12px;padding:8px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
 </style>
 </head>
 <body>
@@ -134,7 +145,7 @@ button:active{transform:translateY(1px)}
 
 
   <section class="map-wrap">
-    <div class="map-card"><div id="mapCanvas"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
+    <div class="map-card"><div id="mapCanvas"><div id="mapBootMessage" style="position:absolute;z-index:500;background:rgba(255,255,255,.92);padding:8px 10px;border-radius:10px;left:10px;top:10px;font-weight:800;color:#073b61;display:none">🗺️ Preparando mapa...</div></div><div class="map-toolbar"><button class="btn" id="retryMapBtn" type="button">🔄 Recarregar mapa</button><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
     <div class="side">
       <section class="panel">
         <div class="list-head"><h2>Clientes do lote</h2></div>
@@ -769,7 +780,7 @@ function openDiagPage(){
       runDiagnostics();
     }catch(e){
       const msg=mapErrorText(e);
-      console.error("[V40] erro ao abrir diagnóstico",e);
+      console.error("[V41] erro ao abrir diagnóstico",e);
       if($("diagSummary")) $("diagSummary").innerHTML=`<b>❌ Erro:</b> ${esc(msg)}`;
     }
   },60);
@@ -883,50 +894,91 @@ window.addEventListener("unhandledrejection",e=>{
 });
 window.__openClient=openClient;
 
-// BOOT V35: usa exatamente a inicialização que funcionou no teste manual,
-// mas executa automaticamente depois que a tela já teve oportunidade de
-// calcular o tamanho do container. Se a primeira tentativa ocorrer cedo demais,
-// novas tentativas são feitas sem exigir que o usuário abra o Diagnóstico.
-(function bootApp(){
-  try{ loadLocal(); }catch(e){ console.error("[BOOT V35] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderCities(); }catch(e){ console.error("[BOOT V35] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderStats(); }catch(e){ console.error("[BOOT V35] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderList(); }catch(e){ console.error("[BOOT V35] renderList falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ updateActionCount(); }catch(e){ console.error("[BOOT V35] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
-
-  const startMap=()=>{
-    if(state.map){
-      try{ renderMarkers(); }catch(e){ console.warn("[BOOT V35] renderMarkers após mapa:",e); }
-      return true;
-    }
+// V41 — BOOT DO MAPA: inicialização automática + tentativas controladas.
+(function bootMapV41(){
+  const boot=()=>{
     try{
-      const ok=initMap();
-      if(ok){
-        console.log("[MAPA V35] mapa inicializado automaticamente.");
-        try{ renderMarkers(); }catch(e){ console.warn("[BOOT V35] renderMarkers:",e); }
+      if(state.map){
+        try{state.map.invalidateSize({pan:false,animate:false});}catch(e){}
+        try{renderMarkers();}catch(e){}
         return true;
       }
+      const ok=initMap();
+      if(ok){
+        const msg=$("mapBootMessage"); if(msg)msg.style.display="none";
+        try{renderMarkers();}catch(e){}
+        try{fitAll();}catch(e){}
+        return true;
+      }
+      const msg=$("mapBootMessage"); if(msg){msg.textContent="⚠️ Mapa não iniciou. Toque em Recarregar mapa.";msg.style.display="block";}
     }catch(e){
       window.__mapInitError=mapErrorText(e);
-      window.__mapCheckpoints=window.__mapCheckpoints||[];
-      mapCheckpoint("BOOT V35 → initMap",false,window.__mapInitError);
-      console.error("[MAPA V35] erro na inicialização automática",e);
+      const msg=$("mapBootMessage"); if(msg){msg.textContent="⚠️ Mapa não iniciou. Toque em Recarregar mapa.";msg.style.display="block";}
+      console.error("[V41] boot mapa",e);
     }
     return false;
   };
-
-  // Primeira tentativa depois de um frame de pintura; as demais cobrem o caso
-  // em que o navegador móvel ainda está calculando o layout do mapa.
-  requestAnimationFrame(()=>{
-    if(startMap()) return;
-    [100,300,700,1500,3000].forEach(ms=>setTimeout(()=>{
-      if(!state.map) startMap();
-    },ms));
-  });
-
-  if(window.__bootError) console.warn("[BOOT V35] Erro não relacionado ao mapa:",window.__bootError);
+  const attempts=[0,100,350,800,1600,3000];
+  attempts.forEach(ms=>setTimeout(boot,ms));
+  window.addEventListener("load",()=>setTimeout(boot,50));
+  window.addEventListener("orientationchange",()=>setTimeout(boot,250));
+  window.__bootMapV41=boot;
 })();
+
+// V41 — listeners principais. Também expostos no window para os botões funcionarem
+// mesmo se o navegador móvel tiver atrasado algum listener durante o carregamento.
+window.openFunctionsPage=openFunctionsPage;
+window.closeFunctionsPage=closeFunctionsPage;
+window.openDiagPage=openDiagPage;
+window.closeDiagPage=closeDiagPage;
+window.openImportPage=openImportPage;
+window.closeImportPage=closeImportPage;
+window.importFiles=importFiles;
+window.geocodeAll=geocodeAll;
+window.exportCoordinates=exportCoordinates;
+window.exportUnlocatedAddresses=exportUnlocatedAddresses;
+window.exportActions=exportActions;
+window.backup=backup;
+window.clearLot=clearLot;
+
+$("openFunctionsBtn")?.addEventListener("click",openFunctionsPage);
+$("openDiagPageBtn")?.addEventListener("click",openDiagPage);
+$("openDiagCardBtn")?.addEventListener("click",openDiagPage);
+$("openImportPageBtn")?.addEventListener("click",openImportPage);
+$("openImportCardBtn")?.addEventListener("click",openImportPage);
+$("closeFunctionsBtn")?.addEventListener("click",closeFunctionsPage);
+$("closeDiagBtn")?.addEventListener("click",closeDiagPage);
+$("closeImportBtn")?.addEventListener("click",closeImportPage);
+$("importBtn")?.addEventListener("click",importFiles);
+$("geocodeBtn")?.addEventListener("click",geocodeAll);
+$("exportCoordsBtn")?.addEventListener("click",exportCoordinates);
+$("exportUnlocatedBtn")?.addEventListener("click",exportUnlocatedAddresses);
+$("exportActionsBtn")?.addEventListener("click",exportActions);
+$("backupBtn")?.addEventListener("click",backup);
+$("clearLotBtn")?.addEventListener("click",clearLot);
+$("retryMapBtn")?.addEventListener("click",()=>{
+  const msg=$("mapBootMessage"); if(msg){msg.textContent="🗺️ Recarregando mapa...";msg.style.display="block";}
+  try{
+    if(state.map){try{state.map.remove();}catch(e){} state.map=null;}
+    window.__mapCheckpoints=[];
+    setTimeout(()=>{if(window.__bootMapV41)window.__bootMapV41();},50);
+  }catch(e){console.error(e);}
+});
+
+// V41 — fallback por atributo inline para navegação/importação em browsers móveis.
+$("openFunctionsBtn")?.setAttribute("onclick","openFunctionsPage();return false;");
+$("openDiagPageBtn")?.setAttribute("onclick","openDiagPage();return false;");
+$("openDiagCardBtn")?.setAttribute("onclick","openDiagPage();return false;");
+$("openImportPageBtn")?.setAttribute("onclick","openImportPage();return false;");
+$("openImportCardBtn")?.setAttribute("onclick","openImportPage();return false;");
+$("closeFunctionsBtn")?.setAttribute("onclick","closeFunctionsPage();return false;");
+$("closeDiagBtn")?.setAttribute("onclick","closeDiagPage();return false;");
+$("closeImportBtn")?.setAttribute("onclick","closeImportPage();return false;");
+$("importBtn")?.setAttribute("onclick","importFiles();return false;");
+
+try{loadLocal();}catch(e){console.warn("[V41] loadLocal",e);}
+try{renderCities();renderStats();renderList();updateActionCount();}catch(e){console.warn("[V41] render inicial",e);}
 </script>
-<div class="version-badge">RECEBE MAIS • V40 • MAPA + FLUXOS + TELAS</div>
+<div class="version-badge">RECEBE MAIS • V41 • MAPA + FLUXOS + TELAS</div>
 </body>
 </html>
