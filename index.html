@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V31</title>
+<title>RECEBE MAIS • V32</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -111,8 +111,11 @@ button:active{transform:translateY(1px)}
   <div class="import-modal">
     <div class="import-modal-header"><h2>🔧 Diagnóstico do mapa</h2><button class="close-modal" id="closeDiagBtn">Fechar</button></div>
     <div class="notice"><b>Use este diagnóstico para identificar por que o mapa não carrega.</b> Ele testa a biblioteca do mapa, a área visual, o Excel, o GPS e o acesso aos tiles do OpenStreetMap.</div>
-    <div id="diagSummary" class="status-line" style="margin-top:10px"></div>
-    <div id="diagChecks" style="margin-top:6px"></div>
+    <div id="diagSummary" class="status-line" style="margin-top:10px">🔎 Aguardando diagnóstico...</div>
+    <div id="diagChecks" style="margin-top:6px">
+      <div class="small-note" style="font-weight:900;color:var(--navy);margin:6px 0">🔎 CHECKPOINTS DA INICIALIZAÇÃO</div>
+      <div class="diag-check diag-warn"><div class="diag-icon">⏳</div><div><b>Aguardando leitura dos checkpoints</b><span>Abra o diagnóstico para executar a verificação.</span></div></div>
+    </div>
     <div class="import-actions" style="margin-top:10px">
       <button class="btn dark" id="runDiagBtn">🔄 Testar novamente</button>
       <button class="btn primary" id="testGpsBtn">📍 Testar GPS</button>
@@ -514,7 +517,24 @@ function initMap(){
   return true;
 }
 
+function diagCheck(title,ok,detail,kind=""){
+  const cls=ok?"diag-ok":(kind==="warn"?"diag-warn":"diag-fail");
+  const icon=ok?"✅":(kind==="warn"?"⚠️":"❌");
+  return `<div class="diag-check ${cls}"><div class="diag-icon">${icon}</div><div><b>${esc(title)}</b><span>${esc(detail||"")}</span></div></div>`;
+}
+function renderCheckpointDiagnostics(){
+  const target=$("diagChecks");
+  if(!target)return;
+  const cps=Array.isArray(window.__mapCheckpoints)?window.__mapCheckpoints:[];
+  if(!cps.length){
+    target.innerHTML=diagCheck("Checkpoints da inicialização",false,"Aguardando a inicialização do mapa...","warn");
+    return;
+  }
+  target.innerHTML=`<div class="small-note" style="font-weight:900;color:var(--navy);margin:6px 0">🔎 CHECKPOINTS DA INICIALIZAÇÃO</div>`+
+    cps.map(x=>diagCheck(x.label,x.ok,x.detail)).join("");
+}
 function runDiagnostics(){
+  try{
   const checks=[];
   const mapEl=$("mapCanvas");
   const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";
@@ -540,11 +560,18 @@ function runDiagnostics(){
   $("diagChecks").innerHTML=checks.join("");
   const fails=checks.filter(x=>x.includes("diag-fail")).length;
   $("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;
+  renderCheckpointDiagnostics();
   testMapTile();
+  }catch(e){
+    const msg=mapErrorText(e);
+    console.error("[DIAGNÓSTICO V32]",e);
+    if($("diagSummary")) $("diagSummary").innerHTML=`<b>❌ Erro no diagnóstico:</b> ${esc(msg)}`;
+    renderCheckpointDiagnostics();
+  }
 }
 function testMapTile(){const el=$("diagTileStatus");if(!el)return;const z=13,lat=-29.1678,lon=-51.1794,n=Math.pow(2,z),x=Math.floor((lon+180)/360*n),latRad=lat*Math.PI/180,y=Math.floor((1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n),img=new Image();let done=false;const box=el.parentElement.parentElement;const finish=(ok,msg)=>{if(done)return;done=true;el.textContent=msg;box.classList.remove("diag-warn","diag-ok","diag-fail");box.classList.add(ok?"diag-ok":"diag-fail")};const timer=setTimeout(()=>finish(false,"O tile não respondeu em 8 segundos. Pode haver bloqueio no acesso aos mapas externos."),8000);img.onload=()=>{clearTimeout(timer);finish(true,"Tile recebido com sucesso do OpenStreetMap.")};img.onerror=()=>{clearTimeout(timer);finish(false,"O tile não pôde ser carregado. O problema está no acesso aos mapas externos.")};img.src=`https://tile.openstreetmap.org/${z}/${x}/${y}.png?diag=${Date.now()}`}
 function testGps(){const log=$("diagLog");log.style.display="block";if(!navigator.geolocation){log.innerHTML="<b>❌ GPS indisponível.</b>";return}log.innerHTML="<b>📍 Solicitando localização...</b>";navigator.geolocation.getCurrentPosition(pos=>{const a=pos.coords.accuracy;log.innerHTML=`<b>✅ GPS funcionando.</b> Latitude ${pos.coords.latitude.toFixed(6)} • Longitude ${pos.coords.longitude.toFixed(6)} • Precisão ${Number.isFinite(a)?Math.round(a)+" m":"não informada"}.`},err=>{log.innerHTML=`<b>❌ GPS não autorizado/indisponível.</b> Código ${err.code}: ${esc(err.message||"sem mensagem")}`},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
-$("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",runDiagnostics);$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
+$("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";renderCheckpointDiagnostics();runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",runDiagnostics);$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
 $("geocodeBtn").onclick=geocodeAll;
 $("exportCoordsBtn").onclick=exportCoordinates;
 $("exportActionsBtn").onclick=exportActions;
@@ -595,6 +622,6 @@ window.addEventListener("unhandledrejection",e=>{
 window.__openClient=openClient;
 loadLocal(); const mapStarted=initMap(); if(!mapStarted){ console.error("[MAPA V31] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); } renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
-<div class="version-badge">RECEBE MAIS • V31 • CHECKPOINTS DO MAPA</div>
+<div class="version-badge">RECEBE MAIS • V32 • CHECKPOINTS DO MAPA</div>
 </body>
 </html>
