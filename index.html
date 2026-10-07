@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V28</title>
+<title>RECEBE MAIS • V29</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -406,23 +406,85 @@ function renderList(){ const list=$("clientList"); let rows=getFilteredClients()
 function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
 function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
 function initMap(){
-  state.map=L.map("map",{zoomControl:true,preferCanvas:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false})
-    .setView([-29.1678,-51.1794],13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-    maxZoom:19,
-    updateWhenIdle:false,
-    keepBuffer:2,
-    attribution:"© OpenStreetMap contributors"
-  }).addTo(state.map);
-  const refreshMapSize=()=>{
-    if(!state.map)return;
-    state.map.invalidateSize({pan:false,animate:false});
-  };
-  setTimeout(refreshMapSize,100);
-  setTimeout(refreshMapSize,500);
-  setTimeout(refreshMapSize,1200);
-  window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
-  window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
+  const mapEl=$("map");
+  if(!mapEl){ console.error("[MAPA] Elemento #map não encontrado."); return false; }
+
+  // Reconstrução completa do mapa: limpa qualquer instância antiga que tenha ficado no DOM.
+  try{ if(state.map){ state.map.remove(); } }catch(e){ console.warn("[MAPA] Não foi possível remover instância anterior:",e); }
+  state.map=null;
+  try{ delete mapEl._leaflet_id; }catch(e){}
+  mapEl.innerHTML="";
+  mapEl.classList.add("leaflet-container");
+  mapEl.style.position="relative";
+  mapEl.style.overflow="hidden";
+
+  if(typeof window.L==="undefined" || typeof L.map!=="function"){
+    mapEl.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-weight:800;color:#7b2430">Leaflet não foi carregado.</div>';
+    return false;
+  }
+
+  try{
+    // Cria a instância em uma etapa separada para sabermos exatamente onde ocorre uma falha.
+    const map=L.map(mapEl,{
+      zoomControl:true,
+      attributionControl:true,
+      preferCanvas:false,
+      zoomAnimation:false,
+      fadeAnimation:false,
+      markerZoomAnimation:false,
+      inertia:true
+    });
+    state.map=map;
+
+    map.setView([-29.1678,-51.1794],13,false);
+
+    const osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+      maxZoom:19,
+      minZoom:3,
+      tileSize:256,
+      updateWhenIdle:false,
+      keepBuffer:2,
+      crossOrigin:false,
+      attribution:"© OpenStreetMap contributors"
+    });
+    osm.addTo(map);
+
+    // Se o primeiro tile falhar, tenta automaticamente um segundo provedor público.
+    let fallbackUsed=false;
+    osm.on("tileerror",function(){
+      if(fallbackUsed || !state.map) return;
+      fallbackUsed=true;
+      try{
+        const fallback=L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{
+          maxZoom:20,
+          tileSize:256,
+          keepBuffer:2,
+          attribution:"© OpenStreetMap France | © OpenStreetMap contributors"
+        });
+        fallback.addTo(state.map);
+      }catch(e){ console.error("[MAPA] Falha no fallback de tiles:",e); }
+    });
+
+    const refreshMapSize=()=>{
+      if(!state.map)return;
+      state.map.invalidateSize({pan:false,animate:false});
+    };
+    setTimeout(refreshMapSize,50);
+    setTimeout(refreshMapSize,250);
+    setTimeout(refreshMapSize,700);
+    setTimeout(refreshMapSize,1500);
+    window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
+    window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
+
+    console.log("[MAPA] Mapa reconstruído com sucesso.");
+    return true;
+  }catch(err){
+    console.error("[MAPA] ERRO AO CRIAR O MAPA:",err);
+    state.map=null;
+    mapEl.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-weight:800;color:#7b2430">Não foi possível criar o mapa.<br><small style="display:block;margin-top:8px;font-weight:600">Abra 🔧 Diagnóstico para ver o erro.</small></div>';
+    window.__mapInitError=String(err&&err.message||err);
+    return false;
+  }
 }
 function setImportStatus(html){
   const a=$("importStatus");
@@ -574,7 +636,7 @@ async function importFiles(){
 function clearLot(){ state.clients=[];state.debtsByEc=new Map();state.latestActionsByEc=new Map();state.proposalsByCpf=new Map(); localStorage.removeItem(STORAGE_KEY); renderCities();renderStats();renderList();renderMarkers();$("geocodeBtn").disabled=true;$("progressBar").style.width="0%"; $("importProgressBar").style.width="0%"; $("importProgressLabel").textContent="Aguardando início da importação."; setImportStatus("<strong>Lote limpo.</strong> Os dados persistentes de coordenadas foram mantidos.");toast("Lote atual removido. Coordenadas preservadas."); }
 
 function diagCheck(label,ok,detail,status){const cls=ok?"diag-ok":(status==="warn"?"diag-warn":"diag-fail");const icon=ok?"✅":(status==="warn"?"⚠️":"❌");return `<div class="diag-check ${cls}"><div class="diag-icon">${icon}</div><div><b>${esc(label)}</b><span>${esc(detail)}</span></div></div>`;}
-function runDiagnostics(){const checks=[];const mapEl=$("map");const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";checks.push(diagCheck("Leaflet carregado",leafletOk,leafletOk?`Leaflet ${L.version||"versão não informada"} disponível.`:"A biblioteca Leaflet não está disponível."));const mapOk=!!state.map;checks.push(diagCheck("Instância do mapa",mapOk,mapOk?"O L.map() foi inicializado.":"O elemento do mapa existe, mas o Leaflet não criou a instância."));const w=mapEl?mapEl.clientWidth:0,h=mapEl?mapEl.clientHeight:0;checks.push(diagCheck("Área visual do mapa",w>0&&h>0,`Área atual: ${w} × ${h} px.`,w>0&&h>0?"":"warn"));const xlsxOk=typeof window.XLSX!=="undefined";checks.push(diagCheck("SheetJS / Excel",xlsxOk,xlsxOk?"Biblioteca XLSX carregada.":"Biblioteca XLSX não carregou."));const geoOk=!!navigator.geolocation;checks.push(diagCheck("GPS do dispositivo",geoOk,geoOk?"navigator.geolocation está disponível.":"Geolocalização indisponível."));const online=navigator.onLine!==false;checks.push(diagCheck("Conexão",online,online?"O navegador informa conexão ativa.":"O navegador informa modo offline.",online?"":"warn"));checks.push(`<div class="diag-check diag-warn"><div class="diag-icon">⏳</div><div><b>Tiles do OpenStreetMap</b><span id="diagTileStatus">Testando uma imagem real do mapa...</span></div></div>`);$("diagChecks").innerHTML=checks.join("");const fails=checks.filter(x=>x.includes("diag-fail")).length;$("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;testMapTile();}
+function runDiagnostics(){const checks=[];const mapEl=$("map");const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";checks.push(diagCheck("Leaflet carregado",leafletOk,leafletOk?`Leaflet ${L.version||"versão não informada"} disponível.`:"A biblioteca Leaflet não está disponível."));const mapOk=!!state.map;const mapDetail=mapOk?"O mapa foi criado e está ativo.":`O mapa não está ativo.${window.__mapInitError?" Erro: "+window.__mapInitError:""}`;checks.push(diagCheck("Instância do mapa",mapOk,mapDetail));const w=mapEl?mapEl.clientWidth:0,h=mapEl?mapEl.clientHeight:0;checks.push(diagCheck("Área visual do mapa",w>0&&h>0,`Área atual: ${w} × ${h} px.`,w>0&&h>0?"":"warn"));const xlsxOk=typeof window.XLSX!=="undefined";checks.push(diagCheck("SheetJS / Excel",xlsxOk,xlsxOk?"Biblioteca XLSX carregada.":"Biblioteca XLSX não carregou."));const geoOk=!!navigator.geolocation;checks.push(diagCheck("GPS do dispositivo",geoOk,geoOk?"navigator.geolocation está disponível.":"Geolocalização indisponível."));const online=navigator.onLine!==false;checks.push(diagCheck("Conexão",online,online?"O navegador informa conexão ativa.":"O navegador informa modo offline.",online?"":"warn"));checks.push(`<div class="diag-check diag-warn"><div class="diag-icon">⏳</div><div><b>Tiles do OpenStreetMap</b><span id="diagTileStatus">Testando uma imagem real do mapa...</span></div></div>`);$("diagChecks").innerHTML=checks.join("");const fails=checks.filter(x=>x.includes("diag-fail")).length;$("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;testMapTile();}
 function testMapTile(){const el=$("diagTileStatus");if(!el)return;const z=13,lat=-29.1678,lon=-51.1794,n=Math.pow(2,z),x=Math.floor((lon+180)/360*n),latRad=lat*Math.PI/180,y=Math.floor((1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n),img=new Image();let done=false;const box=el.parentElement.parentElement;const finish=(ok,msg)=>{if(done)return;done=true;el.textContent=msg;box.classList.remove("diag-warn","diag-ok","diag-fail");box.classList.add(ok?"diag-ok":"diag-fail")};const timer=setTimeout(()=>finish(false,"O tile não respondeu em 8 segundos. Pode haver bloqueio no acesso aos mapas externos."),8000);img.onload=()=>{clearTimeout(timer);finish(true,"Tile recebido com sucesso do OpenStreetMap.")};img.onerror=()=>{clearTimeout(timer);finish(false,"O tile não pôde ser carregado. O problema está no acesso aos mapas externos.")};img.src=`https://tile.openstreetmap.org/${z}/${x}/${y}.png?diag=${Date.now()}`}
 function testGps(){const log=$("diagLog");log.style.display="block";if(!navigator.geolocation){log.innerHTML="<b>❌ GPS indisponível.</b>";return}log.innerHTML="<b>📍 Solicitando localização...</b>";navigator.geolocation.getCurrentPosition(pos=>{const a=pos.coords.accuracy;log.innerHTML=`<b>✅ GPS funcionando.</b> Latitude ${pos.coords.latitude.toFixed(6)} • Longitude ${pos.coords.longitude.toFixed(6)} • Precisão ${Number.isFinite(a)?Math.round(a)+" m":"não informada"}.`},err=>{log.innerHTML=`<b>❌ GPS não autorizado/indisponível.</b> Código ${err.code}: ${esc(err.message||"sem mensagem")}`},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 $("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",runDiagnostics);$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
@@ -616,8 +678,8 @@ $("navigateBtn").onclick=()=>{
   window.location.href=url;
 };
 window.__openClient=openClient;
-loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
+loadLocal(); const mapStarted=initMap(); if(!mapStarted) console.error("[MAPA] Inicialização retornou false."); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
-<div class="version-badge">RECEBE MAIS • V28 • IMPORTAÇÃO + DIAGNÓSTICO</div>
+<div class="version-badge">RECEBE MAIS • V29 • MAPA RECONSTRUÍDO</div>
 </body>
 </html>
