@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V43</title>
+<title>RECEBE MAIS • V44</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -626,6 +626,22 @@ async function geocodeOne(c){const sig=addressKey(c),saved=getActiveCoord(c.ec);
 
 async function geocodeAll(){ const pend=state.clients.filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
 
+
+function fitAll(){
+  if(!state.map) return;
+  const pts=state.clients
+    .filter(c=>Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon)))
+    .map(c=>[Number(c.lat),Number(c.lon)]);
+  if(!pts.length) return;
+  const bounds=L.latLngBounds(pts);
+  if(state.userPos && Number.isFinite(Number(state.userPos.lat)) && Number.isFinite(Number(state.userPos.lon))){
+    bounds.extend([Number(state.userPos.lat),Number(state.userPos.lon)]);
+  }
+  if(bounds.isValid()){
+    state.map.fitBounds(bounds,{padding:[30,30],maxZoom:15});
+  }
+}
+
 function exportCoordinates(){const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']];state.clients.forEach(c=>getCoordStore(c.ec).records.forEach(r=>rows.push([c.ec,c.cpf,c.name,r.address||c.address,r.number||c.number,r.complement||c.complement,r.bairro||c.bairro,r.city||c.city,r.lat,r.lon,r.type==="fictitious"?"Fictício":"Exato",r.confirmedAt||''])));if(rows.length===1){toast("Nenhuma coordenada para exportar.");return;}const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');toast(`${rows.length-1} localização(ões) exportada(s).`);}
 
 function saveAction(){
@@ -750,7 +766,7 @@ async function testImportRead(){
     if(!parsed.clients.length) throw new Error("A Base Clientes foi lida, mas nenhum cliente foi encontrado.");
     if(box) box.innerHTML=`<b>✅ Leitura da Base Clientes funcionando.</b> ${parsed.clients.length} cliente(s) encontrados. Arquivo: ${esc(bf.name)}`;
   }catch(e){
-    console.error("[DIAG IMPORT V43]",e);
+    console.error("[DIAG IMPORT V44]",e);
     if(box) box.innerHTML=`<b>❌ Falha ao ler a Base Clientes.</b> ${esc(e.message||String(e))}`;
   }
 }
@@ -906,6 +922,6 @@ window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
   if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">RECEBE MAIS • V43 • PERSISTÊNCIA</div>
+<div class="version-badge">RECEBE MAIS • V44 • PERSISTÊNCIA</div>
 </body>
 </html>
