@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V47.3 • LOCALIZAÇÃO PROGRESSIVA</title>
+<title>RECEBE MAIS • V48 • LOCALIZAÇÃO PROGRESSIVA • HISTÓRICO ROBUSTO</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -305,10 +305,80 @@ function normalizeLocationType(type){
 }
 function coordRecordFromLegacy(s){ if(!s||!Number.isFinite(Number(s.lat))||!Number.isFinite(Number(s.lon)))return null; return {type:normalizeLocationType(s.type),status:s.status||"",address:s.address||"",number:s.number||"",complement:s.complement||"",bairro:s.bairro||"",city:s.city||"",addressKey:s.addressKey||"",lat:Number(s.lat),lon:Number(s.lon),confirmedAt:s.confirmedAt||new Date().toISOString(),source:s.source||"legacy"}; }
 function normalizeCoordsStore(raw){ const out={}; if(!raw||typeof raw!=="object")return out; Object.entries(raw).forEach(([ec,v])=>{ if(v&&Array.isArray(v.records))out[ec]={records:v.records.filter(r=>r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))).map(r=>({...r,type:normalizeLocationType(r.type),lat:Number(r.lat),lon:Number(r.lon)})),activeType:v.activeType?normalizeLocationType(v.activeType):null}; else {const r=coordRecordFromLegacy(v);if(r)out[ec]={records:[r],activeType:r.type};}}); return out; }
-function getCoordStore(ec){ return state.coords[ec]||{records:[],activeType:null}; }
+function ecKey(ec){
+  return norm(ec).replace(/\s+/g,"");
+}
+function ecDigitsKey(ec){
+  const d=digits(ec);
+  return d ? d.replace(/^0+(?=\d)/,"") : "";
+}
+function findCoordStoreKey(ec, source){
+  const obj=source||state.coords||{};
+  if(Object.prototype.hasOwnProperty.call(obj,ec)) return ec;
+  const k=ecKey(ec);
+  if(k){
+    const exact=Object.keys(obj).find(key=>ecKey(key)===k);
+    if(exact) return exact;
+  }
+  const d=ecDigitsKey(ec);
+  if(d){
+    const numeric=Object.keys(obj).find(key=>ecDigitsKey(key)===d);
+    if(numeric) return numeric;
+  }
+  return null;
+}
+function getCoordStore(ec){
+  const key=findCoordStoreKey(ec);
+  if(key&&state.coords[key]){
+    if(key!==ec && !state.coords[ec]) state.coords[ec]=state.coords[key];
+    return state.coords[ec]||state.coords[key];
+  }
+  return {records:[],activeType:null};
+}
+function mergeCoordStores(base, incoming){
+  const a=base&&Array.isArray(base.records)?base.records:[];
+  const b=incoming&&Array.isArray(incoming.records)?incoming.records:[];
+  const byType=new Map();
+  a.forEach(r=>{ if(r&&r.type) byType.set(normalizeLocationType(r.type),r); });
+  b.forEach(r=>{
+    if(!r||!r.type) return;
+    const t=normalizeLocationType(r.type);
+    if(!byType.has(t)) byType.set(t,{...r,type:t});
+  });
+  const activeCandidates=[base?.activeType,incoming?.activeType,"confirmed","exact","street"];
+  let activeType=null;
+  for(const t of activeCandidates){
+    const nt=t?normalizeLocationType(t):null;
+    if(nt&&byType.has(nt)){ activeType=nt; break; }
+  }
+  return {records:[...byType.values()],activeType};
+}
 function getCoordRecord(ec,type){ return getCoordStore(ec).records.find(r=>r.type===normalizeLocationType(type))||null; }
 function getActiveCoord(ec){ const st=getCoordStore(ec); return st.records.find(r=>r.type===st.activeType)||st.records.find(r=>r.type==="confirmed")||st.records.find(r=>r.type==="exact")||st.records.find(r=>r.type==="street")||st.records[0]||null; }
-function setActiveCoord(ec,type){ const t=normalizeLocationType(type); if(state.coords[ec]&&state.coords[ec].records.some(r=>r.type===t))state.coords[ec].activeType=t; }
+function setActiveCoord(ec,type){
+  const t=normalizeLocationType(type);
+  const st=getCoordStore(ec);
+  if(st.records.some(r=>r.type===t)){
+    st.activeType=t;
+    state.coords[ec]=st;
+    saveLocal();
+  }
+}
+function findClientForCoordinate(item){
+  if(!item) return null;
+  const ec=String(item.ec??"").trim();
+  let c=state.clients.find(x=>String(x.ec??"").trim()===ec);
+  if(c) return c;
+  const key=ecKey(ec);
+  if(key) c=state.clients.find(x=>ecKey(x.ec)===key);
+  if(c) return c;
+  const dk=ecDigitsKey(ec);
+  if(dk) c=state.clients.find(x=>ecDigitsKey(x.ec)===dk);
+  if(c) return c;
+  const cpf=digits(item.cpf||"");
+  if(cpf) c=state.clients.find(x=>digits(x.cpf||"")===cpf);
+  return c||null;
+}
 
 function saveLocal(){
   try{
@@ -354,15 +424,24 @@ function loadLocal(){
     // Recupera o histórico permanente de localização.
     const history=normalizeCoordsStore(JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||"{}"));
     Object.entries(history).forEach(([ec,st])=>{
-      if(!state.coords[ec] || !state.coords[ec].records.length){
+      const currentKey=findCoordStoreKey(ec,state.coords);
+      if(!currentKey){
         state.coords[ec]=st;
       }else{
-        const byType=new Map(state.coords[ec].records.map(r=>[r.type,r]));
-        st.records.forEach(r=>{ if(!byType.has(r.type)) byType.set(r.type,r); });
-        state.coords[ec].records=[...byType.values()];
-        if(!state.coords[ec].activeType && st.activeType) state.coords[ec].activeType=st.activeType;
+        const merged=mergeCoordStores(state.coords[currentKey],st);
+        state.coords[currentKey]=merged;
+        if(currentKey!==ec) state.coords[ec]=merged;
       }
     });
+    // Migração/normalização: se o mesmo EC existir com formatos diferentes,
+    // mantém uma única referência lógica sem apagar registros históricos.
+    const canonical={};
+    Object.entries(state.coords||{}).forEach(([ec,st])=>{
+      const key=ecKey(ec)||ecDigitsKey(ec)||ec;
+      if(!canonical[key]) canonical[key]={ec,store:st};
+      else canonical[key].store=mergeCoordStores(canonical[key].store,st);
+    });
+    Object.values(canonical).forEach(({ec,store})=>{ state.coords[ec]=store; });
 
     state.actionsHistory=JSON.parse(localStorage.getItem(ACTIONS_KEY)||"[]");
     refreshClientCoordsFromStore();
@@ -384,12 +463,18 @@ function mapAddressText(c){ const s=getLocationStatus(c); if(s==="street") retur
 function saveCoordinateRecord(c,r,setActive){
   if(!c||!r||!Number.isFinite(Number(r.lat))||!Number.isFinite(Number(r.lon))) return;
   const type=normalizeLocationType(r.type);
+  const existingKey=findCoordStoreKey(c.ec);
+  if(existingKey&&existingKey!==c.ec){
+    state.coords[c.ec]=state.coords[existingKey];
+  }
   if(!state.coords[c.ec]) state.coords[c.ec]={records:[],activeType:null};
   const st=state.coords[c.ec];
   const record={...r,type,status:r.status||type,lat:Number(r.lat),lon:Number(r.lon),address:r.address||"",number:r.number||"",complement:r.complement||"",bairro:r.bairro||"",city:r.city||"",addressKey:r.addressKey||"",confirmedAt:r.confirmedAt||new Date().toISOString(),source:r.source||""};
   const idx=st.records.findIndex(x=>x.type===type);
   if(idx>=0) st.records[idx]=record; else st.records.push(record);
-  if(setActive || !st.activeType || !st.records.some(x=>x.type===st.activeType)) st.activeType=type;
+  // Uma confirmação em campo nunca é rebaixada por uma localização automática/importada.
+  if(type==="confirmed") st.activeType="confirmed";
+  else if(setActive || !st.activeType || !st.records.some(x=>x.type===st.activeType)) st.activeType=type;
   const active=getActiveCoord(c.ec);
   if(active){ c.lat=Number(active.lat); c.lon=Number(active.lon); c.locationType=active.type; c.locationStatus=getLocationStatus(c); }
   saveLocal();
@@ -457,19 +542,18 @@ function parseCoordinateWorkbook(wb){
   return out;
 }
 function importCoordinateRecords(items){
-  let imported=0,matched=0;
+  let imported=0,matched=0,byCpf=0;
   items.forEach(item=>{
-    const c=state.clients.find(x=>x.ec===item.ec);
+    const c=findClientForCoordinate(item);
     if(!c) return;
     matched++;
+    if(digits(item.cpf||"") && digits(item.cpf||"")===digits(c.cpf||"") && ecKey(item.ec)!==ecKey(c.ec)) byCpf++;
     saveCoordinateRecord(c,item.record,false);
-    const st=state.coords[c.ec];
-    if(!st.activeType) st.activeType=item.record.type;
     imported++;
   });
   refreshClientCoordsFromStore();
   saveLocal();
-  return {imported,matched};
+  return {imported,matched,byCpf};
 }
 function parseBaseWorkbook(wb){
   const base=sheetByName(wb,"BASE");
@@ -875,7 +959,7 @@ function exportActions(){
   toast(`${rows.length-1} ação(ões) exportada(s).`);
 }
 
-function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function backup(){ const data={savedAt:new Date().toISOString(),version:"V48",lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),historyCoords:JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
 
 async function importFiles(){
   const bf=$("baseFile").files[0]; const cfCarteira=$("carteiraFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
@@ -898,7 +982,7 @@ async function importFiles(){
     progress(68,`Carteira carregada: ${state.debtsByEc.size} ECs ativos. Cruzando Base + Carteira...`);
     if(af){ progress(72,"Lendo Base de Acionamentos..."); const awb=XLSX.read(await af.arrayBuffer(),{type:'array',cellDates:false}); state.latestActionsByEc=parseActionsWorkbook(awb); } else state.latestActionsByEc=new Map();
     if(pf){ progress(78,"Lendo Base de Propostas..."); const pwb=XLSX.read(await pf.arrayBuffer(),{type:'array',cellDates:false}); state.proposalsByCpf=parseProposalsWorkbook(pwb); } else state.proposalsByCpf=new Map();
-    if(cf){ progress(83,"Lendo arquivo de Coordenadas..."); const coordWb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false}); const cres=parseCoordinateWorkbook(coordWb); const cimp=importCoordinateRecords(cres); progress(86,`Coordenadas importadas: ${cimp.imported}. EC encontrados na base: ${cimp.matched}.`); }
+    if(cf){ progress(83,"Lendo arquivo de Coordenadas..."); const coordWb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false}); const cres=parseCoordinateWorkbook(coordWb); const cimp=importCoordinateRecords(cres); progress(86,`Coordenadas importadas: ${cimp.imported}. ECs encontrados: ${cimp.matched}${cimp.byCpf?` • ${cimp.byCpf} recuperado(s) por CPF`:""}.`); }
     refreshClientCoordsFromStore();
     progress(90,"Salvando dados no aparelho..."); saveLocal();
     progress(93,"Montando lista e mapa..."); renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
@@ -923,6 +1007,9 @@ function runImportDiagnostics(){
   add("Leitura de Acionamentos",typeof parseActionsWorkbook==="function",typeof parseActionsWorkbook==="function"?"Parser de acionamentos disponível.":"Parser de acionamentos ausente.");
   add("Leitura de Propostas",typeof parseProposalsWorkbook==="function",typeof parseProposalsWorkbook==="function"?"Parser de propostas disponível.":"Parser de propostas ausente.");
   add("Leitura de Coordenadas",typeof parseCoordinateWorkbook==="function",typeof parseCoordinateWorkbook==="function"?"Parser de coordenadas disponível.":"Parser de coordenadas ausente.");
+  const coordCount=Object.keys(state.coords||{}).length;
+  const historyCount=Object.keys(normalizeCoordsStore(JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||"{}"))).length;
+  add("Histórico de localização",true,`${coordCount} EC(s) com coordenadas disponíveis no lote/estado atual • ${historyCount} EC(s) preservados no histórico permanente.`);
   const bf=$("baseFile"),cfCarteira=$("carteiraFile"),af=$("acoesFile"),pf=$("propostasFile"),cf=$("coordenadasFile");
   add("Arquivo Base de Clientes",!!(bf&&bf.files&&bf.files[0]),bf&&bf.files&&bf.files[0]?bf.files[0].name:"Nenhum arquivo selecionado.",bf&&bf.files&&bf.files[0]?undefined:"warn");
   add("Arquivo Carteira Analítica",!!(cfCarteira&&cfCarteira.files&&cfCarteira.files[0]),cfCarteira&&cfCarteira.files&&cfCarteira.files[0]?cfCarteira.files[0].name:"Obrigatório — nenhum arquivo selecionado.",cfCarteira&&cfCarteira.files&&cfCarteira.files[0]?undefined:"warn");
@@ -969,13 +1056,13 @@ function forceMapInitDiagnostic(){
   try{
     window.__mapManualTest=true;
     const result=initMap();
-    console.log("[MAPA V34] resultado do teste direto:",result,window.__mapCheckpoints,window.__mapInitError);
+    console.log("[MAPA V48] resultado do teste direto:",result,window.__mapCheckpoints,window.__mapInitError);
     return result;
   }catch(e){
     window.__mapInitError=mapErrorText(e);
     window.__mapCheckpoints=window.__mapCheckpoints||[];
     mapCheckpoint("TESTE DIRETO → exceção",false,window.__mapInitError);
-    console.error("[MAPA V34] exceção no teste direto",e);
+    console.error("[MAPA V48] exceção no teste direto",e);
     return false;
   }
 }
@@ -1080,7 +1167,7 @@ window.__confirmClientLocation=(ec)=>{const c=state.clients.find(x=>String(x.ec)
 window.addEventListener("beforeunload",()=>{ try{saveLocal();}catch(e){} });
 window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
 
-// BOOT V34: inicializa o mapa ANTES das outras rotinas, para que nenhum erro de
+// BOOT V48: inicializa o mapa ANTES das outras rotinas, para que nenhum erro de
 // importação/lista/estado local consiga impedir a criação do mapa.
 (function bootApp(){
   let mapStarted=false;
@@ -1089,19 +1176,19 @@ window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
   }catch(e){
     window.__mapInitError=mapErrorText(e);
     mapCheckpoint("BOOT → initMap",false,window.__mapInitError);
-    console.error("[MAPA V34] erro fatal em initMap",e);
+    console.error("[MAPA V48] erro fatal em initMap",e);
   }
-  if(!mapStarted){ console.error("[MAPA V34] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); }
+  if(!mapStarted){ console.error("[MAPA V48] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); }
 
-  try{ loadLocal(); }catch(e){ console.error("[BOOT V34] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderCities(); }catch(e){ console.error("[BOOT V34] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderStats(); }catch(e){ console.error("[BOOT V34] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderList(); }catch(e){ console.error("[BOOT V34] renderList falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderMarkers(); }catch(e){ console.error("[BOOT V34] renderMarkers falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ updateActionCount(); }catch(e){ console.error("[BOOT V34] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
-  if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
+  try{ loadLocal(); }catch(e){ console.error("[BOOT V48] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderCities(); }catch(e){ console.error("[BOOT V48] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderStats(); }catch(e){ console.error("[BOOT V48] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderList(); }catch(e){ console.error("[BOOT V48] renderList falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderMarkers(); }catch(e){ console.error("[BOOT V48] renderMarkers falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ updateActionCount(); }catch(e){ console.error("[BOOT V48] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
+  if(window.__bootError) console.warn("[BOOT V48] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">V47 • LOCALIZAÇÃO PROGRESSIVA</div>
+<div class="version-badge">V48 • LOCALIZAÇÃO PROGRESSIVA • HISTÓRICO ROBUSTO</div>
 </body>
-                                                                                                       </html>
+</html>
