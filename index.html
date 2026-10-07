@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V48 • LOCALIZAÇÃO PROGRESSIVA • HISTÓRICO ROBUSTO</title>
+<title>RECEBE MAIS • V48.1 • LOCALIZAÇÃO PROGRESSIVA OTIMIZADA • HISTÓRICO ROBUSTO</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -460,7 +460,7 @@ function getLocationStatus(c){
 }
 function locationStatusLabel(c){ const s=getLocationStatus(c); return s==="confirmed"?"🟢 Confirmado em campo":s==="street"?"🟡 Rua localizada • pendente":s==="auto"?"🔵 Validado automaticamente":"⚪ Sem localização"; }
 function mapAddressText(c){ const s=getLocationStatus(c); if(s==="street") return [c.address,c.bairro,c.city].filter(Boolean).join(" - "); return clientFullAddress(c); }
-function saveCoordinateRecord(c,r,setActive){
+function saveCoordinateRecord(c,r,setActive,silent=false){
   if(!c||!r||!Number.isFinite(Number(r.lat))||!Number.isFinite(Number(r.lon))) return;
   const type=normalizeLocationType(r.type);
   const existingKey=findCoordStoreKey(c.ec);
@@ -477,11 +477,13 @@ function saveCoordinateRecord(c,r,setActive){
   else if(setActive || !st.activeType || !st.records.some(x=>x.type===st.activeType)) st.activeType=type;
   const active=getActiveCoord(c.ec);
   if(active){ c.lat=Number(active.lat); c.lon=Number(active.lon); c.locationType=active.type; c.locationStatus=getLocationStatus(c); }
-  saveLocal();
-  renderLocationRecords(c);
-  renderMarkers();
-  renderList();
-  renderStats();
+  if(!silent){
+    saveLocal();
+    renderLocationRecords(c);
+    renderMarkers();
+    renderList();
+    renderStats();
+  }
 }
 function refreshClientCoordsFromStore(){
   state.clients.forEach(c=>{
@@ -543,12 +545,32 @@ function parseCoordinateWorkbook(wb){
 }
 function importCoordinateRecords(items){
   let imported=0,matched=0,byCpf=0;
+  // Índices temporários: evita percorrer toda a Base para cada linha do Excel.
+  const byEc=new Map(),byEcKey=new Map(),byDigits=new Map(),byCpfIndex=new Map();
+  state.clients.forEach(c=>{
+    const ec=String(c.ec??"").trim();
+    if(ec){
+      byEc.set(ec,c);
+      const k=ecKey(ec); if(k&&!byEcKey.has(k)) byEcKey.set(k,c);
+      const dk=ecDigitsKey(ec); if(dk&&!byDigits.has(dk)) byDigits.set(dk,c);
+    }
+    const cpf=digits(c.cpf||""); if(cpf&&!byCpfIndex.has(cpf)) byCpfIndex.set(cpf,c);
+  });
+  const findIndexed=(item)=>{
+    if(!item)return null;
+    const ec=String(item.ec??"").trim();
+    let c=byEc.get(ec); if(c)return c;
+    const k=ecKey(ec); if(k){c=byEcKey.get(k);if(c)return c;}
+    const dk=ecDigitsKey(ec); if(dk){c=byDigits.get(dk);if(c)return c;}
+    const cpf=digits(item.cpf||""); if(cpf)return byCpfIndex.get(cpf)||null;
+    return null;
+  };
   items.forEach(item=>{
-    const c=findClientForCoordinate(item);
+    const c=findIndexed(item);
     if(!c) return;
     matched++;
     if(digits(item.cpf||"") && digits(item.cpf||"")===digits(c.cpf||"") && ecKey(item.ec)!==ecKey(c.ec)) byCpf++;
-    saveCoordinateRecord(c,item.record,false);
+    saveCoordinateRecord(c,item.record,false,true);
     imported++;
   });
   refreshClientCoordsFromStore();
@@ -959,7 +981,7 @@ function exportActions(){
   toast(`${rows.length-1} ação(ões) exportada(s).`);
 }
 
-function backup(){ const data={savedAt:new Date().toISOString(),version:"V48",lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),historyCoords:JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function backup(){ const data={savedAt:new Date().toISOString(),version:"V48.1",lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),historyCoords:JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
 
 async function importFiles(){
   const bf=$("baseFile").files[0]; const cfCarteira=$("carteiraFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
@@ -982,7 +1004,7 @@ async function importFiles(){
     progress(68,`Carteira carregada: ${state.debtsByEc.size} ECs ativos. Cruzando Base + Carteira...`);
     if(af){ progress(72,"Lendo Base de Acionamentos..."); const awb=XLSX.read(await af.arrayBuffer(),{type:'array',cellDates:false}); state.latestActionsByEc=parseActionsWorkbook(awb); } else state.latestActionsByEc=new Map();
     if(pf){ progress(78,"Lendo Base de Propostas..."); const pwb=XLSX.read(await pf.arrayBuffer(),{type:'array',cellDates:false}); state.proposalsByCpf=parseProposalsWorkbook(pwb); } else state.proposalsByCpf=new Map();
-    if(cf){ progress(83,"Lendo arquivo de Coordenadas..."); const coordWb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false}); const cres=parseCoordinateWorkbook(coordWb); const cimp=importCoordinateRecords(cres); progress(86,`Coordenadas importadas: ${cimp.imported}. ECs encontrados: ${cimp.matched}${cimp.byCpf?` • ${cimp.byCpf} recuperado(s) por CPF`:""}.`); }
+    if(cf){ progress(83,"Lendo arquivo de Coordenadas..."); const coordWb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false}); progress(84,"Processando coordenadas sem redesenhar a tela a cada linha..."); const cres=parseCoordinateWorkbook(coordWb); const cimp=importCoordinateRecords(cres); progress(86,`Coordenadas importadas: ${cimp.imported}. ECs encontrados: ${cimp.matched}${cimp.byCpf?` • ${cimp.byCpf} recuperado(s) por CPF`:""}.`); }
     refreshClientCoordsFromStore();
     progress(90,"Salvando dados no aparelho..."); saveLocal();
     progress(93,"Montando lista e mapa..."); renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
