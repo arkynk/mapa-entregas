@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V23</title>
+<title>RECEBE MAIS</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -56,6 +56,8 @@ button:active{transform:translateY(1px)}
 @media(min-width:700px){
   body{font-size:16px}.wrap{padding:14px 12px 24px;max-width:1100px}.header-row{max-width:1100px}.import-grid{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:repeat(4,1fr)}.map-wrap{display:grid;grid-template-columns:1.25fr .95fr;gap:12px}.map-card{order:1}.side{order:2}.client-list{max-height:66vh;overflow:auto}.map-card #map{height:66vh;min-height:500px}.modal{max-width:760px}.toast{left:50%;right:auto;transform:translateX(-50%)}
 }
+
+  .version-badge{position:fixed;left:8px;bottom:8px;z-index:9999;background:#fff;border:1px solid #d9e3e8;border-radius:10px;padding:5px 8px;font-size:10px;font-weight:900;color:#46606d;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
@@ -63,7 +65,7 @@ button:active{transform:translateY(1px)}
   <div class="header-row">
     <div class="brand">
       <div class="brand-mark">RM</div>
-      <div><h1>RECEBE MAIS</h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div><div style="font-size:10px;font-weight:900;white-space:nowrap;background:rgba(255,255,255,.15);padding:5px 7px;border-radius:8px">V23 • BASE V13</div>
+      <div><h1>RECEBE MAIS</h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
     </div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="statsWalletBtn">📊 Estatísticas Carteira</button><button class="btn" id="openImportBtn">📂 Importação</button></div>
   </div>
@@ -540,5 +542,6 @@ $("navigateBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.select
 window.__openClient=openClient;
 loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
+<div class="version-badge">RECEBE MAIS • V24 • BASE ORIGINAL V13</div>
 </body>
 </html>
