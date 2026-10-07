@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V32</title>
+<title>RECEBE MAIS • V33</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -559,8 +559,9 @@ function runDiagnostics(){
   }
   $("diagChecks").innerHTML=checks.join("");
   const fails=checks.filter(x=>x.includes("diag-fail")).length;
-  $("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;
-  renderCheckpointDiagnostics();
+  const cpFails=Array.isArray(window.__mapCheckpoints)?window.__mapCheckpoints.filter(x=>!x.ok).length:0;
+  const totalFails=Math.max(fails,cpFails);
+  $("diagSummary").innerHTML=totalFails?`<b>⚠️ ${totalFails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;
   testMapTile();
   }catch(e){
     const msg=mapErrorText(e);
@@ -620,8 +621,29 @@ window.addEventListener("unhandledrejection",e=>{
   console.error("[MAPA V31] promise rejeitada:",e.reason);
 });
 window.__openClient=openClient;
-loadLocal(); const mapStarted=initMap(); if(!mapStarted){ console.error("[MAPA V31] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); } renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
+
+// BOOT V33: inicializa o mapa ANTES das outras rotinas, para que nenhum erro de
+// importação/lista/estado local consiga impedir a criação do mapa.
+(function bootApp(){
+  let mapStarted=false;
+  try{
+    mapStarted=initMap();
+  }catch(e){
+    window.__mapInitError=mapErrorText(e);
+    mapCheckpoint("BOOT → initMap",false,window.__mapInitError);
+    console.error("[MAPA V33] erro fatal em initMap",e);
+  }
+  if(!mapStarted){ console.error("[MAPA V33] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); }
+
+  try{ loadLocal(); }catch(e){ console.error("[BOOT V33] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderCities(); }catch(e){ console.error("[BOOT V33] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderStats(); }catch(e){ console.error("[BOOT V33] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderList(); }catch(e){ console.error("[BOOT V33] renderList falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderMarkers(); }catch(e){ console.error("[BOOT V33] renderMarkers falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ updateActionCount(); }catch(e){ console.error("[BOOT V33] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
+  if(window.__bootError) console.warn("[BOOT V33] Erro não relacionado ao mapa:",window.__bootError);
+})();
 </script>
-<div class="version-badge">RECEBE MAIS • V32 • CHECKPOINTS DO MAPA</div>
+<div class="version-badge">RECEBE MAIS • V33 • CHECKPOINTS DO MAPA</div>
 </body>
 </html>
