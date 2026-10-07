@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V29</title>
+<title>RECEBE MAIS • V30</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -35,7 +35,7 @@ button:active{transform:translateY(1px)}
 
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}.stat{background:var(--navy);color:#fff;border-radius:13px;padding:9px 6px;text-align:center;min-height:62px;display:flex;flex-direction:column;justify-content:center}.stat b{display:block;font-size:18px;line-height:1.15;word-break:break-word}.stat span{display:block;font-size:10px;color:#d9edf5;margin-top:3px}
 
-.map-wrap{display:flex;flex-direction:column;gap:9px;align-items:stretch}.map-card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow);order:1}#map{height:45vh;min-height:300px;max-height:460px;background:#dde9dd}.side{width:100%;min-width:0;order:2}
+.map-wrap{display:flex;flex-direction:column;gap:9px;align-items:stretch}.map-card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow);order:1}#mapCanvas{height:45vh;min-height:300px;max-height:460px;background:#dde9dd}.side{width:100%;min-width:0;order:2}
 
 .list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.list-head h2{margin:0;font-size:16px}.search{width:100%;min-height:44px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:14px}.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0}.client-list{max-height:none;overflow:visible;padding-right:0}
 .client-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:7px 0;box-shadow:0 2px 7px rgba(7,59,97,.05)}.client-card h3{margin:0 0 2px;font-size:16px;line-height:1.2}.ec{font-size:11px;color:var(--muted);font-weight:800}.addr{font-size:13px;color:#364f5e;line-height:1.38;margin:7px 0}.meta{display:flex;justify-content:space-between;gap:8px;align-items:center}.debt-pill{font-weight:900;color:var(--navy);font-size:13px}.state-pill{font-size:10px;font-weight:900;padding:5px 7px;border-radius:999px;white-space:nowrap}.state-pill.over{background:var(--redbg);color:var(--red)}.state-pill.future{background:var(--okbg);color:var(--green2)}.state-pill.mixed{background:var(--amberbg);color:#9c6500}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.card-actions .btn{padding:10px 7px;font-size:12px;min-height:43px}
@@ -54,7 +54,7 @@ button:active{transform:translateY(1px)}
 .import-progress{height:10px;background:#e5edf1;border-radius:999px;overflow:hidden;margin:8px 0 4px}.import-progress>div{height:100%;width:0;background:var(--green);transition:width .2s}.import-progress-label{font-size:11px;color:var(--muted);line-height:1.35;min-height:16px}.hidden{display:none!important}
 
 @media(min-width:700px){
-  body{font-size:16px}.wrap{padding:14px 12px 24px;max-width:1100px}.header-row{max-width:1100px}.import-grid{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:repeat(4,1fr)}.map-wrap{display:grid;grid-template-columns:1.25fr .95fr;gap:12px}.map-card{order:1}.side{order:2}.client-list{max-height:66vh;overflow:auto}.map-card #map{height:66vh;min-height:500px}.modal{max-width:760px}.toast{left:50%;right:auto;transform:translateX(-50%)}
+  body{font-size:16px}.wrap{padding:14px 12px 24px;max-width:1100px}.header-row{max-width:1100px}.import-grid{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:repeat(4,1fr)}.map-wrap{display:grid;grid-template-columns:1.25fr .95fr;gap:12px}.map-card{order:1}.side{order:2}.client-list{max-height:66vh;overflow:auto}.map-card #mapCanvas{height:66vh;min-height:500px}.modal{max-width:760px}.toast{left:50%;right:auto;transform:translateX(-50%)}
 }
 
   .version-badge{position:fixed;left:8px;bottom:8px;z-index:9999;background:#fff;border:1px solid #d9e3e8;border-radius:10px;padding:5px 8px;font-size:10px;font-weight:900;color:#46606d;box-shadow:0 2px 8px rgba(0,0,0,.08)}
@@ -80,7 +80,7 @@ button:active{transform:translateY(1px)}
 
 
   <section class="map-wrap">
-    <div class="map-card"><div id="map"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
+    <div class="map-card"><div id="mapCanvas"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
     <div class="side">
       <section class="panel">
         <div class="list-head"><h2>Clientes do lote</h2></div>
@@ -406,83 +406,58 @@ function renderList(){ const list=$("clientList"); let rows=getFilteredClients()
 function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
 function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
 function initMap(){
-  const mapEl=$("map");
-  if(!mapEl){ console.error("[MAPA] Elemento #map não encontrado."); return false; }
+  const el=document.getElementById("mapCanvas");
+  if(!el){ window.__mapInitError="Elemento #mapCanvas não encontrado."; return false; }
 
-  // Reconstrução completa do mapa: limpa qualquer instância antiga que tenha ficado no DOM.
-  try{ if(state.map){ state.map.remove(); } }catch(e){ console.warn("[MAPA] Não foi possível remover instância anterior:",e); }
+  // MAPA V30: instância completamente nova em um novo elemento DOM.
+  try{
+    if(state.map){ state.map.remove(); }
+  }catch(e){}
   state.map=null;
-  try{ delete mapEl._leaflet_id; }catch(e){}
-  mapEl.innerHTML="";
-  mapEl.classList.add("leaflet-container");
-  mapEl.style.position="relative";
-  mapEl.style.overflow="hidden";
+  window.__mapInitError="";
 
-  if(typeof window.L==="undefined" || typeof L.map!=="function"){
-    mapEl.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-weight:800;color:#7b2430">Leaflet não foi carregado.</div>';
+  if(!window.L || typeof window.L.map!=="function"){
+    window.__mapInitError="Leaflet não disponível no momento da inicialização.";
     return false;
   }
 
   try{
-    // Cria a instância em uma etapa separada para sabermos exatamente onde ocorre uma falha.
-    const map=L.map(mapEl,{
-      zoomControl:true,
-      attributionControl:true,
-      preferCanvas:false,
-      zoomAnimation:false,
-      fadeAnimation:false,
-      markerZoomAnimation:false,
-      inertia:true
-    });
+    const map=L.map(el,{zoomControl:true,attributionControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false});
     state.map=map;
+    map.setView([-29.1678,-51.1794],13);
 
-    map.setView([-29.1678,-51.1794],13,false);
-
-    const osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    const tileOptions={
       maxZoom:19,
       minZoom:3,
       tileSize:256,
       updateWhenIdle:false,
       keepBuffer:2,
-      crossOrigin:false,
       attribution:"© OpenStreetMap contributors"
-    });
-    osm.addTo(map);
-
-    // Se o primeiro tile falhar, tenta automaticamente um segundo provedor público.
-    let fallbackUsed=false;
-    osm.on("tileerror",function(){
-      if(fallbackUsed || !state.map) return;
-      fallbackUsed=true;
-      try{
-        const fallback=L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{
-          maxZoom:20,
-          tileSize:256,
-          keepBuffer:2,
-          attribution:"© OpenStreetMap France | © OpenStreetMap contributors"
-        });
-        fallback.addTo(state.map);
-      }catch(e){ console.error("[MAPA] Falha no fallback de tiles:",e); }
-    });
-
-    const refreshMapSize=()=>{
-      if(!state.map)return;
-      state.map.invalidateSize({pan:false,animate:false});
     };
-    setTimeout(refreshMapSize,50);
-    setTimeout(refreshMapSize,250);
-    setTimeout(refreshMapSize,700);
-    setTimeout(refreshMapSize,1500);
-    window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
-    window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
 
-    console.log("[MAPA] Mapa reconstruído com sucesso.");
+    // Primeiro provedor.
+    const osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",tileOptions).addTo(map);
+    let fallback=false;
+    osm.on("tileerror",()=>{
+      if(fallback || !state.map) return;
+      fallback=true;
+      try{
+        L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",{
+          maxZoom:20,tileSize:256,keepBuffer:2,
+          attribution:"© OpenStreetMap contributors"
+        }).addTo(state.map);
+      }catch(err){ console.error("[MAPA V30] fallback:",err); }
+    });
+
+    const resize=()=>{ try{ if(state.map) state.map.invalidateSize(false); }catch(e){} };
+    [0,100,300,700,1500].forEach(ms=>setTimeout(resize,ms));
+
+    console.log("[MAPA V30] criado com sucesso", map);
     return true;
   }catch(err){
-    console.error("[MAPA] ERRO AO CRIAR O MAPA:",err);
     state.map=null;
-    mapEl.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-weight:800;color:#7b2430">Não foi possível criar o mapa.<br><small style="display:block;margin-top:8px;font-weight:600">Abra 🔧 Diagnóstico para ver o erro.</small></div>';
-    window.__mapInitError=String(err&&err.message||err);
+    window.__mapInitError=String(err && (err.message||err));
+    console.error("[MAPA V30] erro ao criar mapa:",err);
     return false;
   }
 }
@@ -636,7 +611,7 @@ async function importFiles(){
 function clearLot(){ state.clients=[];state.debtsByEc=new Map();state.latestActionsByEc=new Map();state.proposalsByCpf=new Map(); localStorage.removeItem(STORAGE_KEY); renderCities();renderStats();renderList();renderMarkers();$("geocodeBtn").disabled=true;$("progressBar").style.width="0%"; $("importProgressBar").style.width="0%"; $("importProgressLabel").textContent="Aguardando início da importação."; setImportStatus("<strong>Lote limpo.</strong> Os dados persistentes de coordenadas foram mantidos.");toast("Lote atual removido. Coordenadas preservadas."); }
 
 function diagCheck(label,ok,detail,status){const cls=ok?"diag-ok":(status==="warn"?"diag-warn":"diag-fail");const icon=ok?"✅":(status==="warn"?"⚠️":"❌");return `<div class="diag-check ${cls}"><div class="diag-icon">${icon}</div><div><b>${esc(label)}</b><span>${esc(detail)}</span></div></div>`;}
-function runDiagnostics(){const checks=[];const mapEl=$("map");const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";checks.push(diagCheck("Leaflet carregado",leafletOk,leafletOk?`Leaflet ${L.version||"versão não informada"} disponível.`:"A biblioteca Leaflet não está disponível."));const mapOk=!!state.map;const mapDetail=mapOk?"O mapa foi criado e está ativo.":`O mapa não está ativo.${window.__mapInitError?" Erro: "+window.__mapInitError:""}`;checks.push(diagCheck("Instância do mapa",mapOk,mapDetail));const w=mapEl?mapEl.clientWidth:0,h=mapEl?mapEl.clientHeight:0;checks.push(diagCheck("Área visual do mapa",w>0&&h>0,`Área atual: ${w} × ${h} px.`,w>0&&h>0?"":"warn"));const xlsxOk=typeof window.XLSX!=="undefined";checks.push(diagCheck("SheetJS / Excel",xlsxOk,xlsxOk?"Biblioteca XLSX carregada.":"Biblioteca XLSX não carregou."));const geoOk=!!navigator.geolocation;checks.push(diagCheck("GPS do dispositivo",geoOk,geoOk?"navigator.geolocation está disponível.":"Geolocalização indisponível."));const online=navigator.onLine!==false;checks.push(diagCheck("Conexão",online,online?"O navegador informa conexão ativa.":"O navegador informa modo offline.",online?"":"warn"));checks.push(`<div class="diag-check diag-warn"><div class="diag-icon">⏳</div><div><b>Tiles do OpenStreetMap</b><span id="diagTileStatus">Testando uma imagem real do mapa...</span></div></div>`);$("diagChecks").innerHTML=checks.join("");const fails=checks.filter(x=>x.includes("diag-fail")).length;$("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;testMapTile();}
+function runDiagnostics(){const checks=[];const mapEl=$("mapCanvas");const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";checks.push(diagCheck("Leaflet carregado",leafletOk,leafletOk?`Leaflet ${L.version||"versão não informada"} disponível.`:"A biblioteca Leaflet não está disponível."));const mapOk=!!state.map;const mapDetail=mapOk?"O mapa foi criado e está ativo.":`O mapa não está ativo.${window.__mapInitError?" Erro: "+window.__mapInitError:""}`;checks.push(diagCheck("Instância do mapa",mapOk,mapDetail));const w=mapEl?mapEl.clientWidth:0,h=mapEl?mapEl.clientHeight:0;checks.push(diagCheck("Área visual do mapa",w>0&&h>0,`Área atual: ${w} × ${h} px.`,w>0&&h>0?"":"warn"));const xlsxOk=typeof window.XLSX!=="undefined";checks.push(diagCheck("SheetJS / Excel",xlsxOk,xlsxOk?"Biblioteca XLSX carregada.":"Biblioteca XLSX não carregou."));const geoOk=!!navigator.geolocation;checks.push(diagCheck("GPS do dispositivo",geoOk,geoOk?"navigator.geolocation está disponível.":"Geolocalização indisponível."));const online=navigator.onLine!==false;checks.push(diagCheck("Conexão",online,online?"O navegador informa conexão ativa.":"O navegador informa modo offline.",online?"":"warn"));checks.push(`<div class="diag-check diag-warn"><div class="diag-icon">⏳</div><div><b>Tiles do OpenStreetMap</b><span id="diagTileStatus">Testando uma imagem real do mapa...</span></div></div>`);$("diagChecks").innerHTML=checks.join("");const fails=checks.filter(x=>x.includes("diag-fail")).length;$("diagSummary").innerHTML=fails?`<b>⚠️ ${fails} falha(s) detectada(s).</b>`:`<b>🔎 Diagnóstico executado.</b> Aguarde o teste dos tiles.`;testMapTile();}
 function testMapTile(){const el=$("diagTileStatus");if(!el)return;const z=13,lat=-29.1678,lon=-51.1794,n=Math.pow(2,z),x=Math.floor((lon+180)/360*n),latRad=lat*Math.PI/180,y=Math.floor((1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n),img=new Image();let done=false;const box=el.parentElement.parentElement;const finish=(ok,msg)=>{if(done)return;done=true;el.textContent=msg;box.classList.remove("diag-warn","diag-ok","diag-fail");box.classList.add(ok?"diag-ok":"diag-fail")};const timer=setTimeout(()=>finish(false,"O tile não respondeu em 8 segundos. Pode haver bloqueio no acesso aos mapas externos."),8000);img.onload=()=>{clearTimeout(timer);finish(true,"Tile recebido com sucesso do OpenStreetMap.")};img.onerror=()=>{clearTimeout(timer);finish(false,"O tile não pôde ser carregado. O problema está no acesso aos mapas externos.")};img.src=`https://tile.openstreetmap.org/${z}/${x}/${y}.png?diag=${Date.now()}`}
 function testGps(){const log=$("diagLog");log.style.display="block";if(!navigator.geolocation){log.innerHTML="<b>❌ GPS indisponível.</b>";return}log.innerHTML="<b>📍 Solicitando localização...</b>";navigator.geolocation.getCurrentPosition(pos=>{const a=pos.coords.accuracy;log.innerHTML=`<b>✅ GPS funcionando.</b> Latitude ${pos.coords.latitude.toFixed(6)} • Longitude ${pos.coords.longitude.toFixed(6)} • Precisão ${Number.isFinite(a)?Math.round(a)+" m":"não informada"}.`},err=>{log.innerHTML=`<b>❌ GPS não autorizado/indisponível.</b> Código ${err.code}: ${esc(err.message||"sem mensagem")}`},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
 $("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",runDiagnostics);$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
@@ -680,6 +655,6 @@ $("navigateBtn").onclick=()=>{
 window.__openClient=openClient;
 loadLocal(); const mapStarted=initMap(); if(!mapStarted) console.error("[MAPA] Inicialização retornou false."); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
-<div class="version-badge">RECEBE MAIS • V29 • MAPA RECONSTRUÍDO</div>
+<div class="version-badge">RECEBE MAIS • V30 • MAPA RECONSTRUÍDO DO ZERO</div>
 </body>
 </html>
