@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V44</title>
+<title>RECEBE MAIS • V45 • BASE + CARTEIRA</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -98,11 +98,20 @@ button:active{transform:translateY(1px)}
 <div class="import-modal-bg" id="statsModal">
   <div class="import-modal">
     <div class="import-modal-header"><h2>📊 Estatísticas Carteira</h2><button class="close-modal" id="closeStatsBtn">Fechar</button></div>
+    <div class="file-box" style="margin-bottom:9px">
+      <b>🏙️ Filtrar estatísticas por cidade</b>
+      <span>O filtro considera a cidade cadastrada na Base de Clientes.</span>
+      <select class="search" id="statsCityFilter"><option value="">Todas as cidades</option></select>
+    </div>
     <div class="stats" style="margin-top:0">
-      <div class="stat"><b id="statTotal">0</b><span>Qtd. Clientes TOTAL</span></div>
-      <div class="stat"><b id="statIncomplete">0</b><span>Quantidade com endereço incompleto</span></div>
-      <div class="stat"><b id="statVisited">0</b><span>Quantidade de visitas realizadas</span></div>
-      <div class="stat"><b id="statPending">0</b><span>Quantidade de visitas pendentes</span></div>
+      <div class="stat"><b id="statTotal">0</b><span>Clientes na Base</span></div>
+      <div class="stat"><b id="statActive">0</b><span>Clientes na Carteira</span></div>
+      <div class="stat"><b id="statIgnored">0</b><span>Clientes ignorados</span></div>
+      <div class="stat"><b id="statLocated">0</b><span>Clientes localizados</span></div>
+      <div class="stat"><b id="statUnlocated">0</b><span>Clientes não localizados</span></div>
+      <div class="stat"><b id="statVisited">0</b><span>Visitas realizadas</span></div>
+      <div class="stat"><b id="statPending">0</b><span>Visitas pendentes</span></div>
+      <div class="stat"><b id="statIncomplete">0</b><span>Endereço incompleto</span></div>
     </div>
   </div>
 </div>
@@ -128,10 +137,11 @@ button:active{transform:translateY(1px)}
   <div class="import-modal">
     <div class="import-modal-header"><h2>📂 Importação e dados</h2><button class="close-modal" id="closeImportBtn">Fechar</button></div>
     <div class="notice"><b>Use esta tela para importar, localizar, exportar ou limpar.</b> Essas funções ficam separadas da tela principal para evitar toques acidentais.</div>
-    <div class="file-box"><b>1. Base Clientes</b><span>Arquivo com as abas BASE e Carteira Analitica Divida.</span><input type="file" id="baseFile" accept=".xlsx,.xls,.xlsm"></div>
-    <div class="file-box"><b>2. Base de Acionamentos</b><span>Use a base oficial completa para consulta do último acionamento.</span><input type="file" id="acoesFile" accept=".xlsx,.xls,.xlsm"></div>
-    <div class="file-box"><b>3. Propostas</b><span>Formato esperado: CPF | Proposta.</span><input type="file" id="propostasFile" accept=".xlsx,.xls,.xlsm"></div>
-    <div class="file-box"><b>4. Coordenadas</b><span>Arquivo de pesquisa de coordenadas. Cruza pelo EC e mantém Exato/Fictício.</span><input type="file" id="coordenadasFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>1. Base de Clientes</b><span>Cadastro permanente. Deve conter a aba BASE com os dados dos clientes.</span><input type="file" id="baseFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>2. Carteira Analítica de Dívida</b><span>Define quem está ativo para a rota. O mesmo EC pode aparecer várias vezes por parcela/contrato.</span><input type="file" id="carteiraFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>3. Base de Acionamentos</b><span>Opcional. Use a base oficial para consulta do último acionamento.</span><input type="file" id="acoesFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>4. Propostas</b><span>Opcional. Formato esperado: CPF | Proposta.</span><input type="file" id="propostasFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>5. Coordenadas</b><span>Opcional. Cruza pelo EC e mantém Exato/Fictício.</span><input type="file" id="coordenadasFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="import-actions">
       <button class="btn dark" id="importBtn">📥 Importar lote</button>
       <button class="btn primary" id="geocodeBtn" disabled>🗺️ Localizar sem coordenada</button>
@@ -404,9 +414,8 @@ function importCoordinateRecords(items){
   return {imported,matched};
 }
 function parseBaseWorkbook(wb){
-  const base=sheetByName(wb,"BASE"); const debt=sheetByName(wb,"Carteira Analitica Divida");
+  const base=sheetByName(wb,"BASE");
   if(!base) throw new Error("Aba BASE não encontrada.");
-  if(!debt) throw new Error("Aba Carteira Analitica Divida não encontrada.");
   const b=makeRows(base); const bh=b[0]||[];
   const iEC=findCol(bh,["EC","Cliente EC"]), iCpf=findCol(bh,["Cpf/Cnpj","CPF","CPF/CNPJ"]), iNome=findCol(bh,["Nome"]), iAddr=findCol(bh,["Endereço","Endereco"]), iNum=findCol(bh,["Número","Numero"]), iComp=findCol(bh,["Complemento"]), iBairro=findCol(bh,["Bairro"]), iCity=findCol(bh,["Cidade"]), iTel=findCol(bh,["Telefone"]), iContra=findCol(bh,["DataContra","Data Contrato"]);
   if(iEC<0||iNome<0||iAddr<0||iCity<0) throw new Error("A aba BASE não possui as colunas essenciais EC, Nome, Endereço e Cidade.");
@@ -417,19 +426,38 @@ function parseBaseWorkbook(wb){
     const old=getActiveCoord(ec); if(old && Number.isFinite(old.lat)&&Number.isFinite(old.lon)){c.lat=old.lat;c.lon=old.lon;c.locationType=old.type||"exact";}
     clients.push(c);
   }
+  clients.forEach(c=>{ c.debtTotal=0;c.debtState="over";c.hasFuture=false;c.products=[]; });
+  return {clients};
+}
+
+function parseDebtWorkbook(wb){
+  const debt=sheetByName(wb,"Carteira Analitica Divida") || wb.Sheets[wb.SheetNames[0]];
+  if(!debt) throw new Error("Aba Carteira Analitica Divida não encontrada.");
   const d=makeRows(debt); const dh=d[0]||[];
-  const dEC=findCol(dh,["Cliente EC","EC"]), dCpf=findCol(dh,["Cpf/Cnpj","CPF"]), dName=findCol(dh,["Nome"]), dProd=findCol(dh,["Produto"]), dVal=findCol(dh,["Valor Dívida","Valor Divida"]), dDue=findCol(dh,["Data Vencimento","DataVencimento"]), dDays=findCol(dh,["Dias_Atraso","Dias Atraso"]), dStatus=findCol(dh,["Atraso/Em dia","Atraso Em dia"]);
-  if(dEC<0||dProd<0||dVal<0||dDue<0) throw new Error("A aba Carteira Analitica Divida não possui as colunas essenciais Cliente EC, Produto, Valor Dívida e Data Vencimento.");
+  const dEC=findCol(dh,["Cliente EC","EC"]), dProd=findCol(dh,["Produto"]), dVal=findCol(dh,["Valor Dívida","Valor Divida"]), dDue=findCol(dh,["Data Vencimento","DataVencimento"]), dDays=findCol(dh,["Dias_Atraso","Dias Atraso"]);
+  if(dEC<0||dProd<0||dVal<0||dDue<0) throw new Error("A Carteira Analítica não possui as colunas essenciais Cliente EC, Produto, Valor Dívida e Data Vencimento.");
+  const dContract=findCol(dh,["Contrato EC","Contrato"]);
   const map=new Map();
   for(let r=1;r<d.length;r++){
     const row=d[r]; const ec=String(getText(row,dEC)).trim(); if(!ec) continue;
-    const val=Number(getText(row,dVal))||0; const due=excelDate(getText(row,dDue)); const days=Number(getText(row,dDays)); const dueState=due ? (dateOnlyTime(due)<today.getTime()?"over":"future") : ((Number.isFinite(days)&&days>0)?"over":(Number.isFinite(days)&&days<0)?"future":"over");
+    const val=Number(getText(row,dVal))||0; const due=excelDate(getText(row,dDue)); const days=Number(getText(row,dDays));
+    const dueState=due ? (dateOnlyTime(due)<today.getTime()?"over":"future") : ((Number.isFinite(days)&&days>0)?"over":(Number.isFinite(days)&&days<0)?"future":"over");
     const productRaw=String(getText(row,dProd)).trim(); const productType=classifyProduct(productRaw);
-    if(!map.has(ec)) map.set(ec,[]); map.get(ec).push({valueDebt:val,dueDate:due,dueState,days,productRaw,productType,status:dueState,contract:String(getText(row,findCol(dh,["Contrato EC","Contrato"]))||"").trim()});
+    if(!map.has(ec)) map.set(ec,[]); map.get(ec).push({valueDebt:val,dueDate:due,dueState,days,productRaw,productType,status:dueState,contract:String(getText(row,dContract)||"").trim()});
   }
-  clients.forEach(c=>{ const rows=map.get(c.ec)||[]; const s=debtSummary(rows); c.debtTotal=s.total;c.debtState=s.state;c.hasFuture=s.future>0;c.products=Object.keys(s.byProd).filter(k=>k!=="OUTRO"); });
-  return {clients,debts:map};
+  return map;
 }
+
+function applyPortfolioToClients(){
+  state.clients.forEach(c=>{
+    const rows=state.debtsByEc.get(c.ec)||[];
+    const sm=debtSummary(rows);
+    c.debtTotal=sm.total;c.debtState=sm.state;c.hasFuture=sm.future>0;c.products=Object.keys(sm.byProd).filter(k=>k!=="OUTRO");
+  });
+}
+
+function isClientActive(c){ return !!c && state.debtsByEc instanceof Map && state.debtsByEc.has(c.ec); }
+function getRouteClients(){ return state.clients.filter(isClientActive); }
 function parseActionsWorkbook(wb){
   const sh=sheetByName(wb,"Relatório Acionamento") || wb.Sheets[wb.SheetNames[0]]; if(!sh) return new Map();
   const a=makeRows(sh); const h=a[0]||[]; const iEC=findCol(h,["Cliente Ec","Cliente EC","EC"]), iCpf=findCol(h,["Cpf/Cnpj","CPF"]), iName=findCol(h,["Nome"]), iAction=findCol(h,["Ação","Acao"]), iDate=findCol(h,["Data"]), iDesc=findCol(h,["Descrição","Descricao"]);
@@ -443,13 +471,29 @@ function parseProposalsWorkbook(wb){
   return map;
 }
 function clientFullAddress(c){ const p=[c.address,c.number].filter(Boolean).join(", "); const cpl=c.complement && c.complement!=="-"?c.complement:""; return [p,cpl,c.bairro,c.city].filter(Boolean).join(" - ").replace(/\s+-\s+([A-ZÁ-Ú])/g," - $1"); }
-function renderCities(){ const sel=$("cityFilter"); const current=sel.value; const cities=[...new Set(state.clients.map(c=>c.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR")); sel.innerHTML='<option value="">Todas as cidades</option>'+cities.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(""); sel.value=cities.includes(current)?current:""; }
+function renderCities(){
+  const cities=[...new Set(state.clients.map(c=>c.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const fill=(id)=>{ const sel=$(id); if(!sel)return; const current=sel.value; sel.innerHTML='<option value="">Todas as cidades</option>'+cities.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(""); sel.value=cities.includes(current)?current:""; };
+  fill("cityFilter"); fill("statsCityFilter");
+}
 function esc(s){ return String(s??"").replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-function renderStats(){ const total=state.clients.length; const incomplete=state.clients.filter(c=>!String(c.address||"").trim()||!String(c.number||"").trim()||!String(c.city||"").trim()).length; const visitedSet=new Set((state.actionsHistory||[]).map(a=>String(a.ec))); const visited=[...visitedSet].filter(ec=>state.clients.some(c=>c.ec===ec)).length; $("statTotal").textContent=total; $("statIncomplete").textContent=incomplete; $("statVisited").textContent=visited; $("statPending").textContent=Math.max(total-visited,0); }
-function getFilteredClients(){ const q=norm($("searchInput").value), city=$("cityFilter").value, df=$("debtFilter").value; return state.clients.filter(c=>{ const text=norm(c.name+" "+c.ec); if(q&&!text.includes(q)) return false; if(city&&c.city!==city)return false; if(df&&c.debtState!==df)return false; return true; }).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR")); }
+function renderStats(){
+  const city=$("statsCityFilter")?.value||"";
+  const base=state.clients.filter(c=>!city||c.city===city);
+  const active=base.filter(isClientActive);
+  const activeSet=new Set(active.map(c=>c.ec));
+  const ignored=base.filter(c=>!isClientActive(c));
+  const incomplete=active.filter(c=>!String(c.address||"").trim()||!String(c.number||"").trim()||!String(c.city||"").trim()).length;
+  const located=active.filter(c=>Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon))).length;
+  const visitedSet=new Set((state.actionsHistory||[]).map(a=>String(a.ec)));
+  const visited=active.filter(c=>visitedSet.has(String(c.ec))).length;
+  const set=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
+  set("statTotal",base.length);set("statActive",active.length);set("statIgnored",ignored.length);set("statLocated",located);set("statUnlocated",Math.max(active.length-located,0));set("statIncomplete",incomplete);set("statVisited",visited);set("statPending",Math.max(active.length-visited,0));
+}
+function getFilteredClients(){ const q=norm($("searchInput").value), city=$("cityFilter").value, df=$("debtFilter").value; return getRouteClients().filter(c=>{ const text=norm(c.name+" "+c.ec); if(q&&!text.includes(q)) return false; if(city&&c.city!==city)return false; if(df&&c.debtState!==df)return false; return true; }).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR")); }
 function renderList(){ const list=$("clientList"); let rows=getFilteredClients(); if(state.userPos){ rows=rows.map(c=>({...c,_dist:Number.isFinite(c.lat)&&Number.isFinite(c.lon)?distanceKm(state.userPos.lat,state.userPos.lon,c.lat,c.lon):null})).sort((a,b)=>a._dist==null?1:b._dist==null?-1:a._dist-b._dist); } if(!rows.length){list.innerHTML='<div class="empty">Nenhum cliente encontrado.</div>';return;} list.innerHTML=rows.map(c=>{ const stateLabel=c.debtState==="future"?"Tem a vencer":c.debtState==="mixed"?"Vencido + a vencer":"Tudo vencido"; const cls=c.debtState==="future"?"future":c.debtState==="mixed"?"mixed":"over"; const loc=Number.isFinite(c.lat)&&Number.isFinite(c.lon); const dist=c._dist!=null?`<div class="distance-line">📏 <span class="distance-value">${distanceText(c._dist)}</span> de você</div>`:""; return `<div class="client-card"><h3>${esc(c.name)}</h3><div class="ec">EC: ${esc(c.ec)}</div><div class="addr">${esc(clientFullAddress(c))}</div>${dist}<div class="meta"><div class="debt-pill">Total dívida: ${money(c.debtTotal||0)}</div><div class="state-pill ${cls}">${esc(stateLabel)}</div></div><div class="card-actions"><button class="btn" data-open="${esc(c.ec)}">Ver cliente</button><button class="btn primary" data-open="${esc(c.ec)}">${loc?"📍 Localização":"🔎 Localizar"}</button></div></div>`; }).join(""); list.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openClient(btn.dataset.open))); }
 function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
-function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); state.clients.forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
+function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); getRouteClients().forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
 function mapCheckpoint(label,ok,detail=""){
   window.__mapCheckpoints=window.__mapCheckpoints||[];
   window.__mapCheckpoints.push({label,ok,detail:String(detail||"")});
@@ -624,12 +668,12 @@ function useCurrentLocationForEditor(){ if(!state.userPos){ toast("Primeiro obte
 
 async function geocodeOne(c){const sig=addressKey(c),saved=getActiveCoord(c.ec);if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"exact";return true;}const q=[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", ");const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q);const res=await fetch(url,{headers:{Accept:"application/json"}});if(!res.ok)throw new Error("HTTP "+res.status);const data=await res.json(),expected=norm(c.city);for(const it of data){const name=norm(it.display_name||"");if(expected&&!name.includes(expected))continue;const lat=parseFloat(it.lat),lon=parseFloat(it.lon);if(Number.isFinite(lat)&&Number.isFinite(lon)){saveCoordinateRecord(c,{type:"exact",address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,addressKey:sig,lat,lon,confirmedAt:new Date().toISOString()},true);return true;}}return false;}
 
-async function geocodeAll(){ const pend=state.clients.filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
+async function geocodeAll(){ const pend=getRouteClients().filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
 
 
 function fitAll(){
   if(!state.map) return;
-  const pts=state.clients
+  const pts=getRouteClients()
     .filter(c=>Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon)))
     .map(c=>[Number(c.lat),Number(c.lon)]);
   if(!pts.length) return;
@@ -678,59 +722,36 @@ function exportActions(){
 function backup(){ const data={savedAt:new Date().toISOString(),lot:JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'),coords:JSON.parse(localStorage.getItem(COORDS_KEY)||'{}'),actions:JSON.parse(localStorage.getItem(ACTIONS_KEY)||'[]')}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Backup_Recebe_Mais_'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
 
 async function importFiles(){
-  const bf=$("baseFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
-  if(!bf){toast("Selecione a Base Clientes.");return;}
+  const bf=$("baseFile").files[0]; const cfCarteira=$("carteiraFile").files[0]; const af=$("acoesFile").files[0]; const pf=$("propostasFile").files[0]; const cf=$("coordenadasFile").files[0];
+  if(!bf){toast("Selecione a Base de Clientes.");return;}
+  if(!cfCarteira){toast("Selecione a Carteira Analítica de Dívida.");return;}
   const bar=$("importProgressBar"), label=$("importProgressLabel");
   const progress=(pct,text)=>{ if(bar)bar.style.width=Math.max(0,Math.min(100,pct))+"%"; if(label)label.textContent=text||""; setImportStatus(`<strong>Importando...</strong> ${esc(text||"")}`); };
   try{
     $("importBtn").disabled=true;
-    progress(5,"Preparando a Base Clientes...");
-    await new Promise(r=>setTimeout(r,80));
-
-    progress(15,"Lendo Base Clientes...");
+    progress(5,"Preparando os arquivos..."); await new Promise(r=>setTimeout(r,80));
+    progress(15,"Lendo Base de Clientes...");
     const bwb=XLSX.read(await bf.arrayBuffer(),{type:'array',cellDates:false});
-    progress(35,"Processando aba BASE...");
     const parsed=parseBaseWorkbook(bwb);
-    state.clients=parsed.clients; state.debtsByEc=parsed.debts;
-
-    progress(55,`Clientes carregados: ${state.clients.length}. Processando dívidas...`);
-    await new Promise(r=>setTimeout(r,80));
-
-    if(af){
-      progress(68,"Lendo Base de Acionamentos...");
-      const awb=XLSX.read(await af.arrayBuffer(),{type:'array',cellDates:false});
-      state.latestActionsByEc=parseActionsWorkbook(awb);
-    } else state.latestActionsByEc=new Map();
-
-    if(pf){
-      progress(78,"Lendo Base de Propostas...");
-      const pwb=XLSX.read(await pf.arrayBuffer(),{type:'array',cellDates:false});
-      state.proposalsByCpf=parseProposalsWorkbook(pwb);
-    } else state.proposalsByCpf=new Map();
-
-    if(cf){
-      progress(83,"Lendo arquivo de Coordenadas...");
-      const cwb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false});
-      const cres=parseCoordinateWorkbook(cwb);
-      const cimp=importCoordinateRecords(cres);
-      progress(86,`Coordenadas importadas: ${cimp.imported}. EC encontrados na base: ${cimp.matched}.`);
-    }
-
+    state.clients=parsed.clients;
+    state.debtsByEc=new Map();
+    progress(45,`Base carregada: ${state.clients.length} clientes. Lendo Carteira Analítica...`);
+    const cwbDiv=XLSX.read(await cfCarteira.arrayBuffer(),{type:'array',cellDates:false});
+    state.debtsByEc=parseDebtWorkbook(cwbDiv);
+    applyPortfolioToClients();
+    progress(68,`Carteira carregada: ${state.debtsByEc.size} ECs ativos. Cruzando Base + Carteira...`);
+    if(af){ progress(72,"Lendo Base de Acionamentos..."); const awb=XLSX.read(await af.arrayBuffer(),{type:'array',cellDates:false}); state.latestActionsByEc=parseActionsWorkbook(awb); } else state.latestActionsByEc=new Map();
+    if(pf){ progress(78,"Lendo Base de Propostas..."); const pwb=XLSX.read(await pf.arrayBuffer(),{type:'array',cellDates:false}); state.proposalsByCpf=parseProposalsWorkbook(pwb); } else state.proposalsByCpf=new Map();
+    if(cf){ progress(83,"Lendo arquivo de Coordenadas..."); const coordWb=XLSX.read(await cf.arrayBuffer(),{type:'array',cellDates:false}); const cres=parseCoordinateWorkbook(coordWb); const cimp=importCoordinateRecords(cres); progress(86,`Coordenadas importadas: ${cimp.imported}. EC encontrados na base: ${cimp.matched}.`); }
     refreshClientCoordsFromStore();
-    progress(88,"Salvando dados no aparelho...");
-    saveLocal();
-    progress(91,"Montando lista e mapa...");
-    renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
-    $("geocodeBtn").disabled=false;
-    progress(100,"Importação concluída.");
-    setImportStatus(`<strong>Lote carregado:</strong> ${state.clients.length} clientes. ${cf?"Coordenadas cruzadas pela coluna EC. ":""}Dívidas cruzadas pela coluna Cliente EC.`);
-    toast(`Lote importado com ${state.clients.length} clientes.`);
+    progress(90,"Salvando dados no aparelho..."); saveLocal();
+    progress(93,"Montando lista e mapa..."); renderCities(); renderStats(); renderList(); renderMarkers(); fitAll();
+    $("geocodeBtn").disabled=false; progress(100,"Importação concluída.");
+    const ignored=state.clients.filter(c=>!isClientActive(c)).length;
+    setImportStatus(`<strong>Base + Carteira carregadas:</strong> ${state.clients.length} clientes na Base • ${state.debtsByEc.size} ECs ativos na Carteira • ${ignored} ignorados.`);
+    toast(`Base e Carteira importadas. ${ignored} cliente(s) ignorado(s).`);
   }catch(e){
-    console.error(e);
-    if(bar)bar.style.width="0%";
-    if(label)label.textContent="A importação foi interrompida.";
-    toast("Erro na importação: "+e.message);
-    setImportStatus(`<strong>Erro:</strong> ${esc(e.message)}`);
+    console.error(e); if(bar)bar.style.width="0%"; if(label)label.textContent="A importação foi interrompida."; toast("Erro na importação: "+e.message); setImportStatus(`<strong>Erro:</strong> ${esc(e.message)}`);
   }finally{ $("importBtn").disabled=false; }
 }
 
@@ -746,14 +767,15 @@ function runImportDiagnostics(){
   add("Leitura de Acionamentos",typeof parseActionsWorkbook==="function",typeof parseActionsWorkbook==="function"?"Parser de acionamentos disponível.":"Parser de acionamentos ausente.");
   add("Leitura de Propostas",typeof parseProposalsWorkbook==="function",typeof parseProposalsWorkbook==="function"?"Parser de propostas disponível.":"Parser de propostas ausente.");
   add("Leitura de Coordenadas",typeof parseCoordinateWorkbook==="function",typeof parseCoordinateWorkbook==="function"?"Parser de coordenadas disponível.":"Parser de coordenadas ausente.");
-  const bf=$("baseFile"),af=$("acoesFile"),pf=$("propostasFile"),cf=$("coordenadasFile");
-  add("Arquivo Base Clientes",!!(bf&&bf.files&&bf.files[0]),bf&&bf.files&&bf.files[0]?bf.files[0].name:"Nenhum arquivo selecionado.",bf&&bf.files&&bf.files[0]?undefined:"warn");
+  const bf=$("baseFile"),cfCarteira=$("carteiraFile"),af=$("acoesFile"),pf=$("propostasFile"),cf=$("coordenadasFile");
+  add("Arquivo Base de Clientes",!!(bf&&bf.files&&bf.files[0]),bf&&bf.files&&bf.files[0]?bf.files[0].name:"Nenhum arquivo selecionado.",bf&&bf.files&&bf.files[0]?undefined:"warn");
+  add("Arquivo Carteira Analítica",!!(cfCarteira&&cfCarteira.files&&cfCarteira.files[0]),cfCarteira&&cfCarteira.files&&cfCarteira.files[0]?cfCarteira.files[0].name:"Obrigatório — nenhum arquivo selecionado.",cfCarteira&&cfCarteira.files&&cfCarteira.files[0]?undefined:"warn");
   add("Arquivo Acionamentos",!!(af&&af.files&&af.files[0]),af&&af.files&&af.files[0]?af.files[0].name:"Opcional — nenhum arquivo selecionado.","warn");
   add("Arquivo Propostas",!!(pf&&pf.files&&pf.files[0]),pf&&pf.files&&pf.files[0]?pf.files[0].name:"Opcional — nenhum arquivo selecionado.","warn");
   add("Arquivo Coordenadas",!!(cf&&cf.files&&cf.files[0]),cf&&cf.files&&cf.files[0]?cf.files[0].name:"Opcional — nenhum arquivo selecionado.","warn");
   $("importDiagChecks").innerHTML=rows.join("");
   const bad=rows.filter(x=>x.includes("diag-fail")).length;
-  $("importDiagSummary").innerHTML=bad?`<b>❌ ${bad} problema(s) encontrado(s).</b> Corrija antes de importar.`:`<b>✅ Estrutura de importação OK.</b> ${bf&&bf.files&&bf.files[0]?"A Base Clientes está selecionada e pronta para teste.":"Selecione a Base Clientes para testar."}`;
+  $("importDiagSummary").innerHTML=bad?`<b>❌ ${bad} problema(s) encontrado(s).</b> Corrija antes de importar.`:`<b>✅ Estrutura de importação OK.</b> ${bf&&bf.files&&bf.files[0]&&cfCarteira&&cfCarteira.files&&cfCarteira.files[0]?"Base e Carteira estão selecionadas e prontas para teste.":"Selecione a Base e a Carteira Analítica para importar."}`;
 }
 async function testImportRead(){
   const box=$("importDiagLog"); if(box) box.style.display="block";
@@ -846,7 +868,7 @@ function testGps(){const log=$("diagLog");log.style.display="block";if(!navigato
 
 $("runImportDiagBtn")?.addEventListener("click",runImportDiagnostics);
 $("testImportReadBtn")?.addEventListener("click",testImportRead);
-["baseFile","acoesFile","propostasFile","coordenadasFile"].forEach(id=>$(id)?.addEventListener("change",runImportDiagnostics));
+["baseFile","carteiraFile","acoesFile","propostasFile","coordenadasFile"].forEach(id=>$(id)?.addEventListener("change",runImportDiagnostics));
 
 $("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";if(!state.map) forceMapInitDiagnostic();renderCheckpointDiagnostics();runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",()=>{forceMapInitDiagnostic();renderCheckpointDiagnostics();runDiagnostics()});$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});if(typeof importFiles==="function") $("importBtn")?.addEventListener("click",importFiles);
 if(typeof geocodeAll==="function") $("geocodeBtn").onclick=geocodeAll;
@@ -855,7 +877,8 @@ if(typeof exportActions==="function") $("exportActionsBtn").onclick=exportAction
 if(typeof saveAction==="function") $("saveActionBtn").onclick=saveAction;
 if(typeof clearLot==="function") $("clearLotBtn").onclick=clearLot;
 if(typeof backup==="function") $("backupBtn").onclick=backup;
-$("statsWalletBtn")?.addEventListener("click",()=>{ renderStats(); $("statsModal").style.display="flex"; });
+$("statsWalletBtn")?.addEventListener("click",()=>{ renderCities(); renderStats(); $("statsModal").style.display="flex"; });
+$("statsCityFilter")?.addEventListener("change",renderStats);
 $("closeStatsBtn")?.addEventListener("click",()=>{ $("statsModal").style.display="none"; });
 $("statsModal")?.addEventListener("click",e=>{ if(e.target.id==="statsModal")$("statsModal").style.display="none"; });
 $("openImportBtn")?.addEventListener("click",()=>{ $("importModal").style.display="flex"; });
@@ -922,6 +945,6 @@ window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
   if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">RECEBE MAIS • V44 • PERSISTÊNCIA</div>
+<div class="version-badge">RECEBE MAIS • V45 • BASE + CARTEIRA • PERSISTÊNCIA</div>
 </body>
 </html>
