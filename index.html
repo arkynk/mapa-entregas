@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V19</title>
+<title>RECEBE MAIS • V20</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -63,7 +63,7 @@ button:active{transform:translateY(1px)}
   <div class="header-row">
     <div class="brand">
       <div class="brand-mark">RM</div>
-      <div><h1>RECEBE MAIS <span style="font-size:11px;font-weight:900;background:#073b61;color:#fff;padding:4px 7px;border-radius:999px;vertical-align:middle">V19</span></h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
+      <div><h1>RECEBE MAIS <span style="font-size:11px;font-weight:900;background:#073b61;color:#fff;padding:4px 7px;border-radius:999px;vertical-align:middle">V20</span></h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
     </div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="statsWalletBtn">📊 Estatísticas Carteira</button><button class="btn" id="openImportBtn">📂 Importação</button></div>
   </div>
@@ -78,7 +78,7 @@ button:active{transform:translateY(1px)}
 
 
   <section class="map-wrap">
-    <div class="map-card"><div id="map"><div id="mapLoading" style="position:absolute;z-index:500;left:12px;top:12px;background:rgba(255,255,255,.94);padding:8px 10px;border-radius:9px;font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.15)">🗺️ Carregando mapa...</div></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
+    <div class="map-card"><div id="map"></div><div class="map-toolbar"><button class="btn" id="myLocationBtn">📍 Minha localização</button><button class="btn" id="fitMapBtn">🗺️ Ver todos</button></div></div>
     <div class="side">
       <section class="panel">
         <div class="list-head"><h2>Clientes do lote</h2></div>
@@ -444,144 +444,27 @@ function fitAll(){
 }
 function refreshMap(){
   if(!state.map)return;
-  setTimeout(()=>{
-    try{state.map.invalidateSize({pan:false,animate:false});}catch(e){}
-  },50);
-  setTimeout(()=>{
-    try{state.map.invalidateSize({pan:false,animate:false});}catch(e){}
-  },300);
-  setTimeout(()=>{
-    try{state.map.invalidateSize({pan:false,animate:false});fitAll();}catch(e){}
-  },800);
+  try{state.map.invalidateSize({pan:false,animate:false});}catch(e){}
+  setTimeout(()=>{try{if(state.map)state.map.invalidateSize({pan:false,animate:false});}catch(e){}},300);
 }
 function initMap(){
-  const el=$('map');
-  if(!el){console.error('Elemento #map não encontrado.');return;}
-  const loading=$('mapLoading');
-  const showLoading=(txt)=>{if(loading){loading.style.display='block';loading.textContent=txt;}};
-  const hideLoading=()=>{if(loading)loading.style.display='none';};
-  if(typeof L==='undefined'){
-    showLoading('🗺️ Carregando biblioteca do mapa...');
-    // Fallback para quando o CDN principal do Leaflet não responder no celular.
-    const fallback=document.createElement('script');
-    fallback.src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
-    fallback.onload=()=>initMap();
-    fallback.onerror=()=>showLoading('❌ Mapa indisponível. Verifique a internet e recarregue.');
-    document.head.appendChild(fallback);
-    return;
-  }
-  if(state.map){refreshMap();return;}
-  try{
-    state.map=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false,attributionControl:true})
-      .setView([-29.1678,-51.1794],13);
-    const tileSources=[
-      {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
-      {url:'https://tile.openstreetmap.de/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
-      {url:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',attr:'© OpenStreetMap France | © OpenStreetMap contributors'}
-    ];
-    let tileIndex=0, loaded=false, tiles=null, errorCount=0;
-    function addTiles(){
-      const src=tileSources[tileIndex];
-      errorCount=0;
-      tiles=L.tileLayer(src.url,{maxZoom:19,minZoom:3,updateWhenIdle:false,keepBuffer:3,attribution:src.attr,crossOrigin:true});
-      tiles.on('load',function(){loaded=true;hideLoading();refreshMap();fitAll();});
-      tiles.on('tileerror',function(e){
-        errorCount++;
-        console.warn('Falha ao carregar bloco do mapa:',e);
-        if(!loaded && errorCount>=3 && tileIndex<tileSources.length-1){
-          tileIndex++;
-          try{state.map.removeLayer(tiles);}catch(err){}
-          addTiles();
-        }else if(!loaded && errorCount>=3 && loading){
-          loading.textContent='⚠️ Não foi possível carregar os mapas. Verifique a internet.';
-        }
-      });
-      tiles.addTo(state.map);
-    }
-    addTiles();
-    state.map.whenReady(()=>{
-      refreshMap();
-      setTimeout(()=>{refreshMap();renderMarkers();fitAll();},300);
-      setTimeout(()=>{if(loading && loaded) hideLoading();},2500);
-    });
-    if(!window.__mapResizeBound){
-      window.__mapResizeBound=true;
-      window.addEventListener('resize',refreshMap,{passive:true});
-      window.addEventListener('orientationchange',()=>setTimeout(refreshMap,300),{passive:true});
-      document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refreshMap,150);});
-    }
-    refreshMap();
-  }catch(e){
-    console.error('Erro ao iniciar mapa:',e);
-    if(loading)loading.textContent='❌ Erro ao iniciar o mapa. Recarregue a página.';
-  }
-}
-function setImportStatus(html){
-  const a=$("importStatus");
-  const b=$("importStatusModal");
-  if(a) a.innerHTML=html||"";
-  if(b) b.innerHTML=html||"";
-}
-function renderLocationRecords(c){ const st=getCoordStore(c.ec),el=$("locationRecords"); if(!el)return; if(!st.records.length){el.innerHTML='<div class="small-note">Nenhuma localização salva além do endereço da base.</div>';return;} el.innerHTML=st.records.map(r=>{const tipo=r.type==="fictitious"?"Coordenada salva":"Exato",active=st.activeType===r.type,addr=[r.address,r.number].filter(Boolean).join(", "),line=[r.complement&&r.complement!=="-"?"Comp.: "+r.complement:"",r.bairro,r.city].filter(Boolean).join(" • ");return `<div class="location-record"><b>${tipo}${active?" • EM USO NO MAPA":""}</b><div class="small-note">${esc(addr||clientFullAddress(c)||"Endereço não informado")}</div><div class="small-note">${esc(line)}</div><div class="small-note">${Number(r.lat).toFixed(6)}, ${Number(r.lon).toFixed(6)} • ${r.confirmedAt?esc(new Date(r.confirmedAt).toLocaleString("pt-BR")):""}</div><button class="btn" style="margin-top:6px;min-height:38px" data-use-location="${esc(r.type)}">${active?"✓ Localização em uso":"Usar esta localização no mapa"}</button></div>`;}).join("");el.querySelectorAll("[data-use-location]").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.useLocation;setActiveCoord(c.ec,type);const r=getCoordRecord(c.ec,type);if(r){c.lat=r.lat;c.lon=r.lon;c.locationType=type;saveLocal();renderLocationRecords(c);renderMarkers();renderList();renderStats();toast(type==="fictitious"?"Coordenada salva selecionada para uso no mapa.":"Localização exata selecionada para uso.");}})); }
-function fillLocationEditor(c){ const r=getCoordRecord(c.ec,"fictitious"); const preview=$("currentCoordPreview"); if(r&&Number.isFinite(r.lat)&&Number.isFinite(r.lon)){preview.textContent=`Coordenada salva: ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}. Para substituir, obtenha sua localização novamente e toque no botão.`;} else preview.textContent="Nenhuma nova coordenada capturada."; }
-function saveManualLocation(){ toast("Use o botão 'Usar coordenada atual' para salvar o ponto onde você está."); }
-function useCurrentLocationForEditor(){ if(!state.userPos){ toast("Primeiro obtenha sua localização pelo botão Minha localização."); return; } const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c)return; const lat=Number(state.userPos.lat),lon=Number(state.userPos.lon); if(!Number.isFinite(lat)||!Number.isFinite(lon))return; const r={type:"fictitious",address:c.address||"",number:c.number||"",complement:c.complement||"",bairro:c.bairro||"",city:c.city||"",addressKey:addressKey(c),lat,lon,confirmedAt:new Date().toISOString(),source:"manual"}; saveCoordinateRecord(c,r,true); fillLocationEditor(c); toast("Coordenada salva neste ponto. Ela ficará guardada para a próxima visita."); }
-async function geocodeOne(c){
-  const sig=addressKey(c),saved=getActiveCoord(c.ec);
-  if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){
-    c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"exact";return true;
-  }
-  if(!String(c.address||'').trim()||!String(c.city||'').trim()) return false;
-  const queries=[
-    [c.address,c.number,c.bairro,c.city,"RS","Brasil"],
-    [c.address,c.number,c.city,"RS","Brasil"],
-    [c.address,c.bairro,c.city,"RS","Brasil"]
-  ];
-  const expected=norm(c.city);
-  const seen=new Set();
-  for(const parts of queries){
-    const q=parts.filter(Boolean).join(', ');
-    const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q);
-    const res=await fetch(url,{headers:{Accept:"application/json"}});
-    if(!res.ok) continue;
-    const data=await res.json();
-    for(const it of data){
-      const resultCity=norm(it.address?.city||it.address?.town||it.address?.municipality||it.address?.village||'');
-      const displayNorm=norm(it.display_name||'');
-      // Aceita somente resultados cuja cidade realmente corresponda à cidade da base.
-      // Não usamos mais o display_name como prova de cidade, pois isso podia aceitar
-      // um resultado de bairro/rua em outra cidade e marcar como localizado.
-      if(expected && resultCity !== expected) continue;
-      const requestedNumber=String(c.number||'').trim();
-      const resultNumber=String(it.address?.house_number||'').trim();
-      if(requestedNumber && resultNumber && requestedNumber !== resultNumber) continue;
-      const lat=parseFloat(it.lat),lon=parseFloat(it.lon);
-      if(!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
-      const key=(it.display_name||'')+'|'+lat+'|'+lon;
-      if(seen.has(key)) continue;
-      seen.add(key);
-      saveCoordinateRecord(c,{type:"exact",address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,addressKey:sig,lat,lon,confirmedAt:new Date().toISOString(),source:"address-import"},true);
-      return true;
-    }
-    await new Promise(r=>setTimeout(r,450));
-  }
-  return false;
-}
-function updateAddressImportErrors(){
-  const errors=[];
-  state.clients.forEach(c=>{
-    const has=Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon));
-    if(!has){
-      let reason='Endereço não localizado';
-      if(!String(c.address||'').trim()) reason='Endereço não informado';
-      else if(!String(c.city||'').trim()) reason='Cidade não informada';
-      else if(!String(c.number||'').trim()) reason='Número não informado ou endereço não localizado';
-      errors.push({ec:c.ec,cpf:c.cpf,name:c.name,address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,reason});
-    }
-  });
-  state.importErrors=errors;
-  renderImportResult(state.clients.length-errors.length,errors.length);
-  return errors;
+  state.map=L.map("map",{zoomControl:true,preferCanvas:true,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false})
+    .setView([-29.1678,-51.1794],13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:19,
+    updateWhenIdle:false,
+    keepBuffer:2,
+    attribution:"© OpenStreetMap contributors"
+  }).addTo(state.map);
+  const refreshMapSize=()=>{
+    if(!state.map)return;
+    state.map.invalidateSize({pan:false,animate:false});
+  };
+  setTimeout(refreshMapSize,100);
+  setTimeout(refreshMapSize,500);
+  setTimeout(refreshMapSize,1200);
+  window.addEventListener("resize",()=>setTimeout(refreshMapSize,150));
+  window.addEventListener("orientationchange",()=>setTimeout(refreshMapSize,400));
 }
 async function geocodeAll(){
   if(!state.clients.length){toast("Importe a base de clientes primeiro.");return;}
