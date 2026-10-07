@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V45 • BASE + CARTEIRA</title>
+<title>RECEBE MAIS • V46 • COORDENADAS CORRIGIDO</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -267,7 +267,7 @@ function excelDate(v){
 }
 function fmtDate(d){ return d ? d.toLocaleDateString("pt-BR") : "-"; }
 function dateOnlyTime(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(); }
-function normalizeHeader(s){ return norm(s).replace(/[^A-Z0-9]/g,""); }
+function normalizeHeader(s){ return norm(String(s??"").replace(/[\u200B-\u200D\uFEFF]/g,"")).replace(/[^A-Z0-9]/g,""); }
 function findCol(headers, candidates){
   const map=new Map(headers.map((h,i)=>[normalizeHeader(h),i]));
   for(const c of candidates){ const idx=map.get(normalizeHeader(c)); if(idx!==undefined) return idx; }
@@ -367,8 +367,22 @@ function refreshClientCoordsFromStore(){
 function parseCoordinateWorkbook(wb){
   const sh=sheetByName(wb,"Coordenadas") || wb.Sheets[wb.SheetNames[0]];
   if(!sh) throw new Error("Aba de coordenadas não encontrada.");
-  const rows=makeRows(sh), h=rows[0]||[];
-  const iEC=findCol(h,["EC","Cliente EC"]);
+  const rows=makeRows(sh);
+  let headerRowIndex=-1, h=[];
+  const maxHeaderRows=Math.min(rows.length,10);
+  for(let i=0;i<maxHeaderRows;i++){
+    const candidate=rows[i]||[];
+    const normalized=candidate.map(normalizeHeader);
+    const hasEC=normalized.some(v=>["EC","CLIENTEEC","CODIGOEC","CODIGOCLIENTE"].includes(v));
+    const hasLat=normalized.some(v=>["LATITUDE","LAT"].includes(v));
+    const hasLon=normalized.some(v=>["LONGITUDE","LON","LNG"].includes(v));
+    if(hasEC&&hasLat&&hasLon){ headerRowIndex=i; h=candidate; break; }
+  }
+  if(headerRowIndex<0){
+    const preview=(rows[0]||[]).map(v=>String(v??"").trim()).filter(Boolean).join(" | ");
+    throw new Error(`Arquivo de Coordenadas não reconhecido. Cabeçalhos encontrados: ${preview||"nenhum"}. Esperado: EC, Latitude e Longitude.`);
+  }
+  const iEC=findCol(h,["EC","Cliente EC","Código EC","Codigo EC","Código Cliente","Codigo Cliente"]);
   const iCpf=findCol(h,["CPF","Cpf/Cnpj","CPF/CNPJ"]);
   const iName=findCol(h,["Nome"]);
   const iAddr=findCol(h,["Endereço Origem","Endereco Origem","Endereço","Endereco"]);
@@ -380,10 +394,13 @@ function parseCoordinateWorkbook(wb){
   const iLon=findCol(h,["Longitude","Lon","Lng"]);
   const iType=findCol(h,["Tipo"]);
   const iDate=findCol(h,["Data Confirmação","Data Confirmacao","Data"]);
-  if(iEC<0||iLat<0||iLon<0) throw new Error("O arquivo de Coordenadas precisa ter EC, Latitude e Longitude.");
   const out=[];
-  for(let r=1;r<rows.length;r++){
-    const row=rows[r], ec=String(getText(row,iEC)).trim(), lat=Number(getText(row,iLat)), lon=Number(getText(row,iLon));
+  for(let r=headerRowIndex+1;r<rows.length;r++){
+    const row=rows[r]||[];
+    const ec=String(getText(row,iEC)).trim();
+    const latRaw=getText(row,iLat), lonRaw=getText(row,iLon);
+    const lat=typeof latRaw==='string' ? Number(latRaw.replace(',','.')) : Number(latRaw);
+    const lon=typeof lonRaw==='string' ? Number(lonRaw.replace(',','.')) : Number(lonRaw);
     if(!ec||!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
     const rawType=norm(getText(row,iType));
     const type=rawType.includes("FICT")?"fictitious":"exact";
@@ -945,6 +962,6 @@ window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
   if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">RECEBE MAIS • V45 • BASE + CARTEIRA • PERSISTÊNCIA</div>
+<div class="version-badge">RECEBE MAIS • V46 • COORDENADAS CORRIGIDO • PERSISTÊNCIA</div>
 </body>
 </html>
