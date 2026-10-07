@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V46 • COORDENADAS CORRIGIDO</title>
+<title>RECEBE MAIS • V47 • LOCALIZAÇÃO PROGRESSIVA</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -50,7 +50,9 @@ button:active{transform:translateY(1px)}
 .notice{background:#f4f9fb;border:1px solid #d7e8ef;border-radius:12px;padding:9px 10px;font-size:11px;color:#405866;line-height:1.45;margin-top:9px}.notice b{color:var(--navy)}.location-history{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px;background:#fff}.location-history h3{font-size:13px;margin:0 0 7px;color:var(--navy)}.location-record{border:1px solid var(--line);border-radius:11px;padding:9px;margin-top:7px;background:#fbfdfe}.location-record b{font-size:11px;color:var(--navy)}.location-record .small-note{margin-top:3px}.location-editor{border-top:1px solid var(--line);margin-top:9px;padding-top:9px}.location-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.location-grid .full{grid-column:1/-1}.action-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.action-option{min-height:82px;background:#fff;border:1px solid var(--line);color:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px}.action-option span{font-size:11px}.action-option.selected{border:2px solid var(--green);background:#eefbf5;color:var(--green2)}
 .diag-check{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);border-radius:12px;padding:10px;margin:7px 0;background:#fbfdfe}.diag-icon{font-size:18px;line-height:1}.diag-check b{display:block;font-size:12px;color:var(--navy)}.diag-check span{display:block;font-size:10px;color:var(--muted);line-height:1.4;margin-top:2px}.diag-ok{border-color:#bfe8d2;background:#f3fcf7}.diag-fail{border-color:#f0b8bf;background:#fff5f6}.diag-warn{border-color:#ead6aa;background:#fffbf2}.toast{position:fixed;left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));transform:none;background:#163041;color:#fff;padding:11px 13px;border-radius:12px;z-index:9000;display:none;font-size:12px;box-shadow:0 8px 22px rgba(0,0,0,.18);text-align:center}
 
-.import-modal-bg{position:fixed;inset:0;background:rgba(3,22,35,.72);z-index:8000;display:none;align-items:flex-end;justify-content:center;padding:0}.import-modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 12px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25)}.import-modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.import-modal-header h2{margin:0;color:var(--navy);font-size:17px}.close-modal{background:#eef3f6;color:var(--navy);padding:9px 12px;min-height:42px}.file-box input{min-height:44px}.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.map-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;background:#fff;border-top:1px solid var(--line)}.map-toolbar .btn{min-height:42px}.distance-line{font-size:11px;color:var(--muted);margin-top:5px}.distance-value{font-weight:900;color:var(--navy)}
+.import-modal-bg{position:fixed;inset:0;background:rgba(3,22,35,.72);z-index:8000;display:none;align-items:flex-end;justify-content:center;padding:0}.import-modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 12px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.25)}.import-modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.import-modal-header h2{margin:0;color:var(--navy);font-size:17px}.close-modal{background:#eef3f6;color:var(--navy);padding:9px 12px;min-height:42px}.file-box input{min-height:44px}.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.map-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;background:#fff;border-top:1px solid var(--line)}.map-toolbar .btn{min-height:42px} .distance-line{font-size:11px;color:var(--muted);margin-top:5px}.distance-value{font-weight:900;color:var(--navy)}
+.location-status-line{font-size:10px;font-weight:900;margin-top:5px}.loc-confirmed{color:var(--green2)}.loc-auto{color:#135a8c}.loc-street{color:#9c6500}.loc-none{color:var(--muted)}
+
 .import-progress{height:10px;background:#e5edf1;border-radius:999px;overflow:hidden;margin:8px 0 4px}.import-progress>div{height:100%;width:0;background:var(--green);transition:width .2s}.import-progress-label{font-size:11px;color:var(--muted);line-height:1.35;min-height:16px}.hidden{display:none!important}
 
 @media(min-width:700px){
@@ -107,8 +109,11 @@ button:active{transform:translateY(1px)}
       <div class="stat"><b id="statTotal">0</b><span>Clientes na Base</span></div>
       <div class="stat"><b id="statActive">0</b><span>Clientes na Carteira</span></div>
       <div class="stat"><b id="statIgnored">0</b><span>Clientes ignorados</span></div>
-      <div class="stat"><b id="statLocated">0</b><span>Clientes localizados</span></div>
-      <div class="stat"><b id="statUnlocated">0</b><span>Clientes não localizados</span></div>
+      <div class="stat"><b id="statLocated">0</b><span>Clientes com ponto</span></div>
+      <div class="stat"><b id="statConfirmed">0</b><span>Confirmados em campo</span></div>
+      <div class="stat"><b id="statStreet">0</b><span>Rua localizada • pendente</span></div>
+      <div class="stat"><b id="statAuto">0</b><span>Validados automaticamente</span></div>
+      <div class="stat"><b id="statUnlocated">0</b><span>Sem localização</span></div>
       <div class="stat"><b id="statVisited">0</b><span>Visitas realizadas</span></div>
       <div class="stat"><b id="statPending">0</b><span>Visitas pendentes</span></div>
       <div class="stat"><b id="statIncomplete">0</b><span>Endereço incompleto</span></div>
@@ -136,12 +141,13 @@ button:active{transform:translateY(1px)}
 <div class="import-modal-bg" id="importModal">
   <div class="import-modal">
     <div class="import-modal-header"><h2>📂 Importação e dados</h2><button class="close-modal" id="closeImportBtn">Fechar</button></div>
-    <div class="notice"><b>Use esta tela para importar, localizar, exportar ou limpar.</b> Essas funções ficam separadas da tela principal para evitar toques acidentais.</div>
+    <div class="notice"><b>Localização progressiva:</b> primeiro tentamos validar o número. Se não houver evidência suficiente, o sistema localiza somente a rua e deixa o cliente como <b>pendente</b>. Ao chegar na residência, use <b>Confirmar que estou neste local</b> para salvar o GPS no EC.
+    <br><br><b>Use esta tela para importar, localizar, exportar ou limpar.</b> Essas funções ficam separadas da tela principal para evitar toques acidentais.</div>
     <div class="file-box"><b>1. Base de Clientes</b><span>Cadastro permanente. Deve conter a aba BASE com os dados dos clientes.</span><input type="file" id="baseFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="file-box"><b>2. Carteira Analítica de Dívida</b><span>Define quem está ativo para a rota. O mesmo EC pode aparecer várias vezes por parcela/contrato.</span><input type="file" id="carteiraFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="file-box"><b>3. Base de Acionamentos</b><span>Opcional. Use a base oficial para consulta do último acionamento.</span><input type="file" id="acoesFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="file-box"><b>4. Propostas</b><span>Opcional. Formato esperado: CPF | Proposta.</span><input type="file" id="propostasFile" accept=".xlsx,.xls,.xlsm"></div>
-    <div class="file-box"><b>5. Coordenadas</b><span>Opcional. Cruza pelo EC e mantém Exato/Fictício.</span><input type="file" id="coordenadasFile" accept=".xlsx,.xls,.xlsm"></div>
+    <div class="file-box"><b>5. Coordenadas</b><span>Opcional. Cruza pelo EC e mantém o histórico de localização, inclusive rua pendente e confirmação em campo.</span><input type="file" id="coordenadasFile" accept=".xlsx,.xls,.xlsm"></div>
     <div class="import-actions">
       <button class="btn dark" id="importBtn">📥 Importar lote</button>
       <button class="btn primary" id="geocodeBtn" disabled>🗺️ Localizar sem coordenada</button>
@@ -177,10 +183,10 @@ button:active{transform:translateY(1px)}
       <h3>📍 Histórico de localizações</h3>
       <div id="locationRecords"></div>
       <div class="location-editor">
-        <div class="small-note"><b>Adicionar / atualizar localização</b></div>
-        <div class="small-note" style="margin-top:5px">A localização <b>Exata</b> continua sendo a indicada pelo endereço. Se o mapa colocar o ponto no lugar errado, não altere o endereço: salve somente o ponto onde você realmente esteve. Esse ponto ficará guardado para a próxima visita.</div>
-        <button class="btn primary" id="useCurrentLocationBtn" style="width:100%;margin-top:8px">📍 Usar coordenada atual</button>
-        <div class="small-note" id="currentCoordPreview" style="margin-top:6px">Nenhuma nova coordenada capturada.</div>
+        <div class="small-note"><b>📍 Confirmar localização em campo</b></div>
+        <div class="small-note" style="margin-top:5px">Se a rua foi localizada mas o número não foi validado, chegue até a residência e toque no botão abaixo. O GPS será salvo como <b>CONFIRMADO EM CAMPO</b> e ficará vinculado ao EC para as próximas carteiras.</div>
+        <button class="btn primary" id="useCurrentLocationBtn" style="width:100%;margin-top:8px">📍 Confirmar que estou neste local</button>
+        <div class="small-note" id="currentCoordPreview" style="margin-top:6px">Nenhuma confirmação feita nesta visita.</div>
       </div>
     </div>
 
@@ -284,70 +290,39 @@ function sheetByName(wb, wanted){
 function getText(obj, idx){ return idx>=0 ? obj[idx] : ""; }
 function classifyProduct(name){ const s=norm(name); if(s.includes("CDC")) return "CDC"; if(s.includes("CP")) return "CP"; if(s.includes("CONSIGNADO INSS ONLINE")||s.includes("INSS")) return "INSS"; return "OUTRO"; }
 function addressKey(c){ return [norm(c.address),norm(c.number),norm(c.complement),norm(c.bairro),norm(c.city)].join("|"); }
-function coordRecordFromLegacy(s){ if(!s||!Number.isFinite(Number(s.lat))||!Number.isFinite(Number(s.lon)))return null; return {type:s.type==="fictitious"?"fictitious":"exact",address:s.address||"",number:s.number||"",complement:s.complement||"",bairro:s.bairro||"",city:s.city||"",addressKey:s.addressKey||"",lat:Number(s.lat),lon:Number(s.lon),confirmedAt:s.confirmedAt||new Date().toISOString()}; }
-function normalizeCoordsStore(raw){ const out={}; if(!raw||typeof raw!=="object")return out; Object.entries(raw).forEach(([ec,v])=>{ if(v&&Array.isArray(v.records))out[ec]={records:v.records.filter(r=>r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))).map(r=>({...r,type:r.type==="fictitious"?"fictitious":"exact",lat:Number(r.lat),lon:Number(r.lon)})),activeType:v.activeType||null}; else {const r=coordRecordFromLegacy(v);if(r)out[ec]={records:[r],activeType:r.type};}}); return out; }
+function normalizeLocationType(type){
+  const t=norm(type);
+  if(t.includes("CONFIRM")||t.includes("CAMPO")) return "confirmed";
+  if(t.includes("RUA")||t.includes("STREET")||t.includes("PEND")) return "street";
+  if(t.includes("FICT")) return "confirmed";
+  return "exact";
+}
+function coordRecordFromLegacy(s){ if(!s||!Number.isFinite(Number(s.lat))||!Number.isFinite(Number(s.lon)))return null; return {type:normalizeLocationType(s.type),status:s.status||"",address:s.address||"",number:s.number||"",complement:s.complement||"",bairro:s.bairro||"",city:s.city||"",addressKey:s.addressKey||"",lat:Number(s.lat),lon:Number(s.lon),confirmedAt:s.confirmedAt||new Date().toISOString(),source:s.source||"legacy"}; }
+function normalizeCoordsStore(raw){ const out={}; if(!raw||typeof raw!=="object")return out; Object.entries(raw).forEach(([ec,v])=>{ if(v&&Array.isArray(v.records))out[ec]={records:v.records.filter(r=>r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))).map(r=>({...r,type:normalizeLocationType(r.type),lat:Number(r.lat),lon:Number(r.lon)})),activeType:v.activeType?normalizeLocationType(v.activeType):null}; else {const r=coordRecordFromLegacy(v);if(r)out[ec]={records:[r],activeType:r.type};}}); return out; }
 function getCoordStore(ec){ return state.coords[ec]||{records:[],activeType:null}; }
-function getCoordRecord(ec,type){ return getCoordStore(ec).records.find(r=>r.type===type)||null; }
-function getActiveCoord(ec){ const st=getCoordStore(ec); return st.records.find(r=>r.type===st.activeType)||st.records[0]||null; }
-function setActiveCoord(ec,type){ if(state.coords[ec]&&state.coords[ec].records.some(r=>r.type===type))state.coords[ec].activeType=type; }
-function saveLocal(){
-  try{
-    const payload={clients:state.clients,debts:[...state.debtsByEc.entries()],latestActions:[...state.latestActionsByEc.entries()],proposals:[...state.proposalsByCpf.entries()]};
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
-    localStorage.setItem(COORDS_KEY,JSON.stringify(state.coords));
-    localStorage.setItem(ACTIONS_KEY,JSON.stringify(state.actionsHistory));
-    // Histórico de coordenadas fica separado do lote atual.
-    const history=JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||"{}");
-    Object.entries(state.coords||{}).forEach(([ec,st])=>{
-      if(!st||!Array.isArray(st.records)) return;
-      if(st.records.length) history[ec]=st;
-    });
-    localStorage.setItem(HISTORY_COORDS_KEY,JSON.stringify(history));
-    window.__lastSaveAt=new Date().toISOString();
-    return true;
-  }catch(e){ console.error("[PERSISTÊNCIA] Falha ao salvar:",e); return false; }
+function getCoordRecord(ec,type){ return getCoordStore(ec).records.find(r=>r.type===normalizeLocationType(type))||null; }
+function getActiveCoord(ec){ const st=getCoordStore(ec); return st.records.find(r=>r.type===st.activeType)||st.records.find(r=>r.type==="confirmed")||st.records.find(r=>r.type==="exact")||st.records.find(r=>r.type==="street")||st.records[0]||null; }
+function setActiveCoord(ec,type){ const t=normalizeLocationType(type); if(state.coords[ec]&&state.coords[ec].records.some(r=>r.type===t))state.coords[ec].activeType=t; }
+function getLocationStatus(c){
+  const r=getActiveCoord(c.ec);
+  if(!r || !Number.isFinite(Number(r.lat)) || !Number.isFinite(Number(r.lon))) return "none";
+  if(r.type==="confirmed") return "confirmed";
+  if(r.type==="street") return "street";
+  return "auto";
 }
-function loadLocal(){
-  try{
-    const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-    if(p){
-      state.clients=p.clients||[];
-      state.debtsByEc=new Map(p.debts||[]);
-      state.latestActionsByEc=new Map(p.latestActions||[]);
-      state.proposalsByCpf=new Map(p.proposals||[]);
-    }
-    state.coords=normalizeCoordsStore(JSON.parse(localStorage.getItem(COORDS_KEY)||"{}"));
-    // Recupera histórico de coordenadas mesmo que o lote atual tenha sido trocado.
-    const history=normalizeCoordsStore(JSON.parse(localStorage.getItem(HISTORY_COORDS_KEY)||"{}"));
-    Object.entries(history).forEach(([ec,st])=>{
-      if(!state.coords[ec] || !state.coords[ec].records.length) state.coords[ec]=st;
-      else{
-        const byType=new Map(state.coords[ec].records.map(r=>[r.type,r]));
-        st.records.forEach(r=>{if(!byType.has(r.type)) byType.set(r.type,r);});
-        state.coords[ec].records=[...byType.values()];
-      }
-    });
-    state.actionsHistory=JSON.parse(localStorage.getItem(ACTIONS_KEY)||"[]");
-    refreshClientCoordsFromStore();
-    saveLocal();
-    window.__dataRestored=true;
-  }catch(e){ console.warn("[PERSISTÊNCIA] Falha ao carregar:",e); window.__dataRestoreError=String(e.message||e); }
-}
-function debtSummary(rows){
-  let total=0; let over=0; let future=0; const byProd={};
-  rows.forEach(r=>{ total+=Number(r.valueDebt)||0; const p=r.productType; byProd[p]=(byProd[p]||0)+(Number(r.valueDebt)||0); if(r.status==="future") future++; else if(r.status==="over") over++; });
-  return {total,over,future,byProd,state: future>0 && over>0 ? "mixed" : future>0 ? "future" : "over"};
-}
+function locationStatusLabel(c){ const s=getLocationStatus(c); return s==="confirmed"?"🟢 Confirmado em campo":s==="street"?"🟡 Rua localizada • pendente":s==="auto"?"🔵 Validado automaticamente":"⚪ Sem localização"; }
+function mapAddressText(c){ const s=getLocationStatus(c); if(s==="street") return [c.address,c.bairro,c.city].filter(Boolean).join(" - "); return clientFullAddress(c); }
 function saveCoordinateRecord(c,r,setActive){
   if(!c||!r||!Number.isFinite(Number(r.lat))||!Number.isFinite(Number(r.lon))) return;
-  const type=r.type==="fictitious"?"fictitious":"exact";
+  const type=normalizeLocationType(r.type);
   if(!state.coords[c.ec]) state.coords[c.ec]={records:[],activeType:null};
   const st=state.coords[c.ec];
-  const record={...r,type,lat:Number(r.lat),lon:Number(r.lon),address:r.address||"",number:r.number||"",complement:r.complement||"",bairro:r.bairro||"",city:r.city||"",addressKey:r.addressKey||"",confirmedAt:r.confirmedAt||new Date().toISOString()};
+  const record={...r,type,status:r.status||type,lat:Number(r.lat),lon:Number(r.lon),address:r.address||"",number:r.number||"",complement:r.complement||"",bairro:r.bairro||"",city:r.city||"",addressKey:r.addressKey||"",confirmedAt:r.confirmedAt||new Date().toISOString(),source:r.source||""};
   const idx=st.records.findIndex(x=>x.type===type);
   if(idx>=0) st.records[idx]=record; else st.records.push(record);
   if(setActive || !st.activeType || !st.records.some(x=>x.type===st.activeType)) st.activeType=type;
-  c.lat=record.lat; c.lon=record.lon; c.locationType=type;
+  const active=getActiveCoord(c.ec);
+  if(active){ c.lat=Number(active.lat); c.lon=Number(active.lon); c.locationType=active.type; c.locationStatus=getLocationStatus(c); }
   saveLocal();
   renderLocationRecords(c);
   renderMarkers();
@@ -357,11 +332,8 @@ function saveCoordinateRecord(c,r,setActive){
 function refreshClientCoordsFromStore(){
   state.clients.forEach(c=>{
     const r=getActiveCoord(c.ec);
-    if(r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))){
-      c.lat=Number(r.lat); c.lon=Number(r.lon); c.locationType=r.type||"exact";
-    } else {
-      c.lat=null; c.lon=null; c.locationType=null;
-    }
+    if(r&&Number.isFinite(Number(r.lat))&&Number.isFinite(Number(r.lon))){ c.lat=Number(r.lat); c.lon=Number(r.lon); c.locationType=r.type||"exact"; c.locationStatus=getLocationStatus(c); }
+    else { c.lat=null; c.lon=null; c.locationType=null; c.locationStatus="none"; }
   });
 }
 function parseCoordinateWorkbook(wb){
@@ -403,7 +375,7 @@ function parseCoordinateWorkbook(wb){
     const lon=typeof lonRaw==='string' ? Number(lonRaw.replace(',','.')) : Number(lonRaw);
     if(!ec||!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
     const rawType=norm(getText(row,iType));
-    const type=rawType.includes("FICT")?"fictitious":"exact";
+    const type=normalizeLocationType(rawType);
     let confirmedAt=getText(row,iDate);
     if(confirmedAt instanceof Date && !isNaN(confirmedAt)) confirmedAt=confirmedAt.toISOString();
     else confirmedAt=String(confirmedAt||"").trim();
@@ -411,7 +383,7 @@ function parseCoordinateWorkbook(wb){
       record:{type,address:String(getText(row,iAddr)).trim(),number:String(getText(row,iNum)).trim(),
       complement:String(getText(row,iComp)).trim(),bairro:String(getText(row,iBairro)).trim(),
       city:String(getText(row,iCity)).trim(),addressKey:[norm(getText(row,iAddr)),norm(getText(row,iNum)),norm(getText(row,iComp)),norm(getText(row,iBairro)),norm(getText(row,iCity))].join("|"),
-      lat,lon,confirmedAt:confirmedAt||new Date().toISOString(),source:"imported"}});
+      lat,lon,confirmedAt:confirmedAt||new Date().toISOString(),source:"imported",status:type}});
   }
   return out;
 }
@@ -488,6 +460,20 @@ function parseProposalsWorkbook(wb){
   return map;
 }
 function clientFullAddress(c){ const p=[c.address,c.number].filter(Boolean).join(", "); const cpl=c.complement && c.complement!=="-"?c.complement:""; return [p,cpl,c.bairro,c.city].filter(Boolean).join(" - ").replace(/\s+-\s+([A-ZÁ-Ú])/g," - $1"); }
+function updateModalAddress(c){
+  const status=getLocationStatus(c);
+  $("modalAddress").textContent=status==="street"?[c.address].filter(Boolean).join("")||"Rua não informada":clientFullAddress(c)||"Endereço não informado";
+  $("modalCityLine").textContent=[status==="street"?"Número ainda não confirmado":(c.complement&&c.complement!=="-"?"Comp.: "+c.complement:""),c.bairro,c.city].filter(Boolean).join(" • ");
+}
+function openClient(ec){
+  const c=state.clients.find(x=>String(x.ec)===String(ec)); if(!c)return;
+  state.selectedEc=c.ec; $("modalName").textContent=c.name||"Cliente"; $("modalEc").textContent="EC: "+c.ec; updateModalAddress(c); $("modalLocationBadge").textContent=locationStatusLabel(c);
+  const d=state.debtsByEc.get(c.ec)||[],sum=debtSummary(d); $("modalDebtTotal").textContent=money(sum.total); $("modalDebtState").textContent=sum.state==="future"?"Tem a vencer":sum.state==="mixed"?"Vencido + a vencer":"Tudo vencido"; $("modalProducts").innerHTML=Object.entries(sum.byProd).map(([k,v])=>`<span class="product-chip">${esc(k)}: ${money(v)}</span>`).join(""); $("debtDetails").classList.add("hidden"); $("debtRows").innerHTML=d.map(r=>`<tr><td>${r.dueDate?new Date(r.dueDate).toLocaleDateString("pt-BR"):""}</td><td>${money(r.valueDebt||0)}</td><td>${esc(r.productRaw||"")}</td><td>${Number.isFinite(r.days)?r.days:""}</td></tr>`).join("");
+  const act=state.actionsHistory.filter(a=>String(a.ec)===String(c.ec)).sort((a,b)=>String(b.date+" "+b.time).localeCompare(String(a.date+" "+a.time))); $("historyBox").innerHTML=`<h3>📝 Últimos acionamentos</h3>`+(act.length?act.slice(0,10).map(a=>`<div class="history-item"><b>${esc(a.action||"")}</b><div class="small-note">${esc(a.date||"")} ${esc(a.time||"")}</div><div class="small-note">${esc(a.observation||"")}</div></div>`).join(""):"<div class='small-note'>Nenhuma ação registrada.</div>");
+  renderLocationRecords(c); fillLocationEditor(c); $("clientModal").style.display="flex";
+}
+function closeModal(){ $("clientModal").style.display="none"; state.selectedEc=null; }
+
 function renderCities(){
   const cities=[...new Set(state.clients.map(c=>c.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const fill=(id)=>{ const sel=$(id); if(!sel)return; const current=sel.value; sel.innerHTML='<option value="">Todas as cidades</option>'+cities.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(""); sel.value=cities.includes(current)?current:""; };
@@ -498,19 +484,34 @@ function renderStats(){
   const city=$("statsCityFilter")?.value||"";
   const base=state.clients.filter(c=>!city||c.city===city);
   const active=base.filter(isClientActive);
-  const activeSet=new Set(active.map(c=>c.ec));
   const ignored=base.filter(c=>!isClientActive(c));
   const incomplete=active.filter(c=>!String(c.address||"").trim()||!String(c.number||"").trim()||!String(c.city||"").trim()).length;
-  const located=active.filter(c=>Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon))).length;
+  const located=active.filter(c=>getLocationStatus(c)!=="none").length;
+  const confirmed=active.filter(c=>getLocationStatus(c)==="confirmed").length;
+  const street=active.filter(c=>getLocationStatus(c)==="street").length;
+  const auto=active.filter(c=>getLocationStatus(c)==="auto").length;
   const visitedSet=new Set((state.actionsHistory||[]).map(a=>String(a.ec)));
   const visited=active.filter(c=>visitedSet.has(String(c.ec))).length;
   const set=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
-  set("statTotal",base.length);set("statActive",active.length);set("statIgnored",ignored.length);set("statLocated",located);set("statUnlocated",Math.max(active.length-located,0));set("statIncomplete",incomplete);set("statVisited",visited);set("statPending",Math.max(active.length-visited,0));
+  set("statTotal",base.length);set("statActive",active.length);set("statIgnored",ignored.length);set("statLocated",located);set("statConfirmed",confirmed);set("statStreet",street);set("statAuto",auto);set("statUnlocated",Math.max(active.length-located,0));set("statIncomplete",incomplete);set("statVisited",visited);set("statPending",Math.max(active.length-visited,0));
 }
 function getFilteredClients(){ const q=norm($("searchInput").value), city=$("cityFilter").value, df=$("debtFilter").value; return getRouteClients().filter(c=>{ const text=norm(c.name+" "+c.ec); if(q&&!text.includes(q)) return false; if(city&&c.city!==city)return false; if(df&&c.debtState!==df)return false; return true; }).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR")); }
-function renderList(){ const list=$("clientList"); let rows=getFilteredClients(); if(state.userPos){ rows=rows.map(c=>({...c,_dist:Number.isFinite(c.lat)&&Number.isFinite(c.lon)?distanceKm(state.userPos.lat,state.userPos.lon,c.lat,c.lon):null})).sort((a,b)=>a._dist==null?1:b._dist==null?-1:a._dist-b._dist); } if(!rows.length){list.innerHTML='<div class="empty">Nenhum cliente encontrado.</div>';return;} list.innerHTML=rows.map(c=>{ const stateLabel=c.debtState==="future"?"Tem a vencer":c.debtState==="mixed"?"Vencido + a vencer":"Tudo vencido"; const cls=c.debtState==="future"?"future":c.debtState==="mixed"?"mixed":"over"; const loc=Number.isFinite(c.lat)&&Number.isFinite(c.lon); const dist=c._dist!=null?`<div class="distance-line">📏 <span class="distance-value">${distanceText(c._dist)}</span> de você</div>`:""; return `<div class="client-card"><h3>${esc(c.name)}</h3><div class="ec">EC: ${esc(c.ec)}</div><div class="addr">${esc(clientFullAddress(c))}</div>${dist}<div class="meta"><div class="debt-pill">Total dívida: ${money(c.debtTotal||0)}</div><div class="state-pill ${cls}">${esc(stateLabel)}</div></div><div class="card-actions"><button class="btn" data-open="${esc(c.ec)}">Ver cliente</button><button class="btn primary" data-open="${esc(c.ec)}">${loc?"📍 Localização":"🔎 Localizar"}</button></div></div>`; }).join(""); list.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openClient(btn.dataset.open))); }
-function markerIcon(){ return L.divIcon({className:"",html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#073b61;border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:7px;top:7px;width:8px;height:8px;border-radius:50%;background:#19a974;border:1px solid #fff"></span></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]}); }
-function renderMarkers(){ if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear(); getRouteClients().forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const m=L.marker([c.lat,c.lon],{icon:markerIcon()}).addTo(state.map); m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(clientFullAddress(c))}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); }); }
+function renderList(){
+  const list=$("clientList"); let rows=getFilteredClients();
+  if(state.userPos){ rows=rows.map(c=>({...c,_dist:Number.isFinite(c.lat)&&Number.isFinite(c.lon)?distanceKm(state.userPos.lat,state.userPos.lon,c.lat,c.lon):null})).sort((a,b)=>a._dist==null?1:b._dist==null?-1:a._dist-b._dist); }
+  if(!rows.length){list.innerHTML='<div class="empty">Nenhum cliente encontrado.</div>';return;}
+  list.innerHTML=rows.map(c=>{ const stateLabel=c.debtState==="future"?"Tem a vencer":c.debtState==="mixed"?"Vencido + a vencer":"Tudo vencido"; const cls=c.debtState==="future"?"future":c.debtState==="mixed"?"mixed":"over"; const locStatus=getLocationStatus(c); const loc=locStatus!=="none"; const dist=c._dist!=null?`<div class="distance-line">📏 <span class="distance-value">${distanceText(c._dist)}</span> de você</div>`:""; const locLine=`<div class="location-status-line ${locStatus==='confirmed'?'loc-confirmed':locStatus==='street'?'loc-street':locStatus==='auto'?'loc-auto':'loc-none'}">${locationStatusLabel(c)}</div>`; return `<div class="client-card"><h3>${esc(c.name)}</h3><div class="ec">EC: ${esc(c.ec)}</div><div class="addr">${esc(clientFullAddress(c))}</div>${locLine}${dist}<div class="meta"><div class="debt-pill">Total dívida: ${money(c.debtTotal||0)}</div><div class="state-pill ${cls}">${esc(stateLabel)}</div></div><div class="card-actions"><button class="btn" data-open="${esc(c.ec)}">Ver cliente</button><button class="btn primary" data-open="${esc(c.ec)}">${loc?"📍 Ver localização":"🔎 Localizar"}</button></div></div>`; }).join("");
+  list.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openClient(btn.dataset.open)));
+}
+function markerIcon(status){
+  const bg=status==="confirmed"?"#19a974":status==="street"?"#d88912":"#135a8c";
+  const inner=status==="confirmed"?"✓":status==="street"?"?":"•";
+  return L.divIcon({className:"",html:`<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${bg};border:3px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);position:relative"><span style="position:absolute;left:6px;top:5px;width:12px;height:12px;border-radius:50%;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.65);font-size:10px;line-height:12px;text-align:center;transform:rotate(45deg)">${inner}</span></div>`,iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+}
+function renderMarkers(){
+  if(!state.map)return; state.markers.forEach(m=>m.remove()); state.markers.clear();
+  getRouteClients().forEach(c=>{ if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon)) return; const status=getLocationStatus(c); const m=L.marker([c.lat,c.lon],{icon:markerIcon(status)}).addTo(state.map); const address=mapAddressText(c); const statusText=locationStatusLabel(c); const confirmButton=status!=="confirmed"?`<button style="margin-top:7px;padding:8px 10px;border-radius:9px;border:0;background:#19a974;color:#fff;font-weight:800" onclick="window.__confirmClientLocation('${c.ec}')">📍 Confirmar que estou aqui</button>`:""; m.bindPopup(`<b>${esc(c.name)}</b><br>EC ${esc(c.ec)}<br>${esc(address)}<br><b>${esc(statusText)}</b>${confirmButton}<br><button style="margin-top:7px;padding:7px 9px;border-radius:9px;border:0;background:#073b61;color:#fff;font-weight:800" onclick="window.__openClient('${c.ec}')">Abrir cliente</button>`); state.markers.set(c.ec,m); });
+}
 function mapCheckpoint(label,ok,detail=""){
   window.__mapCheckpoints=window.__mapCheckpoints||[];
   window.__mapCheckpoints.push({label,ok,detail:String(detail||"")});
@@ -627,11 +628,41 @@ function setImportStatus(html){
   if(b) b.innerHTML=html||"";
 }
 
-function renderLocationRecords(c){ const st=getCoordStore(c.ec),el=$("locationRecords"); if(!el)return; if(!st.records.length){el.innerHTML='<div class="small-note">Nenhuma localização salva além do endereço da base.</div>';return;} el.innerHTML=st.records.map(r=>{const tipo=r.type==="fictitious"?"Coordenada salva":"Exato",active=st.activeType===r.type,addr=[r.address,r.number].filter(Boolean).join(", "),line=[r.complement&&r.complement!=="-"?"Comp.: "+r.complement:"",r.bairro,r.city].filter(Boolean).join(" • ");return `<div class="location-record"><b>${tipo}${active?" • EM USO NO MAPA":""}</b><div class="small-note">${esc(addr||clientFullAddress(c)||"Endereço não informado")}</div><div class="small-note">${esc(line)}</div><div class="small-note">${Number(r.lat).toFixed(6)}, ${Number(r.lon).toFixed(6)} • ${r.confirmedAt?esc(new Date(r.confirmedAt).toLocaleString("pt-BR")):""}</div><button class="btn" style="margin-top:6px;min-height:38px" data-use-location="${esc(r.type)}">${active?"✓ Localização em uso":"Usar esta localização no mapa"}</button></div>`;}).join("");el.querySelectorAll("[data-use-location]").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.useLocation;setActiveCoord(c.ec,type);const r=getCoordRecord(c.ec,type);if(r){c.lat=r.lat;c.lon=r.lon;c.locationType=type;saveLocal();renderLocationRecords(c);renderMarkers();renderList();renderStats();toast(type==="fictitious"?"Coordenada salva selecionada para uso no mapa.":"Localização exata selecionada para uso.");}})); }
-
-function fillLocationEditor(c){ const r=getCoordRecord(c.ec,"fictitious"); const preview=$("currentCoordPreview"); if(r&&Number.isFinite(r.lat)&&Number.isFinite(r.lon)){preview.textContent=`Coordenada salva: ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}. Para substituir, obtenha sua localização novamente e toque no botão.`;} else preview.textContent="Nenhuma nova coordenada capturada."; }
-
-function saveManualLocation(){ toast("Use o botão 'Usar coordenada atual' para salvar o ponto onde você está."); }
+function renderLocationRecords(c){
+  const st=getCoordStore(c.ec),el=$("locationRecords"); if(!el)return;
+  if(!st.records.length){el.innerHTML='<div class="small-note">Nenhuma localização salva. Quando a rua for encontrada, ela aparecerá aqui como pendente.</div>';return;}
+  const order={confirmed:0,exact:1,street:2};
+  const records=[...st.records].sort((a,b)=>(order[a.type]??9)-(order[b.type]??9));
+  el.innerHTML=records.map(r=>{
+    const active=st.activeType===r.type;
+    const tipo=r.type==="confirmed"?"🟢 CONFIRMADO EM CAMPO":r.type==="street"?"🟡 RUA LOCALIZADA • PENDENTE":"🔵 VALIDADO AUTOMATICAMENTE";
+    const addr=r.type==="street"?[r.address,r.bairro,r.city].filter(Boolean).join(" - "):[r.address,r.number].filter(Boolean).join(", ");
+    const line=[r.complement&&r.complement!=="-"?"Comp.: "+r.complement:"",r.bairro,r.city].filter(Boolean).join(" • ");
+    const button=r.type==="street"?`<button class="btn primary" style="margin-top:6px;min-height:38px" data-confirm-location="${esc(r.type)}">📍 Confirmar este local com GPS</button>`:`<button class="btn" style="margin-top:6px;min-height:38px" data-use-location="${esc(r.type)}">${active?"✓ Localização em uso":"Usar esta localização no mapa"}</button>`;
+    return `<div class="location-record"><b>${tipo}${active?" • EM USO NO MAPA":""}</b><div class="small-note">${esc(addr||clientFullAddress(c)||"Endereço não informado")}</div><div class="small-note">${esc(line)}</div><div class="small-note">${Number(r.lat).toFixed(6)}, ${Number(r.lon).toFixed(6)} • ${r.confirmedAt?esc(new Date(r.confirmedAt).toLocaleString("pt-BR")):""}</div>${button}</div>`;
+  }).join("");
+  el.querySelectorAll("[data-use-location]").forEach(btn=>btn.addEventListener("click",()=>{const type=btn.dataset.useLocation;setActiveCoord(c.ec,type);refreshClientCoordsFromStore();saveLocal();renderLocationRecords(c);renderMarkers();renderList();renderStats();toast("Localização selecionada para uso no mapa.");}));
+  el.querySelectorAll("[data-confirm-location]").forEach(btn=>btn.addEventListener("click",()=>confirmCurrentLocationForClient(c)));
+}
+function fillLocationEditor(c){ const r=getCoordRecord(c.ec,"confirmed"); const preview=$("currentCoordPreview"); if(r&&Number.isFinite(r.lat)&&Number.isFinite(r.lon)){preview.textContent=`Confirmado em campo: ${r.lat.toFixed(6)}, ${r.lon.toFixed(6)} • ${new Date(r.confirmedAt).toLocaleString("pt-BR")}`;} else preview.textContent="Nenhuma confirmação feita nesta visita."; }
+function saveManualLocation(){ const c=state.clients.find(x=>x.ec===state.selectedEc); if(c) confirmCurrentLocationForClient(c); else toast("Selecione um cliente primeiro."); }
+function confirmCurrentLocationForClient(c){
+  if(!c)return;
+  if(!navigator.geolocation){toast("Este navegador não disponibiliza a localização do dispositivo.");return;}
+  toast("Obtendo sua posição para confirmar o local...");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=Number(pos.coords.latitude),lon=Number(pos.coords.longitude),acc=Number(pos.coords.accuracy);
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)){toast("O GPS retornou coordenadas inválidas.");return;}
+    const r={type:"confirmed",status:"confirmed",address:c.address||"",number:c.number||"",complement:c.complement||"",bairro:c.bairro||"",city:c.city||"",addressKey:addressKey(c),lat,lon,confirmedAt:new Date().toISOString(),source:"field-gps",accuracy:Number.isFinite(acc)?acc:null};
+    saveCoordinateRecord(c,r,true);
+    fillLocationEditor(c);
+    renderLocationRecords(c);
+    renderMarkers();renderList();renderStats();
+    if(state.map){state.map.setView([lat,lon],17);const m=state.markers.get(c.ec);if(m){setTimeout(()=>m.openPopup(),250);}}
+    toast("✅ Local confirmado em campo e salvo no histórico deste EC.");
+  },err=>{let msg="Não foi possível obter o GPS.";if(err&&err.code===1)msg="Permissão de localização negada. Autorize o GPS no navegador.";else if(err&&err.code===2)msg="A localização do dispositivo não está disponível agora.";else if(err&&err.code===3)msg="O GPS demorou demais para responder.";toast(msg);},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+function useCurrentLocationForEditor(){ const c=state.clients.find(x=>x.ec===state.selectedEc); if(c)confirmCurrentLocationForClient(c); }
 
 function requestLocation(){
   if(!navigator.geolocation){
@@ -683,10 +714,45 @@ function requestLocation(){
 
 function useCurrentLocationForEditor(){ if(!state.userPos){ toast("Primeiro obtenha sua localização pelo botão Minha localização."); return; } const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c)return; const lat=Number(state.userPos.lat),lon=Number(state.userPos.lon); if(!Number.isFinite(lat)||!Number.isFinite(lon))return; const r={type:"fictitious",address:c.address||"",number:c.number||"",complement:c.complement||"",bairro:c.bairro||"",city:c.city||"",addressKey:addressKey(c),lat,lon,confirmedAt:new Date().toISOString(),source:"manual"}; saveCoordinateRecord(c,r,true); fillLocationEditor(c); toast("Coordenada salva neste ponto. Ela ficará guardada para a próxima visita."); }
 
-async function geocodeOne(c){const sig=addressKey(c),saved=getActiveCoord(c.ec);if(saved&&saved.addressKey===sig&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){c.lat=saved.lat;c.lon=saved.lon;c.locationType=saved.type||"exact";return true;}const q=[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", ");const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=br&accept-language=pt-BR&addressdetails=1&q="+encodeURIComponent(q);const res=await fetch(url,{headers:{Accept:"application/json"}});if(!res.ok)throw new Error("HTTP "+res.status);const data=await res.json(),expected=norm(c.city);for(const it of data){const name=norm(it.display_name||"");if(expected&&!name.includes(expected))continue;const lat=parseFloat(it.lat),lon=parseFloat(it.lon);if(Number.isFinite(lat)&&Number.isFinite(lon)){saveCoordinateRecord(c,{type:"exact",address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,addressKey:sig,lat,lon,confirmedAt:new Date().toISOString()},true);return true;}}return false;}
-
-async function geocodeAll(){ const pend=getRouteClients().filter(c=>!Number.isFinite(c.lat)||!Number.isFinite(c.lon)); if(!pend.length){toast("Todos os clientes do lote já possuem localização.");return;} $("geocodeBtn").disabled=true; let ok=0,fail=0; for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ if(await geocodeOne(c)) ok++;else fail++; }catch(e){fail++;} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); } $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${ok} localizados e ${fail} não localizados. Os resultados conhecidos ficam salvos no aparelho.`); $("geocodeBtn").disabled=false; renderList(); fitAll(); }
-
+async function nominatimSearch(params){
+  const qs=new URLSearchParams({format:"jsonv2",limit:"5",countrycodes:"br","accept-language":"pt-BR",addressdetails:"1",...params});
+  const url="https://nominatim.openstreetmap.org/search?"+qs.toString();
+  const res=await fetch(url,{headers:{Accept:"application/json"}});
+  if(!res.ok)throw new Error("HTTP "+res.status);
+  return await res.json();
+}
+function resultCityMatches(it,city){ const expected=norm(city); if(!expected)return true; const a=it.address||{}; const found=norm(a.city||a.town||a.municipality||a.village||it.display_name||""); return found.includes(expected)||norm(it.display_name||"").includes(expected); }
+function resultHasRequestedNumber(it,number){ const wanted=norm(String(number||"")); if(!wanted)return false; const a=it.address||{}; const hn=norm(a.house_number||""); if(hn===wanted)return true; const disp=norm(it.display_name||""); return new RegExp("(^|[^0-9])"+String(wanted).replace(/[-/\\]/g,"\\$&")+"([^0-9]|$)").test(disp); }
+async function geocodeOne(c){
+  const saved=getActiveCoord(c.ec);
+  if(saved&&saved.type==="confirmed"&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){ c.lat=saved.lat;c.lon=saved.lon;c.locationType="confirmed";c.locationStatus="confirmed";return "confirmed"; }
+  if(saved&&saved.type==="exact"&&saved.addressKey===addressKey(c)&&Number.isFinite(saved.lat)&&Number.isFinite(saved.lon)){ c.lat=saved.lat;c.lon=saved.lon;c.locationType="exact";c.locationStatus="auto";return "auto"; }
+  const full=await nominatimSearch({q:[c.address,c.number,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", ")});
+  for(const it of full){
+    if(!resultCityMatches(it,c.city))continue;
+    if(!resultHasRequestedNumber(it,c.number))continue;
+    const lat=parseFloat(it.lat),lon=parseFloat(it.lon);
+    if(Number.isFinite(lat)&&Number.isFinite(lon)){ saveCoordinateRecord(c,{type:"exact",status:"auto",address:c.address,number:c.number,complement:c.complement,bairro:c.bairro,city:c.city,addressKey:addressKey(c),lat,lon,confirmedAt:new Date().toISOString(),source:"nominatim-exact"},true); return "auto"; }
+  }
+  await new Promise(r=>setTimeout(r,700));
+  const street=await nominatimSearch({q:[c.address,c.bairro,c.city,"RS","Brasil"].filter(Boolean).join(", ")});
+  for(const it of street){
+    if(!resultCityMatches(it,c.city))continue;
+    const road=it.address?.road||it.address?.pedestrian||it.address?.residential||"";
+    const isRoad=norm(it.type||"").includes("ROAD")||norm(it.class||"").includes("HIGHWAY")||!!road;
+    if(!isRoad)continue;
+    const lat=parseFloat(it.lat),lon=parseFloat(it.lon);
+    if(Number.isFinite(lat)&&Number.isFinite(lon)){ saveCoordinateRecord(c,{type:"street",status:"street",address:road||c.address,number:"",complement:c.complement,bairro:it.address?.suburb||it.address?.neighbourhood||c.bairro,city:c.city,addressKey:addressKey(c),lat,lon,confirmedAt:new Date().toISOString(),source:"nominatim-street"},true); return "street"; }
+  }
+  return "none";
+}
+async function geocodeAll(){
+  const pend=getRouteClients().filter(c=>getLocationStatus(c)==="none");
+  if(!pend.length){toast("Todos os clientes do lote já possuem uma localização ou estão pendentes na rua.");return;}
+  $("geocodeBtn").disabled=true; let auto=0,street=0,fail=0;
+  for(let i=0;i<pend.length;i++){ const c=pend[i]; $("progressBar").style.width=((i/pend.length)*100)+"%"; setImportStatus(`<strong>Localizando ${i+1} de ${pend.length}:</strong> ${esc(c.name)} — ${esc(clientFullAddress(c))}`); try{ const result=await geocodeOne(c); if(result==="auto")auto++;else if(result==="street")street++;else fail++; }catch(e){fail++;console.warn("Geocodificação",c.ec,e);} saveLocal(); renderStats(); renderMarkers(); await new Promise(r=>setTimeout(r,1100)); }
+  $("progressBar").style.width="100%"; setImportStatus(`<strong>Localização concluída.</strong> ${auto} validados automaticamente, ${street} ruas localizadas para confirmação e ${fail} sem localização.`); $("geocodeBtn").disabled=false; renderList(); fitAll();
+}
 
 function fitAll(){
   if(!state.map) return;
@@ -703,13 +769,17 @@ function fitAll(){
   }
 }
 
-function exportCoordinates(){const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Data Confirmação']];state.clients.forEach(c=>getCoordStore(c.ec).records.forEach(r=>rows.push([c.ec,c.cpf,c.name,r.address||c.address,r.number||c.number,r.complement||c.complement,r.bairro||c.bairro,r.city||c.city,r.lat,r.lon,r.type==="fictitious"?"Fictício":"Exato",r.confirmedAt||''])));if(rows.length===1){toast("Nenhuma coordenada para exportar.");return;}const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');toast(`${rows.length-1} localização(ões) exportada(s).`);}
+function exportCoordinates(){
+  const rows=[['EC','CPF','Nome','Endereço Origem','Número Origem','Complemento Origem','Bairro Origem','Cidade Origem','Latitude','Longitude','Tipo','Status Localização','Origem','Data Confirmação']];
+  state.clients.forEach(c=>getCoordStore(c.ec).records.forEach(r=>rows.push([c.ec,c.cpf,c.name,r.address||c.address,r.number||c.number,r.complement||c.complement,r.bairro||c.bairro,r.city||c.city,r.lat,r.lon,r.type==="confirmed"?"Confirmado em campo":r.type==="street"?"Rua pendente":"Exato",r.type==="confirmed"?"CONFIRMADO":r.type==="street"?"PENDENTE":"VALIDADO_AUTOMATICAMENTE",r.source||'',r.confirmedAt||''])));
+  if(rows.length===1){toast("Nenhuma coordenada para exportar.");return;} const ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Coordenadas');XLSX.writeFile(wb,'Coordenadas_Recebe_Mais.xlsx');toast(`${rows.length-1} localização(ões) exportada(s).`);
+}
 
 function saveAction(){
   const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c){toast("Selecione um cliente.");return;}
   const action=(state.pendingAction||"").trim(); const observation=$("actionObservation").value.trim(); if(!action){toast("Selecione a ação primeiro.");return;}
   const now=new Date(), active=getActiveCoord(c.ec);
-  const rec={id:Date.now()+"_"+Math.random().toString(36).slice(2,8),ec:c.ec,cpf:c.cpf||"",name:c.name||"",date:now.toLocaleDateString("pt-BR"),time:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),action,observation,address:(active?.address||c.address||""),number:(active?.number||c.number||""),complement:(active?.complement||c.complement||""),bairro:(active?.bairro||c.bairro||""),city:(active?.city||c.city||""),latitude:Number.isFinite(c.lat)?c.lat:"",longitude:Number.isFinite(c.lon)?c.lon:"",locationType:c.locationType==="fictitious"?"Fictício":"Exato"};
+  const rec={id:Date.now()+"_"+Math.random().toString(36).slice(2,8),ec:c.ec,cpf:c.cpf||"",name:c.name||"",date:now.toLocaleDateString("pt-BR"),time:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),action,observation,address:(active?.address||c.address||""),number:(active?.number||c.number||""),complement:(active?.complement||c.complement||""),bairro:(active?.bairro||c.bairro||""),city:(active?.city||c.city||""),latitude:Number.isFinite(c.lat)?c.lat:"",longitude:Number.isFinite(c.lon)?c.lon:"",locationType:getLocationStatus(c)==="confirmed"?"Confirmado em campo":getLocationStatus(c)==="street"?"Rua pendente":"Validado automaticamente"};
   state.actionsHistory.push(rec); state.latestActionsByEc.set(c.ec,{ec:c.ec,cpf:c.cpf||"",name:c.name||"",action,date:now,description:observation}); saveLocal(); resetActionWizard(); updateActionCount(); renderStats(); toast("Ação registrada com sucesso.");
 }
 
@@ -937,6 +1007,7 @@ window.addEventListener("unhandledrejection",e=>{
   console.error("[MAPA V31] promise rejeitada:",e.reason);
 });
 window.__openClient=openClient;
+window.__confirmClientLocation=(ec)=>{const c=state.clients.find(x=>String(x.ec)===String(ec));if(c)confirmCurrentLocationForClient(c);};
 window.addEventListener("beforeunload",()=>{ try{saveLocal();}catch(e){} });
 window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
 
@@ -962,6 +1033,6 @@ window.addEventListener("pagehide",()=>{ try{saveLocal();}catch(e){} });
   if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">RECEBE MAIS • V46 • COORDENADAS CORRIGIDO • PERSISTÊNCIA</div>
+<div class="version-badge">V47 • LOCALIZAÇÃO PROGRESSIVA</div>
 </body>
 </html>
