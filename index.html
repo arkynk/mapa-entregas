@@ -289,6 +289,11 @@ function sheetByName(wb, wanted){
 }
 function getText(obj, idx){ return idx>=0 ? obj[idx] : ""; }
 function classifyProduct(name){ const s=norm(name); if(s.includes("CDC")) return "CDC"; if(s.includes("CP")) return "CP"; if(s.includes("CONSIGNADO INSS ONLINE")||s.includes("INSS")) return "INSS"; return "OUTRO"; }
+function debtSummary(rows){
+  let total=0; let over=0; let future=0; const byProd={};
+  (rows||[]).forEach(r=>{ total+=Number(r.valueDebt)||0; const p=r.productType||classifyProduct(r.productRaw||""); byProd[p]=(byProd[p]||0)+(Number(r.valueDebt)||0); if(r.status==="future") future++; else if(r.status==="over") over++; });
+  return {total,over,future,byProd,state: future>0 && over>0 ? "mixed" : future>0 ? "future" : "over"};
+}
 function addressKey(c){ return [norm(c.address),norm(c.number),norm(c.complement),norm(c.bairro),norm(c.city)].join("|"); }
 function normalizeLocationType(type){
   const t=norm(type);
