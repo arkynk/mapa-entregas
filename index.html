@@ -586,10 +586,20 @@ $("modalClose").onclick=closeModal;
 $("clientModal").addEventListener("click",e=>{if(e.target.id==="clientModal")closeModal();});
 $("debtDetailsBtn").onclick=()=>$("debtDetails").classList.toggle("hidden");
 $("mapClientBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)){closeModal();state.map.setView([c.lat,c.lon],17);const m=state.markers.get(c.ec);if(m)m.openPopup();}else toast("Este cliente ainda não possui coordenadas."); };
-$("navigateBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c)return; const dest=Number.isFinite(c.lat)&&Number.isFinite(c.lon)?`${c.lat},${c.lon}`:clientFullAddress(c); window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`,"_blank"); };
+$("navigateBtn").onclick=()=>{
+  const c=state.clients.find(x=>x.ec===state.selectedEc);
+  if(!c)return;
+  const hasCoord=Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon));
+  const dest=hasCoord ? `${Number(c.lat)},${Number(c.lon)}` : clientFullAddress(c);
+  if(!dest){ toast("Este cliente não possui endereço ou coordenadas para abrir no Maps."); return; }
+  const url=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+  // Em arquivos HTML locais, window.open pode ser bloqueado pelo navegador.
+  // Navegação direta permite que o sistema operacional encaminhe para o Google Maps/app.
+  window.location.href=url;
+};
 window.__openClient=openClient;
 loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateActionCount();
 </script>
-<div class="version-badge">RECEBE MAIS • V25 • CORREÇÃO MAPA + LOCALIZAÇÃO</div>
+<div class="version-badge">RECEBE MAIS • V26 • GOOGLE MAPS CORRIGIDO</div>
 </body>
 </html>
