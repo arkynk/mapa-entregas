@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V17</title>
+<title>RECEBE MAIS • V19</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -63,7 +63,7 @@ button:active{transform:translateY(1px)}
   <div class="header-row">
     <div class="brand">
       <div class="brand-mark">RM</div>
-      <div><h1>RECEBE MAIS <span style="font-size:11px;font-weight:900;background:#073b61;color:#fff;padding:4px 7px;border-radius:999px;vertical-align:middle">V18</span></h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
+      <div><h1>RECEBE MAIS <span style="font-size:11px;font-weight:900;background:#073b61;color:#fff;padding:4px 7px;border-radius:999px;vertical-align:middle">V19</span></h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
     </div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="statsWalletBtn">📊 Estatísticas Carteira</button><button class="btn" id="openImportBtn">📂 Importação</button></div>
   </div>
@@ -458,44 +458,62 @@ function initMap(){
   const el=$('map');
   if(!el){console.error('Elemento #map não encontrado.');return;}
   const loading=$('mapLoading');
+  const showLoading=(txt)=>{if(loading){loading.style.display='block';loading.textContent=txt;}};
+  const hideLoading=()=>{if(loading)loading.style.display='none';};
   if(typeof L==='undefined'){
-    if(loading) loading.textContent='❌ Biblioteca do mapa não carregou. Verifique a internet e recarregue.';
+    showLoading('🗺️ Carregando biblioteca do mapa...');
+    // Fallback para quando o CDN principal do Leaflet não responder no celular.
+    const fallback=document.createElement('script');
+    fallback.src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+    fallback.onload=()=>initMap();
+    fallback.onerror=()=>showLoading('❌ Mapa indisponível. Verifique a internet e recarregue.');
+    document.head.appendChild(fallback);
     return;
   }
+  if(state.map){refreshMap();return;}
   try{
-    state.map=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false})
+    state.map=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false,attributionControl:true})
       .setView([-29.1678,-51.1794],13);
     const tileSources=[
-      {url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
+      {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
+      {url:'https://tile.openstreetmap.de/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
       {url:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',attr:'© OpenStreetMap France | © OpenStreetMap contributors'}
     ];
-    let tileIndex=0, loaded=false, tiles=null;
+    let tileIndex=0, loaded=false, tiles=null, errorCount=0;
     function addTiles(){
       const src=tileSources[tileIndex];
-      tiles=L.tileLayer(src.url,{maxZoom:19,minZoom:3,updateWhenIdle:true,keepBuffer:4,attribution:src.attr});
-      tiles.on('load',function(){loaded=true;if(loading)loading.style.display='none';refreshMap();});
+      errorCount=0;
+      tiles=L.tileLayer(src.url,{maxZoom:19,minZoom:3,updateWhenIdle:false,keepBuffer:3,attribution:src.attr,crossOrigin:true});
+      tiles.on('load',function(){loaded=true;hideLoading();refreshMap();fitAll();});
       tiles.on('tileerror',function(e){
+        errorCount++;
         console.warn('Falha ao carregar bloco do mapa:',e);
-        if(!loaded && tileIndex<tileSources.length-1){
+        if(!loaded && errorCount>=3 && tileIndex<tileSources.length-1){
           tileIndex++;
           try{state.map.removeLayer(tiles);}catch(err){}
           addTiles();
-        }else if(!loaded && loading){loading.textContent='⚠️ Não foi possível carregar o mapa. Verifique a internet.';}
+        }else if(!loaded && errorCount>=3 && loading){
+          loading.textContent='⚠️ Não foi possível carregar os mapas. Verifique a internet.';
+        }
       });
       tiles.addTo(state.map);
     }
     addTiles();
     state.map.whenReady(()=>{
       refreshMap();
-      setTimeout(()=>{refreshMap();renderMarkers();},500);
-      setTimeout(()=>{if(loading && loaded) loading.style.display='none';},2500);
+      setTimeout(()=>{refreshMap();renderMarkers();fitAll();},300);
+      setTimeout(()=>{if(loading && loaded) hideLoading();},2500);
     });
-    window.addEventListener('resize',refreshMap);
-    window.addEventListener('orientationchange',()=>setTimeout(refreshMap,300));
+    if(!window.__mapResizeBound){
+      window.__mapResizeBound=true;
+      window.addEventListener('resize',refreshMap,{passive:true});
+      window.addEventListener('orientationchange',()=>setTimeout(refreshMap,300),{passive:true});
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refreshMap,150);});
+    }
     refreshMap();
   }catch(e){
-    console.error(e);
-    if(loading) loading.textContent='❌ Erro ao iniciar o mapa. Recarregue a página.';
+    console.error('Erro ao iniciar mapa:',e);
+    if(loading)loading.textContent='❌ Erro ao iniciar o mapa. Recarregue a página.';
   }
 }
 function setImportStatus(html){
@@ -730,7 +748,13 @@ $("navigateBtn").onclick=()=>{
   window.location.href=mapsUrl;
 };
 window.__openClient=openClient;
-loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateAddressImportErrors(); refreshMap(); updateActionCount();
+function startApp(){
+  try{loadLocal();}catch(e){console.error('Erro ao carregar dados locais:',e);}
+  try{renderCities(); renderStats(); renderList(); updateAddressImportErrors(); updateActionCount();}catch(e){console.error('Erro ao renderizar a interface:',e);}
+  try{initMap();}catch(e){console.error('Erro ao iniciar mapa:',e);}
+  setTimeout(()=>{try{if(state.map){refreshMap();renderMarkers();fitAll();}}catch(e){console.error(e);}},500);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startApp,{once:true}); else startApp();
 </script>
 </body>
 </html>
