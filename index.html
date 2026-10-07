@@ -63,7 +63,7 @@ button:active{transform:translateY(1px)}
   <div class="header-row">
     <div class="brand">
       <div class="brand-mark">RM</div>
-      <div><h1>RECEBE MAIS</h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
+      <div><h1>RECEBE MAIS <span style="font-size:11px;font-weight:900;background:#073b61;color:#fff;padding:4px 7px;border-radius:999px;vertical-align:middle">V18</span></h1><p>Visitas In Loco de Cobrança • Uso mobile</p></div>
     </div>
     <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="statsWalletBtn">📊 Estatísticas Carteira</button><button class="btn" id="openImportBtn">📂 Importação</button></div>
   </div>
@@ -465,21 +465,26 @@ function initMap(){
   try{
     state.map=L.map(el,{zoomControl:true,preferCanvas:false,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false,worldCopyJump:false})
       .setView([-29.1678,-51.1794],13);
-    const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:19,minZoom:3,updateWhenIdle:true,keepBuffer:4,
-      attribution:'© OpenStreetMap contributors'
-    });
-    let loaded=false;
-    tiles.on('load',function(){
-      loaded=true;
-      if(loading) loading.style.display='none';
-      refreshMap();
-    });
-    tiles.on('tileerror',function(e){
-      console.warn('Falha ao carregar bloco do mapa:',e);
-      if(!loaded && loading) loading.textContent='⚠️ Carregando mapa... se continuar em branco, verifique a internet.';
-    });
-    tiles.addTo(state.map);
+    const tileSources=[
+      {url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'© OpenStreetMap contributors'},
+      {url:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',attr:'© OpenStreetMap France | © OpenStreetMap contributors'}
+    ];
+    let tileIndex=0, loaded=false, tiles=null;
+    function addTiles(){
+      const src=tileSources[tileIndex];
+      tiles=L.tileLayer(src.url,{maxZoom:19,minZoom:3,updateWhenIdle:true,keepBuffer:4,attribution:src.attr});
+      tiles.on('load',function(){loaded=true;if(loading)loading.style.display='none';refreshMap();});
+      tiles.on('tileerror',function(e){
+        console.warn('Falha ao carregar bloco do mapa:',e);
+        if(!loaded && tileIndex<tileSources.length-1){
+          tileIndex++;
+          try{state.map.removeLayer(tiles);}catch(err){}
+          addTiles();
+        }else if(!loaded && loading){loading.textContent='⚠️ Não foi possível carregar o mapa. Verifique a internet.';}
+      });
+      tiles.addTo(state.map);
+    }
+    addTiles();
     state.map.whenReady(()=>{
       refreshMap();
       setTimeout(()=>{refreshMap();renderMarkers();},500);
@@ -523,9 +528,15 @@ async function geocodeOne(c){
     if(!res.ok) continue;
     const data=await res.json();
     for(const it of data){
-      const cityNorm=norm(it.address?.city||it.address?.town||it.address?.municipality||it.address?.village||it.display_name||'');
+      const resultCity=norm(it.address?.city||it.address?.town||it.address?.municipality||it.address?.village||'');
       const displayNorm=norm(it.display_name||'');
-      if(expected && !cityNorm.includes(expected) && !displayNorm.includes(expected)) continue;
+      // Aceita somente resultados cuja cidade realmente corresponda à cidade da base.
+      // Não usamos mais o display_name como prova de cidade, pois isso podia aceitar
+      // um resultado de bairro/rua em outra cidade e marcar como localizado.
+      if(expected && resultCity !== expected) continue;
+      const requestedNumber=String(c.number||'').trim();
+      const resultNumber=String(it.address?.house_number||'').trim();
+      if(requestedNumber && resultNumber && requestedNumber !== resultNumber) continue;
       const lat=parseFloat(it.lat),lon=parseFloat(it.lon);
       if(!Number.isFinite(lat)||!Number.isFinite(lon)) continue;
       const key=(it.display_name||'')+'|'+lat+'|'+lon;
@@ -708,7 +719,16 @@ $("modalClose").onclick=closeModal;
 $("clientModal").addEventListener("click",e=>{if(e.target.id==="clientModal")closeModal();});
 $("debtDetailsBtn").onclick=()=>$("debtDetails").classList.toggle("hidden");
 $("mapClientBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)){closeModal();state.map.setView([c.lat,c.lon],17);const m=state.markers.get(c.ec);if(m)m.openPopup();}else toast("Este cliente ainda não possui coordenadas."); };
-$("navigateBtn").onclick=()=>{ const c=state.clients.find(x=>x.ec===state.selectedEc); if(!c)return; const dest=Number.isFinite(c.lat)&&Number.isFinite(c.lon)?`${c.lat},${c.lon}`:clientFullAddress(c); window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`,"_blank"); };
+$("navigateBtn").onclick=()=>{
+  const c=state.clients.find(x=>x.ec===state.selectedEc);
+  if(!c)return;
+  const dest=Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lon))
+    ? `${Number(c.lat).toFixed(6)},${Number(c.lon).toFixed(6)}`
+    : clientFullAddress(c);
+  const mapsUrl=`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+  // Evita bloqueio de popup quando o HTML é aberto localmente no celular.
+  window.location.href=mapsUrl;
+};
 window.__openClient=openClient;
 loadLocal(); initMap(); renderCities(); renderStats(); renderList(); renderMarkers(); updateAddressImportErrors(); refreshMap(); updateActionCount();
 </script>
