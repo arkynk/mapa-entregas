@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#073b61">
-<title>RECEBE MAIS • V33</title>
+<title>RECEBE MAIS • V34</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=25">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
@@ -533,8 +533,25 @@ function renderCheckpointDiagnostics(){
   target.innerHTML=`<div class="small-note" style="font-weight:900;color:var(--navy);margin:6px 0">🔎 CHECKPOINTS DA INICIALIZAÇÃO</div>`+
     cps.map(x=>diagCheck(x.label,x.ok,x.detail)).join("");
 }
+function forceMapInitDiagnostic(){
+  try{
+    window.__mapManualTest=true;
+    const result=initMap();
+    console.log("[MAPA V34] resultado do teste direto:",result,window.__mapCheckpoints,window.__mapInitError);
+    return result;
+  }catch(e){
+    window.__mapInitError=mapErrorText(e);
+    window.__mapCheckpoints=window.__mapCheckpoints||[];
+    mapCheckpoint("TESTE DIRETO → exceção",false,window.__mapInitError);
+    console.error("[MAPA V34] exceção no teste direto",e);
+    return false;
+  }
+}
 function runDiagnostics(){
   try{
+  if(!state.map){
+    forceMapInitDiagnostic();
+  }
   const checks=[];
   const mapEl=$("mapCanvas");
   const leafletOk=typeof window.L!=="undefined"&&typeof L.map==="function";
@@ -572,7 +589,7 @@ function runDiagnostics(){
 }
 function testMapTile(){const el=$("diagTileStatus");if(!el)return;const z=13,lat=-29.1678,lon=-51.1794,n=Math.pow(2,z),x=Math.floor((lon+180)/360*n),latRad=lat*Math.PI/180,y=Math.floor((1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n),img=new Image();let done=false;const box=el.parentElement.parentElement;const finish=(ok,msg)=>{if(done)return;done=true;el.textContent=msg;box.classList.remove("diag-warn","diag-ok","diag-fail");box.classList.add(ok?"diag-ok":"diag-fail")};const timer=setTimeout(()=>finish(false,"O tile não respondeu em 8 segundos. Pode haver bloqueio no acesso aos mapas externos."),8000);img.onload=()=>{clearTimeout(timer);finish(true,"Tile recebido com sucesso do OpenStreetMap.")};img.onerror=()=>{clearTimeout(timer);finish(false,"O tile não pôde ser carregado. O problema está no acesso aos mapas externos.")};img.src=`https://tile.openstreetmap.org/${z}/${x}/${y}.png?diag=${Date.now()}`}
 function testGps(){const log=$("diagLog");log.style.display="block";if(!navigator.geolocation){log.innerHTML="<b>❌ GPS indisponível.</b>";return}log.innerHTML="<b>📍 Solicitando localização...</b>";navigator.geolocation.getCurrentPosition(pos=>{const a=pos.coords.accuracy;log.innerHTML=`<b>✅ GPS funcionando.</b> Latitude ${pos.coords.latitude.toFixed(6)} • Longitude ${pos.coords.longitude.toFixed(6)} • Precisão ${Number.isFinite(a)?Math.round(a)+" m":"não informada"}.`},err=>{log.innerHTML=`<b>❌ GPS não autorizado/indisponível.</b> Código ${err.code}: ${esc(err.message||"sem mensagem")}`},{enableHighAccuracy:true,timeout:10000,maximumAge:0})}
-$("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";renderCheckpointDiagnostics();runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",runDiagnostics);$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
+$("openDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="flex";if(!state.map) forceMapInitDiagnostic();renderCheckpointDiagnostics();runDiagnostics()});$("closeDiagBtn")?.addEventListener("click",()=>{$("diagModal").style.display="none"});$("runDiagBtn")?.addEventListener("click",()=>{forceMapInitDiagnostic();renderCheckpointDiagnostics();runDiagnostics()});$("testGpsBtn")?.addEventListener("click",testGps);$("diagModal")?.addEventListener("click",e=>{if(e.target.id==="diagModal")$("diagModal").style.display="none"});$("importBtn")?.addEventListener("click",importFiles);
 $("geocodeBtn").onclick=geocodeAll;
 $("exportCoordsBtn").onclick=exportCoordinates;
 $("exportActionsBtn").onclick=exportActions;
@@ -622,7 +639,7 @@ window.addEventListener("unhandledrejection",e=>{
 });
 window.__openClient=openClient;
 
-// BOOT V33: inicializa o mapa ANTES das outras rotinas, para que nenhum erro de
+// BOOT V34: inicializa o mapa ANTES das outras rotinas, para que nenhum erro de
 // importação/lista/estado local consiga impedir a criação do mapa.
 (function bootApp(){
   let mapStarted=false;
@@ -631,19 +648,19 @@ window.__openClient=openClient;
   }catch(e){
     window.__mapInitError=mapErrorText(e);
     mapCheckpoint("BOOT → initMap",false,window.__mapInitError);
-    console.error("[MAPA V33] erro fatal em initMap",e);
+    console.error("[MAPA V34] erro fatal em initMap",e);
   }
-  if(!mapStarted){ console.error("[MAPA V33] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); }
+  if(!mapStarted){ console.error("[MAPA V34] Inicialização retornou false.",window.__mapCheckpoints,window.__mapInitError); }
 
-  try{ loadLocal(); }catch(e){ console.error("[BOOT V33] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderCities(); }catch(e){ console.error("[BOOT V33] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderStats(); }catch(e){ console.error("[BOOT V33] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderList(); }catch(e){ console.error("[BOOT V33] renderList falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ renderMarkers(); }catch(e){ console.error("[BOOT V33] renderMarkers falhou:",e); window.__bootError=mapErrorText(e); }
-  try{ updateActionCount(); }catch(e){ console.error("[BOOT V33] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
-  if(window.__bootError) console.warn("[BOOT V33] Erro não relacionado ao mapa:",window.__bootError);
+  try{ loadLocal(); }catch(e){ console.error("[BOOT V34] loadLocal falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderCities(); }catch(e){ console.error("[BOOT V34] renderCities falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderStats(); }catch(e){ console.error("[BOOT V34] renderStats falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderList(); }catch(e){ console.error("[BOOT V34] renderList falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ renderMarkers(); }catch(e){ console.error("[BOOT V34] renderMarkers falhou:",e); window.__bootError=mapErrorText(e); }
+  try{ updateActionCount(); }catch(e){ console.error("[BOOT V34] updateActionCount falhou:",e); window.__bootError=mapErrorText(e); }
+  if(window.__bootError) console.warn("[BOOT V34] Erro não relacionado ao mapa:",window.__bootError);
 })();
 </script>
-<div class="version-badge">RECEBE MAIS • V33 • CHECKPOINTS DO MAPA</div>
+<div class="version-badge">RECEBE MAIS • V34 • CHECKPOINTS DO MAPA</div>
 </body>
 </html>
